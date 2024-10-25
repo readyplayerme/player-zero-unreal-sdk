@@ -1,21 +1,14 @@
 #include "Api/Characters/CharacterApi.h"
-#include "HttpModule.h"
-#include "RpmNextGen.h"
 #include "Api/Auth/ApiKeyAuthStrategy.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"
 #include "Api/Characters/Models/CharacterPreviewRequest.h"
 #include "Api/Characters/Models/CharacterUpdateRequest.h"
-#include "Interfaces/IHttpResponse.h"
 #include "Settings/RpmDeveloperSettings.h"
 
 FCharacterApi::FCharacterApi()
 {
 	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
 	BaseUrl = FString::Printf(TEXT("%s/v1/characters"), *RpmSettings->GetApiBaseUrl());
-	if(!RpmSettings->ApiKey.IsEmpty() && RpmSettings->ApiProxyUrl.IsEmpty())
-	{
-		SetAuthenticationStrategy(MakeShared<FApiKeyAuthStrategy>());
-	}
 }
 
 FCharacterApi::~FCharacterApi()

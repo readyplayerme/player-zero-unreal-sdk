@@ -9,6 +9,7 @@ class RPMNEXTGEN_API FApiKeyAuthStrategy : public IAuthenticationStrategy
 public:
 	FApiKeyAuthStrategy();
 	FApiKeyAuthStrategy(const FString& InApiKey);
+	
 	virtual void AddAuthToRequest(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, bool)> OnAuthComplete) override
 	{
 		if(ApiKey.IsEmpty())
@@ -27,11 +28,10 @@ public:
 		if(ApiKey.IsEmpty())
 		{
 			UE_LOG(LogReadyPlayerMe, Error, TEXT("No API key provided for refresh") );
-			OnTokenRefreshed(ApiRequest, FRefreshTokenResponse(), false);
-			return;
 		}
 		OnTokenRefreshed(ApiRequest, FRefreshTokenResponse(), !ApiKey.IsEmpty());
 	}
-private:
+	
+protected:
 	FString ApiKey;
 };

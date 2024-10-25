@@ -198,7 +198,7 @@ void SRpmDeveloperLoginWidget::Initialize()
 	{
 		return;
 	}
-
+	CharacterStyleAssets = TMap<FString, FAsset>();
 	ActiveLoaders = TArray<TSharedPtr<FRpmTextureLoader>>();
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
 	if (!DeveloperAuthApi.IsValid())
@@ -211,7 +211,7 @@ void SRpmDeveloperLoginWidget::Initialize()
 		AssetApi = MakeShared<FAssetApi>();
 		if (!DevAuthData.IsDemo)
 		{
-			AssetApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
+			AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
 		}
 	}
 	if (!DeveloperAccountApi.IsValid())
@@ -219,7 +219,7 @@ void SRpmDeveloperLoginWidget::Initialize()
 		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>(nullptr);
 		if (!DevAuthData.IsDemo)
 		{
-			DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
+			DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
 		}
 	}
 	bIsInitialized = true;
@@ -349,8 +349,8 @@ FReply SRpmDeveloperLoginWidget::OnLoginClicked()
 	FEditorCache::SetString(CacheKeyEmail, Email);
 	Email = Email.TrimStartAndEnd();
 	Password = Password.TrimStartAndEnd();
-	DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
-	AssetApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
+	DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
+	AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
 	const TSharedPtr<FDeveloperLoginRequest> LoginRequest = MakeShared<FDeveloperLoginRequest>(Email, Password);
 	TWeakPtr<SRpmDeveloperLoginWidget> WeakPtrThis = StaticCastSharedRef<SRpmDeveloperLoginWidget>(AsShared());
 	DeveloperAuthApi->LoginWithEmail(LoginRequest, FOnDeveloperLoginResponse::CreateLambda([WeakPtrThis]( TSharedPtr<FDeveloperLoginResponse> Response, bool bWasSuccessful)
@@ -486,6 +486,7 @@ void SRpmDeveloperLoginWidget::OnComboBoxSelectionChanged(TSharedPtr<FString> Ne
 FReply SRpmDeveloperLoginWidget::OnUseDemoAccountClicked()
 {
 	URpmDeveloperSettings* RpmSettings = GetMutableDefault<URpmDeveloperSettings>();
+	RpmSettings->Reset();
 	RpmSettings->SetupDemoAccount();
 	FDeveloperAuth AuthData = FDeveloperAuth();
 	AuthData.Name = DemoUserName;
@@ -545,11 +546,17 @@ void SRpmDeveloperLoginWidget::LoadBaseModelList()
 void SRpmDeveloperLoginWidget::HandleBaseModelListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
 {
 	CharacterStyleAssets.Empty();
-	for (FAsset Asset : Response->Data)
+	if(bWasSuccessful && Response.IsValid() && Response->Data.Num() > 0)
 	{
-		CharacterStyleAssets.Add(Asset.Id, Asset);
-		AddCharacterStyle(Asset);
+		for (FAsset Asset : Response->Data)
+		{
+			CharacterStyleAssets.Add(Asset.Id, Asset);
+			AddCharacterStyle(Asset);
+		}
+		return;
 	}
+	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to list base models"));
+
 }
 
 

@@ -9,48 +9,40 @@ class IAuthenticationStrategy;
 class RPMNEXTGEN_API FWebApiWithAuth : public FWebApi
 {
 public:
-	FWebApiWithAuth();
-	FWebApiWithAuth(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy);
-	virtual ~FWebApiWithAuth() override;
-	void SetAuthenticationStrategy(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy);
-	template <typename T>
-	void SendRequestWithAuth(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<T>, bool, int32)> OnResponse);
-	
-protected:
-	TSharedPtr<IAuthenticationStrategy> AuthenticationStrategy;
+    FWebApiWithAuth();
+    FWebApiWithAuth(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy);
+    virtual ~FWebApiWithAuth() override;
 
+    virtual void SetAuthenticationStrategy(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy);
+
+    template <typename T>
+    void SendRequestWithAuth(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<T>, bool, int32)> OnResponse);
+
+private:
+    TSharedPtr<IAuthenticationStrategy> AuthenticationStrategy;
+
+    template <typename T>
+    void SendAuthenticatedRequest(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<T>, bool, int32)> OnResponse);
+
+    template <typename T>
+    void HandleFailedRequestWithRefresh(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<T>, bool, int32)> OnResponse, int32 StatusCode);
+
+    template <typename T>
+    void RetryRequestWithRefreshedToken(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<T>, bool, int32)> OnResponse);
 };
 
 template <typename T>
 void FWebApiWithAuth::SendRequestWithAuth(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<T>, bool, int32)> OnResponse)
 {
+    TWeakPtr<FWebApiWithAuth> WeakPtrThis =  StaticCastSharedRef<FWebApiWithAuth>(AsShared());
+
     if (AuthenticationStrategy)
     {
-        AuthenticationStrategy->AddAuthToRequest(ApiRequest, [this, ApiRequest, OnResponse](TSharedPtr<FApiRequest> AuthenticatedRequest, bool bAddAuthSuccess)
+        AuthenticationStrategy->AddAuthToRequest(ApiRequest, [WeakPtrThis, ApiRequest, OnResponse](TSharedPtr<FApiRequest> AuthenticatedRequest, bool bAuthSuccess)
         {
-            if (bAddAuthSuccess)
+            if (WeakPtrThis.IsValid())
             {
-                SendRequest<T>(AuthenticatedRequest, [this, ApiRequest, OnResponse](TSharedPtr<T> Response, bool bWasSuccessful, int32 StatusCode)
-                {
-                    if (!bWasSuccessful && Response.IsValid() && StatusCode == 401)
-                    {
-                        AuthenticationStrategy->TryRefresh(ApiRequest, [this, ApiRequest, OnResponse, StatusCode](TSharedPtr<FApiRequest> RefreshedRequest, const FRefreshTokenResponse& RefreshResponse, bool bRefreshSuccess)
-                        {
-                            if (bRefreshSuccess)
-                            {
-                                SendRequest<T>(RefreshedRequest, OnResponse);
-                            }
-                            else
-                            {
-                                OnResponse(nullptr, false, StatusCode);
-                            }
-                        });
-                    }
-                    else
-                    {
-                        OnResponse(Response, bWasSuccessful, StatusCode);
-                    }
-                });
+                WeakPtrThis.Pin()->SendAuthenticatedRequest<T>(AuthenticatedRequest, OnResponse);
             }
             else
             {
@@ -60,26 +52,64 @@ void FWebApiWithAuth::SendRequestWithAuth(TSharedPtr<FApiRequest> ApiRequest, TF
     }
     else
     {
-        SendRequest<T>(ApiRequest, [this, ApiRequest, OnResponse](TSharedPtr<T> Response, bool bWasSuccessful, int32 StatusCode)
+        UE_LOG( LogTemp, Error, TEXT("No authentication strategy set. Run request without") );
+        SendRequest<T>(ApiRequest, OnResponse);
+    }
+}
+
+template <typename T>
+void FWebApiWithAuth::SendAuthenticatedRequest(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<T>, bool, int32)> OnResponse)
+{
+    TWeakPtr<FWebApiWithAuth> WeakPtrThis = StaticCastSharedRef<FWebApiWithAuth>(AsShared());
+
+    SendRequest<T>(ApiRequest, [WeakPtrThis, ApiRequest, OnResponse](TSharedPtr<T> Response, bool bWasSuccessful, int32 StatusCode)
+    {
+        if (WeakPtrThis.IsValid())
         {
-            if (!bWasSuccessful && Response.IsValid() && StatusCode == 401)
+            if (!bWasSuccessful && StatusCode == 401)
             {
-                AuthenticationStrategy->TryRefresh(ApiRequest, [this, ApiRequest, OnResponse, StatusCode](TSharedPtr<FApiRequest> RefreshedRequest, const FRefreshTokenResponse& RefreshResponse, bool bRefreshSuccess)
-                {
-                    if (bRefreshSuccess)
-                    {
-                        SendRequest<T>(RefreshedRequest, OnResponse);
-                    }
-                    else
-                    {
-                        OnResponse(nullptr, false, StatusCode);
-                    }
-                });
+                WeakPtrThis.Pin()->HandleFailedRequestWithRefresh<T>(ApiRequest, OnResponse, StatusCode);
             }
             else
             {
                 OnResponse(Response, bWasSuccessful, StatusCode);
             }
-        });
-    }
+        }
+    });
 }
+
+template <typename T>
+void FWebApiWithAuth::HandleFailedRequestWithRefresh(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<T>, bool, int32)> OnResponse, int32 StatusCode)
+{
+    TWeakPtr<FWebApiWithAuth> WeakPtrThis = StaticCastSharedRef<FWebApiWithAuth>(AsShared());
+
+    AuthenticationStrategy->TryRefresh(ApiRequest, [WeakPtrThis, ApiRequest, OnResponse, StatusCode](TSharedPtr<FApiRequest> RefreshedRequest, const FRefreshTokenResponse& RefreshResponse, bool bRefreshSuccess)
+    {
+        if (WeakPtrThis.IsValid())
+        {
+            if (bRefreshSuccess)
+            {
+                WeakPtrThis.Pin()->RetryRequestWithRefreshedToken<T>(RefreshedRequest, OnResponse);
+            }
+            else
+            {
+                OnResponse(nullptr, false, StatusCode);
+            }
+        }
+    });
+}
+
+template <typename T>
+void FWebApiWithAuth::RetryRequestWithRefreshedToken(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<T>, bool, int32)> OnResponse)
+{
+    TWeakPtr<FWebApiWithAuth> WeakPtrThis = StaticCastSharedRef<FWebApiWithAuth>(AsShared());
+
+    SendRequest<T>(ApiRequest, [WeakPtrThis, OnResponse](TSharedPtr<T> Response, bool bWasSuccessful, int32 StatusCode)
+    {
+        if (WeakPtrThis.IsValid())
+        {
+            OnResponse(Response, bWasSuccessful, StatusCode);
+        }
+    });
+}
+

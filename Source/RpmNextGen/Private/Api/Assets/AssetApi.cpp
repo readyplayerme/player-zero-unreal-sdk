@@ -1,5 +1,4 @@
 #include "Api/Assets/AssetApi.h"
-
 #include "RpmNextGen.h"
 #include "Settings/RpmDeveloperSettings.h"
 #include "Api/Assets/Models/AssetListRequest.h"
@@ -7,7 +6,6 @@
 #include "Api/Assets/Models/AssetTypeListRequest.h"
 #include "Api/Auth/ApiKeyAuthStrategy.h"
 #include "Cache/AssetCacheManager.h"
-#include "Interfaces/IHttpResponse.h"
 
 struct FCachedAssetData;
 struct FAssetTypeListRequest;
@@ -25,24 +23,23 @@ FAssetApi::FAssetApi(EApiRequestStrategy InApiRequestStrategy) : ApiRequestStrat
 
 FAssetApi::~FAssetApi()
 {
+	CancelAllRequests();
 }
 
 void FAssetApi::Initialize()
 {
-	if (bIsInitialized)	return;
-	
 	const URpmDeveloperSettings* Settings = GetDefault<URpmDeveloperSettings>();
 	ApiBaseUrl = Settings->GetApiBaseUrl();
 	if (Settings->ApplicationId.IsEmpty())
 	{
 		UE_LOG(LogReadyPlayerMe, Error, TEXT("Application ID is empty. Please set the Application ID in the Ready Player Me Developer Settings"));
 	}
+}
 
-	if (!Settings->ApiKey.IsEmpty() || Settings->ApiProxyUrl.IsEmpty())
-	{
-		SetAuthenticationStrategy(MakeShared<FApiKeyAuthStrategy>());
-	}
-	bIsInitialized = true;
+void FAssetApi::SetAuthenticationStrategy(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy)
+{
+	FWebApiWithAuth::SetAuthenticationStrategy(InAuthenticationStrategy);
+	Initialize();
 }
 
 void FAssetApi::ListAssetsAsync(TSharedPtr<FAssetListRequest> Request, FOnListAssetsResponse OnComplete)
@@ -52,16 +49,6 @@ void FAssetApi::ListAssetsAsync(TSharedPtr<FAssetListRequest> Request, FOnListAs
 		LoadAssetsFromCache(Request->BuildQueryMap(), OnComplete);
 		return;
 	}
-	
-	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
-	// TODO implement or remove
-	if(RpmSettings->ApplicationId.IsEmpty())
-	{
-		// UE_LOG(LogReadyPlayerMe, Error, TEXT("Application ID is empty"));
-		// OnListAssetsResponse.ExecuteIfBound(FAssetListResponse(), false);
-		// return;
-	}
-	
 	const FString Url = FString::Printf(TEXT("%s/v1/phoenix-assets"), *ApiBaseUrl);
 	TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
 	ApiRequest->Url = Url;
@@ -81,14 +68,6 @@ void FAssetApi::ListAssetTypesAsync(TSharedPtr<FAssetTypeListRequest> Request, F
 		LoadAssetTypesFromCache(OnComplete);
 		return;
 	}
-	URpmDeveloperSettings* Settings = GetMutableDefault<URpmDeveloperSettings>();
-	// TODO implement or remove
-	if(Settings->ApplicationId.IsEmpty())
-	{
-		// UE_LOG(LogReadyPlayerMe, Error, TEXT("Application ID is empty"));
-		// OnListAssetsResponse.ExecuteIfBound(FAssetListResponse(), false);
-		// return;
-	}
 	FString QueryString = Request->BuildQueryString();
 	const FString Url = FString::Printf(TEXT("%s/v1/phoenix-assets/types%s"), *ApiBaseUrl, *QueryString);
 	TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
@@ -99,48 +78,6 @@ void FAssetApi::ListAssetTypesAsync(TSharedPtr<FAssetTypeListRequest> Request, F
 		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
 	});
 }
-
-// void FAssetApi::HandleAssetResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful)
-// {
-// 	const bool bIsTypeRequest = ApiRequest->Url.Contains(TEXT("/types"));
-// 	if (bWasSuccessful && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-// 	{
-// 		FAssetTypeListResponse AssetTypeListResponse;
-// 		
-// 		if (bIsTypeRequest && FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &AssetTypeListResponse, 0, 0))
-// 		{
-// 			OnListAssetTypeResponse.ExecuteIfBound(AssetTypeListResponse, true);
-// 			return;
-// 		}
-// 		FAssetListResponse AssetListResponse;
-// 		if (!bIsTypeRequest && FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &AssetListResponse, 0, 0))
-// 		{
-// 			OnListAssetsResponse.ExecuteIfBound(AssetListResponse, true);
-// 			return;
-// 		}
-// 	}
-// 	
-// 	if(ApiRequestStrategy == EApiRequestStrategy::ApiOnly)
-// 	{
-// 		if(bIsTypeRequest)
-// 		{
-// 			UE_LOG(LogReadyPlayerMe, Error, TEXT("AssetApi:ListAssetTypesAsync request failed: %s"), *Response->GetContentAsString());
-// 			OnListAssetTypeResponse.ExecuteIfBound(FAssetTypeListResponse(), false);
-// 			return;
-// 		}
-// 		UE_LOG(LogReadyPlayerMe, Error, TEXT("AssetApi:ListAssetsAsync request failed: %s"), *Response->GetContentAsString());
-// 		OnListAssetsResponse.ExecuteIfBound(FAssetListResponse(), false);
-// 		return;
-// 	}
-// 	if(bIsTypeRequest)
-// 	{
-// 		UE_LOG(LogReadyPlayerMe, Warning, TEXT("FAssetApi::ListAssetTypesAsync request failed, falling back to cache."));
-// 		LoadAssetTypesFromCache();
-// 		return;
-// 	}
-// 	UE_LOG(LogReadyPlayerMe, Warning, TEXT("FAssetApi::ListAssetsAsync request failed, falling back to cache."));
-// 	LoadAssetsFromCache(ApiRequest->QueryParams);
-// }
 
 void FAssetApi::LoadAssetsFromCache(TMap<FString, FString> QueryParams, FOnListAssetsResponse OnComplete)
 {

@@ -1,14 +1,15 @@
-﻿#include "Api/Auth/AuthApi.h"
-#include "RpmNextGen.h"
-#include "Api/Auth/Models/CreateUserRequest.h"
+﻿
+#include "Api/Auth/AuthApi.h"
 #include "Api/Auth/Models/CreateUserResponse.h"
-#include "Api/Auth/Models/LoginWithCodeRequest.h"
 #include "Api/Auth/Models/LoginWithCodeResponse.h"
-#include "Interfaces/IHttpResponse.h"
 #include "Api/Auth/Models/RefreshTokenResponse.h"
-#include "Api/Auth/Models/SendLoginCodeRequest.h"
-#include "Api/Auth/Models/RefreshTokenRequest.h"
 #include "Settings/RpmDeveloperSettings.h"
+// ReSharper disable All
+#include "Api/Auth/Models/RefreshTokenRequest.h"
+#include "Api/Auth/Models/SendLoginCodeRequest.h"
+#include "Api/Auth/Models/LoginWithCodeRequest.h"
+#include "Api/Auth/Models/CreateUserRequest.h"
+// ReSharper restore All
 
 FAuthApi::FAuthApi()
 {

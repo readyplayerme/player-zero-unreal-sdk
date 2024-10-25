@@ -1,29 +1,23 @@
 ﻿#include "Auth/DeveloperTokenAuthStrategy.h"
-#include "RpmNextGen.h"
 #include "Auth/DevAuthTokenCache.h"
 #include "Api/Auth/Models/RefreshTokenRequest.h"
 #include "Api/Auth/Models/RefreshTokenResponse.h"
 #include "Auth/Models/DeveloperAuth.h"
-#include "Settings/RpmDeveloperSettings.h"
 
-DeveloperTokenAuthStrategy::DeveloperTokenAuthStrategy() 
-{
-	if(const URpmDeveloperSettings* Settings = GetDefault<URpmDeveloperSettings>())
-	{
-		ApiKey = Settings->ApiKey;
-	}
-}
-
-DeveloperTokenAuthStrategy::DeveloperTokenAuthStrategy(const FString& InApiKey) : ApiKey(InApiKey)
+FDeveloperTokenAuthStrategy::FDeveloperTokenAuthStrategy()
 {
 }
 
-DeveloperTokenAuthStrategy::~DeveloperTokenAuthStrategy()
+FDeveloperTokenAuthStrategy::FDeveloperTokenAuthStrategy(const FString& InApiKey) : FApiKeyAuthStrategy(InApiKey)
+{
+}
+
+FDeveloperTokenAuthStrategy::~FDeveloperTokenAuthStrategy()
 {
 	CancelAllRequests();
 }
 
-void DeveloperTokenAuthStrategy::TryRefresh(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, const FRefreshTokenResponse&, bool)> OnTokenRefreshed)
+void FDeveloperTokenAuthStrategy::TryRefresh(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, const FRefreshTokenResponse&, bool)> OnTokenRefreshed)
 {
 	FRefreshTokenRequest RefreshRequest;
 	RefreshRequest.Data.Token = FDevAuthTokenCache::GetAuthData().Token;
