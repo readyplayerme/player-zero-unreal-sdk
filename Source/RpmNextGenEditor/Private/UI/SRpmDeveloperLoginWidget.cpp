@@ -556,7 +556,6 @@ void SRpmDeveloperLoginWidget::HandleBaseModelListResponse(TSharedPtr<FAssetList
 		return;
 	}
 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to list base models"));
-
 }
 
 

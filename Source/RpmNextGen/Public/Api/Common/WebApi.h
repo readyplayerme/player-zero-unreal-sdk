@@ -11,7 +11,6 @@
 
 class FHttpModule;
 
-
 class RPMNEXTGEN_API FWebApi : public TSharedFromThis<FWebApi> 
 {
 public:	
@@ -60,7 +59,6 @@ void FWebApi::SendRequest(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSh
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = HttpModule->CreateRequest();
 	HttpRequest->SetURL(FullUrl);
 	HttpRequest->SetVerb(ApiRequest->GetVerb());
-	UE_LOG(LogTemp, Log, TEXT("Making request to %s"), *FullUrl);
 
 	for (const auto& Header : ApiRequest->Headers)
 	{
@@ -98,7 +96,6 @@ void FWebApi::SendRequest(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSh
 				{
 					TSharedPtr<T> ParsedResponse = MakeShareable(new T());
 					FString ContentAsString = Response->GetContentAsString();
-					UE_LOG(LogTemp, Log, TEXT("Response: %s"), *ContentAsString);
 					FJsonObjectConverter::JsonObjectStringToUStruct(ContentAsString, ParsedResponse.Get(), 0, 0);
 					OnResponse(ParsedResponse, true, ResponseCode);
 				}
@@ -123,16 +120,14 @@ FString FWebApi::ConvertToJsonString(const T& Data)
 	return JsonString;
 }
 
-// Overload for TSharedPtr
+
 template <typename T>
 FString FWebApi::ConvertToJsonString(const TSharedPtr<T>& DataPtr)
 {
 	FString JsonString;
-    
-	// Ensure the TSharedPtr is valid
+	
 	if (DataPtr.IsValid())
 	{
-		// Convert the underlying struct to JSON
 		FJsonObjectConverter::UStructToJsonObjectString(*DataPtr.Get(), JsonString);
 	}
     

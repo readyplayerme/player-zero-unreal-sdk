@@ -33,7 +33,6 @@ void URpmDeveloperSettings::PostEditChangeProperty(struct FPropertyChangedEvent&
 }
 #endif // WITH_EDITOR
 
-
 void URpmDeveloperSettings::SetupDemoAccount()
 {
 	ApplicationId = DemoAppId;

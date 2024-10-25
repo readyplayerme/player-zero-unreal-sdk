@@ -2,7 +2,6 @@
 #include "Api/Assets/AssetLoaderContext.h"
 #include "HttpModule.h"
 #include "Cache/AssetCacheManager.h"
-#include "Interfaces/IHttpResponse.h"
 
 FAssetIconLoader::FAssetIconLoader()
 {

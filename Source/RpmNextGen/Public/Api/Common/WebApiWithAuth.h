@@ -49,12 +49,9 @@ void FWebApiWithAuth::SendRequestWithAuth(TSharedPtr<FApiRequest> ApiRequest, TF
                 OnResponse(nullptr, false, -1);
             }
         });
+        return;
     }
-    else
-    {
-        UE_LOG( LogTemp, Error, TEXT("No authentication strategy set. Run request without") );
-        SendRequest<T>(ApiRequest, OnResponse);
-    }
+    SendRequest<T>(ApiRequest, OnResponse);
 }
 
 template <typename T>
@@ -112,4 +109,3 @@ void FWebApiWithAuth::RetryRequestWithRefreshedToken(TSharedPtr<FApiRequest> Api
         }
     });
 }
-
