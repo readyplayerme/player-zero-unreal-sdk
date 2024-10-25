@@ -7,6 +7,7 @@
 #include "Auth/Models/DeveloperAuth.h"
 #include "Auth/Models/DeveloperLoginRequest.h"
 #include "DeveloperAccounts/DeveloperAccountApi.h"
+#include "DeveloperAccounts/Models/ApplicationListRequest.h"
 #include "DeveloperAccounts/Models/OrganizationListRequest.h"
 #include "DeveloperAccounts/Models/OrganizationListResponse.h"
 #include "Settings/RpmDeveloperSettings.h"
@@ -144,7 +145,28 @@ void SDeveloperLoginPanel::HandleOrganizationListResponse(TSharedPtr<FOrganizati
 			UE_LOG(LogReadyPlayerMe, Error, TEXT("No organizations found"));
 			return;
 		}
-		OnOrgRequestComplete.ExecuteIfBound(Response->Data[0].Id);
+		TSharedPtr<FApplicationListRequest> Request = MakeShared<FApplicationListRequest>();
+		Request->Params.Add("organizationId", Response->Data[0].Id);
+		TWeakPtr<SDeveloperLoginPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperLoginPanel>(AsShared());
+		DeveloperAccountApi->ListApplicationsAsync(Request, FOnApplicationListResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
+		{
+			if(WeakPtrThis.IsValid())
+			{
+				WeakPtrThis.Pin()->HandleApplicationListResponse(Response, bWasSuccessful);
+			}
+		}));
 		return;
 	}
+
+	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch organizations"));
+}
+
+void SDeveloperLoginPanel::HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
+{
+	if(bWasSuccessful)
+	{
+		OnOrgRequestComplete.ExecuteIfBound(*Response.Get());
+		return;
+	}
+	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch applications"));
 }
