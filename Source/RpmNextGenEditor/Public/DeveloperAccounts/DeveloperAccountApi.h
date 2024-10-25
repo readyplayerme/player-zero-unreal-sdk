@@ -13,7 +13,8 @@ DECLARE_DELEGATE_TwoParams(FOnOrganizationListResponse, TSharedPtr<FOrganization
 
 class RPMNEXTGENEDITOR_API FDeveloperAccountApi : public FWebApiWithAuth
 {
-public:	
+public:
+	FDeveloperAccountApi();
 	FDeveloperAccountApi(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy);
 	void ListApplicationsAsync(TSharedPtr<FApplicationListRequest> Request, FOnApplicationListResponse OnComplete);
 	void ListOrganizationsAsync(TSharedPtr<FOrganizationListRequest> Request, FOnOrganizationListResponse OnComplete);

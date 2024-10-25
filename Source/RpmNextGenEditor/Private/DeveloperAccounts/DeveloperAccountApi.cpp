@@ -5,6 +5,10 @@
 #include "DeveloperAccounts/Models/OrganizationListResponse.h"
 #include "Settings/RpmDeveloperSettings.h"
 
+FDeveloperAccountApi::FDeveloperAccountApi()
+{    
+}
+
 FDeveloperAccountApi::FDeveloperAccountApi(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy) : FWebApiWithAuth(InAuthenticationStrategy)
 {
     if (URpmDeveloperSettings* Settings = GetMutableDefault<URpmDeveloperSettings>())

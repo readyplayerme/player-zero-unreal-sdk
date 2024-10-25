@@ -12,6 +12,8 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Containers/Map.h"
 
+class SDeveloperSettingsPanel;
+class SDeveloperLoginPanel;
 class FRpmTextureLoader;
 struct FDeveloperLoginResponse;
 class URpmDeveloperSettings;
@@ -34,6 +36,10 @@ public:
 	virtual ~SRpmDeveloperLoginWidget() override;
 	
 private:
+
+	TSharedPtr<SDeveloperLoginPanel> LoginPanel;
+	TSharedPtr<SDeveloperSettingsPanel> SettingsPanel;
+	
 	TSharedPtr<SVerticalBox> ContentBox;
 	TSharedPtr<SEditableTextBox> EmailTextBox;
 	TSharedPtr<SEditableTextBox> PasswordTextBox;
