@@ -10,6 +10,7 @@
 #include "RpmCharacterTypes.h"
 #include "RpmLoaderComponent.generated.h"
 
+class FAssetApi;
 class FFileApi;
 class FGlbLoader;
 struct FCharacterCreateResponse;
@@ -57,6 +58,9 @@ protected:
 	FRpmCharacterData CharacterData;
 	
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
+	virtual void CreateCharacterFromFirstStyle();
 	
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
 	virtual void CreateCharacter(const FString& BaseModelId);
@@ -84,6 +88,6 @@ protected:
 private:
 	TSharedPtr<FCharacterApi> CharacterApi;
 	TSharedPtr<FFileApi> FileApi;
-
+	TSharedPtr<FAssetApi> AssetApi;
 	void LoadAssetsFromCacheWithNewStyle();
 };

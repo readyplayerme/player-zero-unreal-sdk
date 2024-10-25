@@ -7,13 +7,14 @@
 #include "RpmFunctionLibrary.h"
 #include "Api/Assets/AssetApi.h"
 #include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/AssetListRequest.h"
+#include "Api/Assets/Models/AssetListResponse.h"
 #include "Api/Characters/CharacterApi.h"
 #include "Api/Characters/Models/CharacterCreateResponse.h"
 #include "Api/Characters/Models/CharacterFindByIdResponse.h"
 #include "Api/Characters/Models/CharacterUpdateResponse.h"
 #include "Api/Files/GlbLoader.h"
 #include "Cache/AssetCacheManager.h"
-#include "GenericPlatform/GenericPlatformCrashContext.h"
 #include "Settings/RpmDeveloperSettings.h"
 
 URpmLoaderComponent::URpmLoaderComponent()
@@ -24,6 +25,7 @@ URpmLoaderComponent::URpmLoaderComponent()
 	FileApi = MakeShared<FFileApi>();
 	FileApi->OnAssetFileRequestComplete.BindUObject(this, &URpmLoaderComponent::HandleAssetLoaded);
 	FileApi->OnFileRequestComplete.BindUObject(this, &URpmLoaderComponent::HandleCharacterAssetLoaded);
+	AssetApi = MakeShared<FAssetApi>();
 	CharacterApi = MakeShared<FCharacterApi>();
 	CharacterData = FRpmCharacterData();
 	GltfConfig = FglTFRuntimeConfig();
@@ -38,6 +40,27 @@ void URpmLoaderComponent::SetGltfConfig(const FglTFRuntimeConfig* Config)
 void URpmLoaderComponent::BeginPlay()
 {
 	Super::BeginPlay();	
+}
+
+void URpmLoaderComponent::CreateCharacterFromFirstStyle()
+{
+	TSharedPtr<FAssetListRequest> AssetListRequest = MakeShared<FAssetListRequest>(FAssetListQueryParams());
+	AssetListRequest->Params.ApplicationId = AppId;
+	AssetListRequest->Params.Limit = 1;
+	AssetListRequest->Params.Type = FAssetApi::BaseModelType;
+	TWeakObjectPtr<URpmLoaderComponent> WeakAssetApi = TWeakObjectPtr<URpmLoaderComponent>(this);
+	AssetApi->ListAssetsAsync(AssetListRequest, FOnListAssetsResponse::CreateLambda( [WeakAssetApi](TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
+	{
+		if (WeakAssetApi.IsValid())
+		{
+			if(bWasSuccessful && Response.IsValid() && Response->Data.Num() > 0)
+			{
+				WeakAssetApi->CreateCharacter(Response->Data[0].Id);
+				return;
+			}
+			UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch first asset id"));
+		}
+	}));
 }
 
 void URpmLoaderComponent::CreateCharacter(const FString& BaseModelId)
