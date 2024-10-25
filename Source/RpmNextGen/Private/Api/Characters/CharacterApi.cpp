@@ -25,7 +25,10 @@ void FCharacterApi::CreateAsync(TSharedPtr<FCharacterCreateRequest> Request, FOn
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	SendRequestWithAuth<FCharacterCreateResponse>(ApiRequest, [OnComplete](TSharedPtr<FCharacterCreateResponse> Response, bool bWasSuccessful, int32 StatusCode)
 	 {
-		//UE_LOG(LogReadyPlayerMe, Warning, TEXT("Character CREATE request failed."));
+		if (StatusCode == 401)
+		{
+			UE_LOG(LogReadyPlayerMe, Error,TEXT("The request to the character API failed with a 401 response code. Please ensure that your API Key or proxy is correctly configured."));
+		}
 		 OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
 	 });
 }
@@ -40,7 +43,10 @@ void FCharacterApi::UpdateAsync(TSharedPtr<FCharacterUpdateRequest> Request, FOn
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	SendRequestWithAuth<FCharacterUpdateResponse>(ApiRequest, [OnComplete](TSharedPtr<FCharacterUpdateResponse> Response, bool bWasSuccessful, int32 StatusCode)
 	{
-		//UE_LOG(LogReadyPlayerMe, Warning, TEXT("Character UPDATE request failed."));
+		if (StatusCode == 401)
+		{
+			UE_LOG(LogReadyPlayerMe, Error,TEXT("The request to the character API failed with a 401 response code. Please ensure that your API Key or proxy is correctly configured."));
+		}
 		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
 	});
 }
@@ -53,7 +59,10 @@ void FCharacterApi::FindByIdAsync(TSharedPtr<FCharacterFindByIdRequest> Request,
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	SendRequestWithAuth<FCharacterFindByIdResponse>(ApiRequest, [OnComplete](TSharedPtr<FCharacterFindByIdResponse> Response, bool bWasSuccessful, int32 StatusCode)
 	{
-		//UE_LOG(LogReadyPlayerMe, Warning, TEXT("Character FindById request failed."));
+		if (StatusCode == 401)
+		{
+			UE_LOG(LogReadyPlayerMe, Error,TEXT("The request to the character API failed with a 401 response code. Please ensure that your API Key or proxy is correctly configured."));
+		}
 		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
 	});
 }
@@ -64,34 +73,3 @@ FString FCharacterApi::GeneratePreviewUrl(const FCharacterPreviewRequest& Reques
 	FString url = FString::Printf(TEXT("%s/%s/preview%s"), *BaseUrl, *Request.Id, *QueryString);
 	return url;
 }
-
-// TODO re-add 401 check before removing this (as a reminder )
-// void FCharacterApi::HandleCharacterResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful)
-// {
-// 	const FString Verb = ApiRequest->GetVerb();
-// 	bool bSuccess = bWasSuccessful && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode());
-// 	if (Response.IsValid() && Response->GetResponseCode() == 401)
-// 	{
-// 		UE_LOG(LogReadyPlayerMe, Error,TEXT("The request to the character API failed with a 401 response code. Please ensure that your API Key or proxy is correctly configured."));
-// 		bSuccess = false;
-// 	}
-// 	switch (ApiRequest->Method)
-// 	{
-// 		case POST:
-// 			HandleCharacterCreateResponse(Response, bSuccess);
-// 			break;
-// 		case PATCH:
-// 			HandleUpdateResponse( Response, bSuccess);
-// 			break;
-// 		case GET: 
-// 			HandleFindResponse(Response, bSuccess);
-// 			break;
-// 		default:
-// 			break;
-// 	}
-//}
-
-
-
-
-
