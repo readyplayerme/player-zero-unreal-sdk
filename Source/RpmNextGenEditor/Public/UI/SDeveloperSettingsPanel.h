@@ -20,6 +20,7 @@ class RPMNEXTGENEDITOR_API SDeveloperSettingsPanel : public SCompoundWidget
 public:
 	SLATE_BEGIN_ARGS(SDeveloperSettingsPanel) {}
 	SLATE_END_ARGS()
+
 	void Construct(const FArguments& InArgs);
 	void RunPanelSetup(const FString& InUserName);
 
@@ -29,6 +30,7 @@ private:
 	TSharedPtr<FDeveloperAccountApi> DeveloperAccountApi;
 	TSharedPtr<FAssetApi> AssetApi;
 	
+	TSharedPtr<STextBlock> ErrorMessageText;
 	TSharedPtr<SVerticalBox> ContentBox;
 	TSharedPtr<FString> SelectedComboBoxItem;
 	TArray<TSharedPtr<FString>> ComboBoxItems;
@@ -39,6 +41,7 @@ private:
 	TSharedPtr<FEditorAssetLoader> AssetLoader;
 	FString UserName;
 
+	void UpdateErrorMessage(const FString& Message);
 	void PopulateSettingsContent(TArray<FApplication> InApplicationList);
 	void OnLoadBaseModelClicked(const FAsset& Asset);
 	void OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> Image, TSharedPtr<FRpmTextureLoader> RpmTextureLoader);

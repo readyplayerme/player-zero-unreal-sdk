@@ -3,13 +3,8 @@
 #include "EditorCache.h"
 #include "Auth/DevAuthTokenCache.h"
 #include "Auth/DeveloperAuthApi.h"
-#include "Auth/DeveloperTokenAuthStrategy.h"
 #include "Auth/Models/DeveloperAuth.h"
 #include "Auth/Models/DeveloperLoginRequest.h"
-#include "DeveloperAccounts/DeveloperAccountApi.h"
-#include "DeveloperAccounts/Models/ApplicationListRequest.h"
-#include "DeveloperAccounts/Models/OrganizationListRequest.h"
-#include "DeveloperAccounts/Models/OrganizationListResponse.h"
 #include "Settings/RpmDeveloperSettings.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Input/SEditableTextBox.h"
@@ -20,7 +15,6 @@ void SDeveloperLoginPanel::Construct(const FArguments& InArgs)
 	ChildSlot
 	[
 		SNew(SVerticalBox)
-        
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(10)
@@ -28,7 +22,6 @@ void SDeveloperLoginPanel::Construct(const FArguments& InArgs)
 			SNew(STextBlock)
 			.Text(FText::FromString("Sign in with your account"))
 		]
-        
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(10)
@@ -36,14 +29,22 @@ void SDeveloperLoginPanel::Construct(const FArguments& InArgs)
 			SNew(STextBlock)
 			.Text(FText::FromString("Email:"))
 		]
-        
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(10)
 		[
 			SAssignNew(EmailTextBox, SEditableTextBox)
+			.OnTextChanged(this, &SDeveloperLoginPanel::OnTextChanged)
 		]
-        
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10, 0)
+		[
+			SAssignNew(EmailErrorText, STextBlock)
+			.Text(FText::FromString("Email is required."))
+			.ColorAndOpacity(FSlateColor(FLinearColor::Red))
+			.Visibility(EVisibility::Collapsed) // Initially hidden
+		]
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(10)
@@ -51,15 +52,23 @@ void SDeveloperLoginPanel::Construct(const FArguments& InArgs)
 			SNew(STextBlock)
 			.Text(FText::FromString("Password:"))
 		]
-        
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(10)
 		[
 			SAssignNew(PasswordTextBox, SEditableTextBox)
 			.IsPassword(true)
+			.OnTextChanged(this, &SDeveloperLoginPanel::OnTextChanged)
 		]
-        
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10, 0)
+		[
+			SAssignNew(PasswordErrorText, STextBlock)
+			.Text(FText::FromString("Password is required."))
+			.ColorAndOpacity(FSlateColor(FLinearColor::Red))
+			.Visibility(EVisibility::Collapsed) // Initially hidden
+		]        
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(10)
@@ -67,6 +76,16 @@ void SDeveloperLoginPanel::Construct(const FArguments& InArgs)
 			SNew(SButton)
 			.Text(FText::FromString("Login"))
 			.OnClicked(this, &SDeveloperLoginPanel::OnLoginClicked)
+			.IsEnabled(this, &SDeveloperLoginPanel::IsInputTextValid) // Bind to enable/disable button
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10, 0)
+		[
+			SAssignNew(LoginErrorText, STextBlock)
+			.Text(FText::FromString("Login failed. Please check your credentials."))
+			.ColorAndOpacity(FSlateColor(FLinearColor::Red))
+			.Visibility(EVisibility::Collapsed) // Initially hidden
 		]
 		+ SVerticalBox::Slot()
 		  .Padding(10)
@@ -77,7 +96,9 @@ void SDeveloperLoginPanel::Construct(const FArguments& InArgs)
 			.OnClicked(this, &SDeveloperLoginPanel::OnUseDemoAccountClicked)
 		]
 	];
+	
 	Initialize();
+	UpdateErrorMessages();
 }
 
 void SDeveloperLoginPanel::Initialize()
@@ -91,6 +112,8 @@ void SDeveloperLoginPanel::Initialize()
 
 FReply SDeveloperLoginPanel::OnLoginClicked()
 {
+	bFailedLogin = false;
+	UpdateErrorMessages();
 	URpmDeveloperSettings* RpmSettings = GetMutableDefault<URpmDeveloperSettings>();
 	RpmSettings->Reset();
 	FString Email = EmailTextBox->GetText().ToString();
@@ -114,6 +137,7 @@ FReply SDeveloperLoginPanel::OnLoginClicked()
 
 FReply SDeveloperLoginPanel::OnUseDemoAccountClicked()
 {
+	bFailedLogin = false;
 	URpmDeveloperSettings* RpmSettings = GetMutableDefault<URpmDeveloperSettings>();
 	RpmSettings->Reset();
 	RpmSettings->SetupDemoAccount();
@@ -134,54 +158,25 @@ void SDeveloperLoginPanel::HandleLoginResponse(TSharedPtr<FDeveloperLoginRespons
 		OnLoginSuccess.ExecuteIfBound(Response->Data.Name);
 		return;
 	}
+	bFailedLogin = true;
 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Login request failed"));
 	FDevAuthTokenCache::ClearAuthData();
+	UpdateErrorMessages();
 }
 
-// void SDeveloperLoginPanel::GetOrganizationList()
-// {
-// 	TSharedPtr<FOrganizationListRequest> OrgRequest = MakeShared<FOrganizationListRequest>();
-// 	TWeakPtr<SDeveloperLoginPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperLoginPanel>(AsShared());
-// 	DeveloperAccountApi->ListOrganizationsAsync(OrgRequest, FOnOrganizationListResponse::CreateLambda([WeakPtrThis]( TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
-// 	{
-// 		if(WeakPtrThis.IsValid())
-// 		{
-// 			WeakPtrThis.Pin()->HandleOrganizationListResponse(Response, bWasSuccessful);
-// 		}
-// 	}));
-// }
+void SDeveloperLoginPanel::OnTextChanged(const FText& Text)
+{
+	UpdateErrorMessages();
+}
 
-// void SDeveloperLoginPanel::HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
-// {
-// 	if (bWasSuccessful)
-// 	{
-// 		if (Response->Data.Num() == 0)
-// 		{
-// 			UE_LOG(LogReadyPlayerMe, Error, TEXT("No organizations found"));
-// 			return;
-// 		}
-// 		TSharedPtr<FApplicationListRequest> Request = MakeShared<FApplicationListRequest>();
-// 		Request->Params.Add("organizationId", Response->Data[0].Id);
-// 		TWeakPtr<SDeveloperLoginPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperLoginPanel>(AsShared());
-// 		DeveloperAccountApi->ListApplicationsAsync(Request, FOnApplicationListResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
-// 		{
-// 			if(WeakPtrThis.IsValid())
-// 			{
-// 				WeakPtrThis.Pin()->HandleApplicationListResponse(Response, bWasSuccessful);
-// 			}
-// 		}));
-// 		return;
-// 	}
-//
-// 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch organizations"));
-// }
-//
-// void SDeveloperLoginPanel::HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
-// {
-// 	if(bWasSuccessful)
-// 	{
-// 		OnApplicationListRequestComplete.ExecuteIfBound(*Response.Get());
-// 		return;
-// 	}
-// 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch applications"));
-// }
+void SDeveloperLoginPanel::UpdateErrorMessages()
+{
+	EmailErrorText->SetVisibility(EmailTextBox->GetText().IsEmpty() ? EVisibility::Visible : EVisibility::Collapsed);
+	PasswordErrorText->SetVisibility(PasswordTextBox->GetText().IsEmpty() ? EVisibility::Visible : EVisibility::Collapsed);
+	LoginErrorText->SetVisibility(bFailedLogin ? EVisibility::Visible : EVisibility::Collapsed);
+}
+
+bool SDeveloperLoginPanel::IsInputTextValid() const
+{
+	return !EmailTextBox->GetText().IsEmpty() && !PasswordTextBox->GetText().IsEmpty();
+}

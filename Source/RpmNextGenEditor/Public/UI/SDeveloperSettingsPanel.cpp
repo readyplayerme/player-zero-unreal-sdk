@@ -96,6 +96,14 @@ void SDeveloperSettingsPanel::Construct(const FArguments& InArgs)
 			.Text(FText::FromString("Here you can import your character models from Studio"))
 		]
 		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10)
+		[
+			SAssignNew(ErrorMessageText, STextBlock)
+			.ColorAndOpacity(FSlateColor(FLinearColor::Red))
+			.Visibility(EVisibility::Collapsed) // Hidden initially
+		]
+		+ SVerticalBox::Slot()
 		  .Padding(10)
 		  .FillHeight(1.0f) // Allows the scroll box to take up remaining space
 		[
@@ -106,12 +114,14 @@ void SDeveloperSettingsPanel::Construct(const FArguments& InArgs)
 			]
 		]	
 	];
+
+	UpdateErrorMessage("");
 }
 
 void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 {
 	InUserName.IsEmpty() ? UserName = TEXT("User") : UserName = InUserName;
-
+	UpdateErrorMessage("");
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
 	if (!AssetApi.IsValid())
 	{
@@ -149,6 +159,18 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 	{
 		DeveloperAccountApi->SetAuthenticationStrategy(nullptr);
 	}
+
+	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
+	if(RpmSettings->ApiKey.IsEmpty() && RpmSettings->ApiProxyUrl.IsEmpty())
+	{
+		UpdateErrorMessage("API Key and Proxy URL is not set. Please check your Ready Player Me Settings.");
+		return;
+	}
+	if(RpmSettings->ApplicationId.IsEmpty())
+	{
+		UpdateErrorMessage("Application ID is not set. Please check your Ready Player Me Settings.");
+		return;
+	}
 	
 	const TSharedPtr<FOrganizationListRequest> OrgRequest = MakeShared<FOrganizationListRequest>();
 	TWeakPtr<SDeveloperSettingsPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperSettingsPanel>(AsShared());
@@ -159,6 +181,19 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 			WeakPtrThis.Pin()->HandleOrganizationListResponse(Response, bWasSuccessful);
 		}
 	}));
+}
+
+void SDeveloperSettingsPanel::UpdateErrorMessage(const FString& Message)
+{
+	if (Message.IsEmpty())
+	{
+		ErrorMessageText->SetVisibility(EVisibility::Collapsed);
+	}
+	else
+	{
+		ErrorMessageText->SetText(FText::FromString(Message));
+		ErrorMessageText->SetVisibility(EVisibility::Visible);
+	}
 }
 
 void SDeveloperSettingsPanel::PopulateSettingsContent(TArray<FApplication> InApplicationList)
@@ -326,19 +361,11 @@ void SDeveloperSettingsPanel::HandleBaseModelListResponse(TSharedPtr<FAssetListR
 			CharacterStyleAssets.Add(Asset.Id, Asset);
 			AddCharacterStyle(Asset);
 		}
+		UpdateErrorMessage("");
 		return;
 	}
 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to list base models"));
-}
-
-void SDeveloperSettingsPanel::HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
-{
-	if(bWasSuccessful && Response.IsValid())
-	{
-		PopulateSettingsContent(Response->Data);
-		return;
-	}
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch applications"));
+	UpdateErrorMessage("Failed to load base models. Please try again.");
 }
 
 void SDeveloperSettingsPanel::HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
@@ -360,10 +387,22 @@ void SDeveloperSettingsPanel::HandleOrganizationListResponse(TSharedPtr<FOrganiz
 				WeakPtrThis.Pin()->HandleApplicationListResponse(Response, bWasSuccessful);
 			}
 		}));
+		UpdateErrorMessage("");
 		return;
 	}
-
+	UpdateErrorMessage("Failed to fetch organizations. Please check your network connection.");
 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch organizations"))
+}
+
+void SDeveloperSettingsPanel::HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
+{
+	if(bWasSuccessful && Response.IsValid())
+	{
+		PopulateSettingsContent(Response->Data);
+		UpdateErrorMessage("");
+		return;
+	}
+	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch applications"));
 }
 
 void SDeveloperSettingsPanel::PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem)
