@@ -348,10 +348,15 @@ void SDeveloperSettingsPanel::OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<
 
 void SDeveloperSettingsPanel::HandleBaseModelListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
 {
-
 	CharacterStyleAssets.Empty();
-	if(bWasSuccessful && Response.IsValid() && Response->Data.Num() > 0)
+	if(bWasSuccessful && Response.IsValid())
 	{
+		if(Response->Data.Num() == 0)
+		{
+			UE_LOG(LogReadyPlayerMe, Error, TEXT("No Avatar styles found. Make sure you have uploaded your character models to Ready Player Me Studio"));
+			UpdateErrorMessage("No Avatar styles found. Make sure you have uploaded your character models to Ready Player Me Studio");
+			return;
+		}
 		for (FAsset Asset : Response->Data)
 		{
 			CharacterStyleAssets.Add(Asset.Id, Asset);
