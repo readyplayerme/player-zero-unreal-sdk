@@ -19,9 +19,15 @@ struct RPMNEXTGENEDITOR_API FDeveloperAuth
 	FString Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me", meta = (JsonName = "isDemo"))
-	bool IsDemo;
+	bool IsDemo = false;
 
-	FDeveloperAuth() = default;
+	FDeveloperAuth()
+	{
+		Token = TEXT("");
+		RefreshToken = TEXT("");
+		Name = TEXT("");
+		IsDemo = false;
+	}
 	
 	FDeveloperAuth(FDeveloperLoginResponseBody Data, bool bIsDemo)
 	{

@@ -165,7 +165,11 @@ TArray<USceneComponent*> ARpmActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAs
 				bIsMasterPoseUpdateRequired = false;
 				continue;
 			}
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
+			SkeletalMeshComponent->SetLeaderPoseComponent(MasterPoseComponent.Get());
+#else
 			SkeletalMeshComponent->SetMasterPoseComponent(MasterPoseComponent.Get());
+#endif
 			NewMeshComponents.Add(SkeletalMeshComponent);
 		}
 		else
