@@ -38,6 +38,7 @@ void SDeveloperSettingsPanel::Construct(const FArguments& InArgs)
 			[
 				SNew(STextBlock)
 				.Text(this, &SDeveloperSettingsPanel::GetWelcomeText)
+				
 			]
 			+ SHorizontalBox::Slot()
 			  .AutoWidth()
@@ -164,11 +165,6 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 	if(RpmSettings->ApiKey.IsEmpty() && RpmSettings->ApiProxyUrl.IsEmpty())
 	{
 		UpdateErrorMessage("API Key and Proxy URL is not set. Please check your Ready Player Me Settings.");
-		return;
-	}
-	if(RpmSettings->ApplicationId.IsEmpty())
-	{
-		UpdateErrorMessage("Application ID is not set. Please check your Ready Player Me Settings.");
 		return;
 	}
 	

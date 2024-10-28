@@ -21,17 +21,18 @@ void SDeveloperLoginPanel::Construct(const FArguments& InArgs)
 		[
 			SNew(STextBlock)
 			.Text(FText::FromString("Sign in with your account"))
+			.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 16))
 		]
 		+ SVerticalBox::Slot()
 		.AutoHeight()
-		.Padding(10)
+		.Padding(10, 5)
 		[
 			SNew(STextBlock)
 			.Text(FText::FromString("Email:"))
 		]
 		+ SVerticalBox::Slot()
 		.AutoHeight()
-		.Padding(10)
+		.Padding(10, 5)
 		[
 			SAssignNew(EmailTextBox, SEditableTextBox)
 			.OnTextChanged(this, &SDeveloperLoginPanel::OnTextChanged)
@@ -47,14 +48,14 @@ void SDeveloperLoginPanel::Construct(const FArguments& InArgs)
 		]
 		+ SVerticalBox::Slot()
 		.AutoHeight()
-		.Padding(10)
+		.Padding(10, 5)
 		[
 			SNew(STextBlock)
 			.Text(FText::FromString("Password:"))
 		]
 		+ SVerticalBox::Slot()
 		.AutoHeight()
-		.Padding(10)
+		.Padding(10, 5)
 		[
 			SAssignNew(PasswordTextBox, SEditableTextBox)
 			.IsPassword(true)
