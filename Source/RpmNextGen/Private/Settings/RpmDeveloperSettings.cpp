@@ -12,9 +12,15 @@ void URpmDeveloperSettings::PostInitProperties()
 	Super::PostInitProperties();
 }
 
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1)
+void URpmDeveloperSettings::PreSave(FObjectPreSaveContext Context)
+{
+	Super::PreSave(Context);
+#else
 void URpmDeveloperSettings::PreSave(const ITargetPlatform* TargetPlatform)
 {
 	Super::PreSave(TargetPlatform);
+#endif
 
 	if(ApiKey.IsEmpty() && ApiProxyUrl.IsEmpty() && !ApplicationId.IsEmpty())
 	{
