@@ -6,10 +6,6 @@ FWebApiWithAuth::FWebApiWithAuth() : AuthenticationStrategy(nullptr)
 {
     FWebApi();
     const URpmDeveloperSettings* Settings = GetDefault<URpmDeveloperSettings>();
-    if (Settings->ApplicationId.IsEmpty())
-    {
-        UE_LOG(LogReadyPlayerMe, Error, TEXT("Application ID is empty. Please set the Application ID in the Ready Player Me Developer Settings"));
-    }
     if (!Settings->ApiKey.IsEmpty() || Settings->ApiProxyUrl.IsEmpty())
     {
         SetAuthenticationStrategy(MakeShared<FApiKeyAuthStrategy>());

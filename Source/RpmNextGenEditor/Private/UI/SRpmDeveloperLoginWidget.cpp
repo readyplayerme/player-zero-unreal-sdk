@@ -2,25 +2,12 @@
 
 #include "UI/SRpmDeveloperLoginWidget.h"
 #include "Auth/DevAuthTokenCache.h"
-#include "EditorCache.h"
 #include "RpmNextGen.h"
 #include "SlateOptMacros.h"
-#include "Api/Assets/Models/AssetListRequest.h"
-#include "Api/Assets/Models/AssetListResponse.h"
-#include "DeveloperAccounts/DeveloperAccountApi.h"
-#include "Auth/DeveloperTokenAuthStrategy.h"
 #include "Widgets/Input/SEditableTextBox.h"
-#include "RpmTextureLoader.h"
-#include "Auth/DeveloperAuthApi.h"
 #include "Auth/Models/DeveloperAuth.h"
-#include "Auth/Models/DeveloperLoginRequest.h"
-#include "DeveloperAccounts/Models/ApplicationListRequest.h"
-#include "DeveloperAccounts/Models/ApplicationListResponse.h"
-#include "DeveloperAccounts/Models/OrganizationListRequest.h"
-#include "DeveloperAccounts/Models/OrganizationListResponse.h"
-#include "Settings/RpmDeveloperSettings.h"
-#include "Utilities/RpmImageHelper.h"
-#include "Widgets/Layout/SScrollBox.h"
+#include "UI/SDeveloperLoginPanel.h"
+#include "UI/SDeveloperSettingsPanel.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -40,531 +27,71 @@ void SRpmDeveloperLoginWidget::Construct(const FArguments& InArgs)
 		UserName = "User";
 		FDevAuthTokenCache::ClearAuthData();
 	}
-
 	ChildSlot
 	[
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
 		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Sign in with your Ready Player Me Studio account"))
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoginViewVisibility)
+			SAssignNew(LoginPanel, SDeveloperLoginPanel)
+			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoginPanelVisibility)
 		]
 		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
 		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Email:"))
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoginViewVisibility)
+			SAssignNew(SettingsPanel, SDeveloperSettingsPanel)
+			.Visibility(this, &SRpmDeveloperLoginWidget::GetSettingsPanelVisibility)
 		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SAssignNew(EmailTextBox, SEditableTextBox)
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoginViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Password:"))
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoginViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SAssignNew(PasswordTextBox, SEditableTextBox)
-			.IsPassword(true)
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoginViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(SButton)
-			.Text(FText::FromString("Login"))
-			.OnClicked(this, &SRpmDeveloperLoginWidget::OnLoginClicked)
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoginViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(SButton)
-			.Text(FText::FromString("Use Demo Account"))
-			.OnClicked(this, &SRpmDeveloperLoginWidget::OnUseDemoAccountClicked)
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoginViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.FillWidth(1.0)
-			[
-				SNew(STextBlock)
-				.Text(this, &SRpmDeveloperLoginWidget::GetWelcomeText)
-				.Visibility(this, &SRpmDeveloperLoginWidget::GetLoggedInViewVisibility)
-			]
-			+ SHorizontalBox::Slot()
-			  .AutoWidth()
-			  .HAlign(HAlign_Right)
-			[
-				SNew(SButton)
-				.Text(FText::FromString("Logout"))
-				.OnClicked(this, &SRpmDeveloperLoginWidget::OnLogoutClicked)
-				.Visibility(this, &SRpmDeveloperLoginWidget::GetLoggedInViewVisibility)
-			]
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Project Settings"))
-			.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf"), 16))
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Select the Ready Player Me application to link to project"))
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(SComboBox<TSharedPtr<FString>>)
-			.OptionsSource(&ComboBoxItems)
-			.OnSelectionChanged(this, &SRpmDeveloperLoginWidget::OnComboBoxSelectionChanged)
-			.OnGenerateWidget_Lambda([](TSharedPtr<FString> Item)
-			                                    {
-				                                    return SNew(STextBlock).Text(FText::FromString(*Item));
-			                                    })
-			[
-				SAssignNew(SelectedApplicationTextBlock, STextBlock).Text(
-					this, &SRpmDeveloperLoginWidget::GetSelectedComboBoxItemText)
-			]
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Character Models"))
-			.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf"), 16))
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Here you can import your character models from Studio"))
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .FillHeight(1.0f) // Allows the scroll box to take up remaining space
-		[
-			SNew(SScrollBox)
-			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoggedInViewVisibility)
-			+ SScrollBox::Slot()
-			[
-				SAssignNew(ContentBox, SVerticalBox)
-			]
-		]	
 	];
 
-	EmailTextBox->SetText(FText::FromString(FEditorCache::GetString(CacheKeyEmail)));
-	Initialize();
-}
-
-void SRpmDeveloperLoginWidget::Initialize()
-{
-	if (bIsInitialized)
+	if(LoginPanel)
 	{
-		return;
-	}
-	CharacterStyleAssets = TMap<FString, FAsset>();
-	ActiveLoaders = TArray<TSharedPtr<FRpmTextureLoader>>();
-	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
-	if (!DeveloperAuthApi.IsValid())
-	{
-		DeveloperAuthApi = MakeShared<FDeveloperAuthApi>();
+		LoginPanel->OnLoginSuccess.BindRaw( this, &SRpmDeveloperLoginWidget::HandleLogin );
 	}
 
-	if (!AssetApi.IsValid())
+	if(SettingsPanel)
 	{
-		AssetApi = MakeShared<FAssetApi>();
-		if (!DevAuthData.IsDemo)
+		SettingsPanel->OnLogout.BindRaw( this, &SRpmDeveloperLoginWidget::HandleLogout );
+		if(bIsLoggedIn)
 		{
-			AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
+			SettingsPanel->RunPanelSetup(UserName);
 		}
 	}
-	if (!DeveloperAccountApi.IsValid())
-	{
-		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>(nullptr);
-		if (!DevAuthData.IsDemo)
-		{
-			DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
-		}
-	}
-	bIsInitialized = true;
-	if (bIsLoggedIn)
-	{
-		GetOrgList();
-		return;
-	}
-	OnLogoutClicked();
+
+	SetLoggedInState(bIsLoggedIn);
 }
 
 SRpmDeveloperLoginWidget::~SRpmDeveloperLoginWidget()
 {
-	ClearLoadedCharacterModelImages();
-	AssetApi->CancelAllRequests();
 }
 
-void SRpmDeveloperLoginWidget::ClearLoadedCharacterModelImages()
+void SRpmDeveloperLoginWidget::HandleLogin(const FString& String)
 {
-	for (const auto Texture : CharacterStyleTextures)
+	UE_LOG(LogReadyPlayerMe, Log, TEXT("Login success: %s"), *String);
+	if(SettingsPanel)
 	{
-		Texture->RemoveFromRoot();
+		SettingsPanel->RunPanelSetup(String);
 	}
-	CharacterStyleTextures.Empty();
+	SetLoggedInState(true);
 }
 
-void SRpmDeveloperLoginWidget::AddCharacterStyle(const FAsset& StyleAsset)
+void SRpmDeveloperLoginWidget::HandleLogout()
 {
-	TSharedPtr<SImage> ImageWidget;
-	const FVector2D ImageSize(100.0f, 100.0f);
-
-	ContentBox->AddSlot()
-	          .AutoHeight()
-	          .Padding(5)
-	[
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
-		  .AutoWidth()
-		  .Padding(5)
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			  .AutoHeight()
-			  .HAlign(HAlign_Left)
-			[
-				SAssignNew(ImageWidget, SImage).
-				DesiredSizeOverride(ImageSize)
-			]
-			+ SVerticalBox::Slot()
-			  .AutoHeight()
-			  .Padding(5, 5)
-			[
-				SNew(SBox)
-				.WidthOverride(100.0f)
-				[
-					SNew(SButton)
-					.HAlign(HAlign_Center)
-					.VAlign(VAlign_Center)
-					.Text(FText::FromString("Import"))
-					.OnClicked_Lambda([this, StyleAsset]() -> FReply
-					{
-						OnLoadBaseModelClicked(StyleAsset);
-						return FReply::Handled();
-					})
-				]
-
-			]
-		]
-		+ SHorizontalBox::Slot()
-		  .AutoWidth()
-		  .VAlign(VAlign_Top)
-		  .Padding(10, 10, 0, 0)
-		[
-			SNew(SEditableText)
-			   .Text(FText::FromString(FString::Printf(TEXT("ID: %s"), *StyleAsset.Id)))
-			   .IsReadOnly(true)
-			   .IsCaretMovedWhenGainFocus(false)
-			   .SelectAllTextWhenFocused(false)
-			   .MinDesiredWidth(100.0f)
-		]
-	];
-
-	TSharedPtr<FRpmTextureLoader> ImageLoader = MakeShared<FRpmTextureLoader>();
-	ActiveLoaders.Add(ImageLoader);
-	ImageLoader->OnTextureLoaded.BindRaw(this, &SRpmDeveloperLoginWidget::OnTextureLoaded, ImageWidget, ImageLoader);
-	ImageLoader->LoadIconFromAsset(StyleAsset);
+	SetLoggedInState(false);
 }
 
-void SRpmDeveloperLoginWidget::OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> SImage, TSharedPtr<FRpmTextureLoader> LoaderToRemove)
+void SRpmDeveloperLoginWidget::SetLoggedInState(bool IsLoggedIn)
 {
-	if (Texture2D)
-	{
-		Texture2D->AddToRoot();
-		CharacterStyleTextures.Add(Texture2D);
-		FRpmImageHelper::LoadTextureToSImage(Texture2D, FVector2D(100.0f, 100.0f), SImage);
-	}
-	ActiveLoaders.Remove(LoaderToRemove);
+	bIsLoggedIn = IsLoggedIn;
+	Invalidate(EInvalidateWidget::Layout); 
 }
 
-void SRpmDeveloperLoginWidget::OnLoadBaseModelClicked(const FAsset& StyleAsset)
-{
-	AssetLoader = MakeShared<FEditorAssetLoader>();
-	AssetLoader->LoadBaseModelAsset(StyleAsset);
-}
-
-EVisibility SRpmDeveloperLoginWidget::GetLoginViewVisibility() const
+EVisibility SRpmDeveloperLoginWidget::GetLoginPanelVisibility() const
 {
 	return bIsLoggedIn ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
-EVisibility SRpmDeveloperLoginWidget::GetLoggedInViewVisibility() const
+EVisibility SRpmDeveloperLoginWidget::GetSettingsPanelVisibility() const
 {
 	return bIsLoggedIn ? EVisibility::Visible : EVisibility::Collapsed;
-}
-
-FText SRpmDeveloperLoginWidget::GetWelcomeText() const
-{
-	return FText::Format(FText::FromString("Welcome {0}"), FText::FromString(UserName));
-}
-
-FReply SRpmDeveloperLoginWidget::OnLoginClicked()
-{
-	URpmDeveloperSettings* RpmSettings = GetMutableDefault<URpmDeveloperSettings>();
-	RpmSettings->Reset();
-	FString Email = EmailTextBox->GetText().ToString();
-	FString Password = PasswordTextBox->GetText().ToString();
-	FEditorCache::SetString(CacheKeyEmail, Email);
-	Email = Email.TrimStartAndEnd();
-	Password = Password.TrimStartAndEnd();
-	DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
-	AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
-	const TSharedPtr<FDeveloperLoginRequest> LoginRequest = MakeShared<FDeveloperLoginRequest>(Email, Password);
-	TWeakPtr<SRpmDeveloperLoginWidget> WeakPtrThis = StaticCastSharedRef<SRpmDeveloperLoginWidget>(AsShared());
-	DeveloperAuthApi->LoginWithEmail(LoginRequest, FOnDeveloperLoginResponse::CreateLambda([WeakPtrThis]( TSharedPtr<FDeveloperLoginResponse> Response, bool bWasSuccessful)
-	{
-		if(WeakPtrThis.IsValid())
-		{
-			WeakPtrThis.Pin()->HandleLoginResponse(Response, bWasSuccessful);
-		}
-	}));
-	return FReply::Handled();
-}
-
-void SRpmDeveloperLoginWidget::GetOrgList()
-{
-	TSharedPtr<FOrganizationListRequest> OrgRequest = MakeShared<FOrganizationListRequest>();
-	TWeakPtr<SRpmDeveloperLoginWidget> WeakPtrThis = StaticCastSharedRef<SRpmDeveloperLoginWidget>(AsShared());
-	DeveloperAccountApi->ListOrganizationsAsync(OrgRequest, FOnOrganizationListResponse::CreateLambda([WeakPtrThis]( TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
-	{
-		if(WeakPtrThis.IsValid())
-		{
-			WeakPtrThis.Pin()->HandleOrganizationListResponse(Response, bWasSuccessful);
-		}
-	}));
-}
-
-void SRpmDeveloperLoginWidget::HandleLoginResponse(TSharedPtr<FDeveloperLoginResponse> Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		UserName = Response->Data.Name;
-		const FDeveloperAuth AuthData = FDeveloperAuth(Response->Data, false);
-		FDevAuthTokenCache::SetAuthData(AuthData);
-		SetLoggedInState(true);
-		GetOrgList();
-		return;
-	}
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Login request failed"));
-	FDevAuthTokenCache::ClearAuthData();
-}
-
-void SRpmDeveloperLoginWidget::HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		if (Response->Data.Num() == 0)
-		{
-			UE_LOG(LogReadyPlayerMe, Error, TEXT("No organizations found"));
-			return;
-		}
-		TSharedPtr<FApplicationListRequest> Request = MakeShared<FApplicationListRequest>();
-		Request->Params.Add("organizationId", Response->Data[0].Id);
-		TWeakPtr<SRpmDeveloperLoginWidget> WeakPtrThis = StaticCastSharedRef<SRpmDeveloperLoginWidget>(AsShared());
-		DeveloperAccountApi->ListApplicationsAsync(Request, FOnApplicationListResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
-		{
-			if(WeakPtrThis.IsValid())
-			{
-				WeakPtrThis.Pin()->HandleApplicationListResponse(Response, bWasSuccessful);
-			}
-		}));
-		return;
-	}
-
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to list organizations"));
-}
-
-void SRpmDeveloperLoginWidget::HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
-		UserApplications = Response->Data;
-		FString Active;
-		TArray<FString> Items;
-		for (const FApplication& App : UserApplications)
-		{
-			Items.Add(App.Name);
-			if (App.Id == RpmSettings->ApplicationId)
-			{
-				Active = App.Name;
-			}
-		}
-		if (Active.IsEmpty() && Items.Num() > 0)
-		{
-			const auto NewActiveItem = MakeShared<FString>(Items[0]);
-			OnComboBoxSelectionChanged(NewActiveItem, ESelectInfo::Direct);
-			SelectedApplicationTextBlock->SetText(FText::FromString(*NewActiveItem));
-		}
-		PopulateComboBoxItems(Items, Active);
-	}
-	else
-	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to list applications"));
-	}
-	LoadBaseModelList();
-}
-
-
-void SRpmDeveloperLoginWidget::PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem)
-{
-	ComboBoxItems.Empty();
-	for (const FString& Item : Items)
-	{
-		ComboBoxItems.Add(MakeShared<FString>(Item));
-	}
-	SelectedComboBoxItem = MakeShared<FString>(ActiveItem);
-}
-
-
-FText SRpmDeveloperLoginWidget::GetSelectedComboBoxItemText() const
-{
-	return SelectedComboBoxItem.IsValid() && !SelectedComboBoxItem->IsEmpty()
-		       ? FText::FromString(*SelectedComboBoxItem)
-		       : FText::FromString("Select an option");
-}
-
-
-void SRpmDeveloperLoginWidget::OnComboBoxSelectionChanged(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo)
-{
-	SelectedComboBoxItem = NewValue;
-	FApplication* application = UserApplications.FindByPredicate([&](FApplication item)
-	{
-		return item.Name == *NewValue;
-	});
-	if (application)
-	{
-		URpmDeveloperSettings* RpmSettings = GetMutableDefault<URpmDeveloperSettings>();
-		RpmSettings->ApplicationId = application->Id;
-		RpmSettings->SaveConfig();
-	}
-}
-
-
-FReply SRpmDeveloperLoginWidget::OnUseDemoAccountClicked()
-{
-	URpmDeveloperSettings* RpmSettings = GetMutableDefault<URpmDeveloperSettings>();
-	RpmSettings->Reset();
-	RpmSettings->SetupDemoAccount();
-	FDeveloperAuth AuthData = FDeveloperAuth();
-	AuthData.Name = DemoUserName;
-	AuthData.IsDemo = true;
-	UserName = AuthData.Name;
-	FDevAuthTokenCache::SetAuthData(AuthData);
-	SetLoggedInState(true);
-
-	// Unset the authentication strategy for the APIs
-	DeveloperAccountApi->SetAuthenticationStrategy(nullptr);
-	AssetApi->SetAuthenticationStrategy(nullptr);
-	GetOrgList();
-	return FReply::Handled();
-}
-
-FReply SRpmDeveloperLoginWidget::OnLogoutClicked()
-{
-	URpmDeveloperSettings* RpmSettings = GetMutableDefault<URpmDeveloperSettings>();
-	RpmSettings->Reset();
-
-	// Clear the content box to remove all child widgets
-	if (ContentBox.IsValid())
-	{
-		ContentBox->ClearChildren();
-	}
-	ComboBoxItems.Empty();
-
-	ClearLoadedCharacterModelImages();
-	FDevAuthTokenCache::ClearAuthData();
-	SetLoggedInState(false);
-	return FReply::Handled();
-}
-
-void SRpmDeveloperLoginWidget::LoadBaseModelList()
-{
-	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
-	if (RpmSettings->ApplicationId.IsEmpty())
-	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("Application ID is empty, unable to load base models."));
-		return;
-	}
-	TSharedPtr<FAssetListRequest> Request = MakeShared<FAssetListRequest>();
-	FAssetListQueryParams Params = FAssetListQueryParams();
-	Params.ApplicationId = RpmSettings->ApplicationId;
-	Params.Type = FAssetApi::BaseModelType;
-	Request->Params = Params;
-	TWeakPtr<SRpmDeveloperLoginWidget> WeakPtrThis = StaticCastSharedRef<SRpmDeveloperLoginWidget>(AsShared());
-	AssetApi->ListAssetsAsync(Request, FOnListAssetsResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
-	{
-		if(WeakPtrThis != nullptr && WeakPtrThis.IsValid())
-		{
-			WeakPtrThis.Pin()->HandleBaseModelListResponse(Response, bWasSuccessful);
-		}
-	}));
-}
-
-void SRpmDeveloperLoginWidget::HandleBaseModelListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
-{
-	CharacterStyleAssets.Empty();
-	if(bWasSuccessful && Response.IsValid() && Response->Data.Num() > 0)
-	{
-		for (FAsset Asset : Response->Data)
-		{
-			CharacterStyleAssets.Add(Asset.Id, Asset);
-			AddCharacterStyle(Asset);
-		}
-		return;
-	}
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to list base models"));
-}
-
-
-void SRpmDeveloperLoginWidget::SetLoggedInState(const bool IsLoggedIn)
-{
-	this->bIsLoggedIn = IsLoggedIn;
-
-	// Force the UI to refresh
-	Invalidate(EInvalidateWidget::Layout);
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

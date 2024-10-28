@@ -10,31 +10,25 @@ struct FDeveloperLoginResponse;
 class FDeveloperAuthApi;
 
 DECLARE_DELEGATE_OneParam(FOnLoginSuccess, const FString&);
-DECLARE_DELEGATE_OneParam(FOnApplicationsRequested, const FApplicationListResponse&);
 
-class SDeveloperLoginPanel : public SCompoundWidget
+class RPMNEXTGENEDITOR_API SDeveloperLoginPanel : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SDeveloperLoginPanel) {}
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
-	void HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful);
-
-private:
-	TSharedPtr<FDeveloperAuthApi> DeveloperAuthApi;
-	TSharedPtr<FDeveloperAccountApi> DeveloperAccountApi;
 	
 	FOnLoginSuccess OnLoginSuccess;
-	FOnApplicationsRequested OnOrgRequestComplete;
-	
+private:
+	TSharedPtr<FDeveloperAuthApi> DeveloperAuthApi;
 	TSharedPtr<SEditableTextBox> EmailTextBox;
 	TSharedPtr<SEditableTextBox> PasswordTextBox;
 	static constexpr const TCHAR* CacheKeyEmail = TEXT("RPM-Email");
 	
 	FReply OnLoginClicked();
-	
+	FReply OnUseDemoAccountClicked();
 	void Initialize();
+	
 	void HandleLoginResponse(TSharedPtr<FDeveloperLoginResponse>, bool bWasSuccessful);
-	void GetOrganizationList();
 };

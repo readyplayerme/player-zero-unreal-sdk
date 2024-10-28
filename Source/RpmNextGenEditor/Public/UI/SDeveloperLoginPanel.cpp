@@ -68,19 +68,24 @@ void SDeveloperLoginPanel::Construct(const FArguments& InArgs)
 			.Text(FText::FromString("Login"))
 			.OnClicked(this, &SDeveloperLoginPanel::OnLoginClicked)
 		]
+		+ SVerticalBox::Slot()
+		  .Padding(10)
+		  .AutoHeight()
+		[
+			SNew(SButton)
+			.Text(FText::FromString("Use Demo Account"))
+			.OnClicked(this, &SDeveloperLoginPanel::OnUseDemoAccountClicked)
+		]
 	];
 	Initialize();
 }
 
 void SDeveloperLoginPanel::Initialize()
 {
+	EmailTextBox->SetText(FText::FromString(FEditorCache::GetString(CacheKeyEmail)));
 	if(!DeveloperAuthApi.IsValid())
 	{
 		DeveloperAuthApi = MakeShared<FDeveloperAuthApi>();
-	}
-	if(!DeveloperAccountApi.IsValid())
-	{
-		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>();
 	}
 }
 
@@ -93,8 +98,6 @@ FReply SDeveloperLoginPanel::OnLoginClicked()
 	FEditorCache::SetString(CacheKeyEmail, Email);
 	Email = Email.TrimStartAndEnd();
 	Password = Password.TrimStartAndEnd();
-	//Update the authentication strategy to use the developer token
-	DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
 	
 	const TSharedPtr<FDeveloperLoginRequest> LoginRequest = MakeShared<FDeveloperLoginRequest>(Email, Password);
 	TWeakPtr<SDeveloperLoginPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperLoginPanel>(AsShared());
@@ -109,6 +112,19 @@ FReply SDeveloperLoginPanel::OnLoginClicked()
 	return FReply::Handled();
 }
 
+FReply SDeveloperLoginPanel::OnUseDemoAccountClicked()
+{
+	URpmDeveloperSettings* RpmSettings = GetMutableDefault<URpmDeveloperSettings>();
+	RpmSettings->Reset();
+	RpmSettings->SetupDemoAccount();
+	FDeveloperAuth AuthData = FDeveloperAuth();
+	AuthData.Name = TEXT("Demo User");
+	AuthData.IsDemo = true;
+	FDevAuthTokenCache::SetAuthData(AuthData);
+	OnLoginSuccess.ExecuteIfBound(AuthData.Name);
+	return FReply::Handled();
+}
+
 void SDeveloperLoginPanel::HandleLoginResponse(TSharedPtr<FDeveloperLoginResponse> Response, bool bWasSuccessful)
 {
 	if (bWasSuccessful)
@@ -116,57 +132,56 @@ void SDeveloperLoginPanel::HandleLoginResponse(TSharedPtr<FDeveloperLoginRespons
 		const FDeveloperAuth AuthData = FDeveloperAuth(Response->Data, false);
 		FDevAuthTokenCache::SetAuthData(AuthData);
 		OnLoginSuccess.ExecuteIfBound(Response->Data.Name);
-		GetOrganizationList();
 		return;
 	}
 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Login request failed"));
 	FDevAuthTokenCache::ClearAuthData();
 }
 
-void SDeveloperLoginPanel::GetOrganizationList()
-{
-	TSharedPtr<FOrganizationListRequest> OrgRequest = MakeShared<FOrganizationListRequest>();
-	TWeakPtr<SDeveloperLoginPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperLoginPanel>(AsShared());
-	DeveloperAccountApi->ListOrganizationsAsync(OrgRequest, FOnOrganizationListResponse::CreateLambda([WeakPtrThis]( TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
-	{
-		if(WeakPtrThis.IsValid())
-		{
-			WeakPtrThis.Pin()->HandleOrganizationListResponse(Response, bWasSuccessful);
-		}
-	}));
-}
+// void SDeveloperLoginPanel::GetOrganizationList()
+// {
+// 	TSharedPtr<FOrganizationListRequest> OrgRequest = MakeShared<FOrganizationListRequest>();
+// 	TWeakPtr<SDeveloperLoginPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperLoginPanel>(AsShared());
+// 	DeveloperAccountApi->ListOrganizationsAsync(OrgRequest, FOnOrganizationListResponse::CreateLambda([WeakPtrThis]( TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
+// 	{
+// 		if(WeakPtrThis.IsValid())
+// 		{
+// 			WeakPtrThis.Pin()->HandleOrganizationListResponse(Response, bWasSuccessful);
+// 		}
+// 	}));
+// }
 
-void SDeveloperLoginPanel::HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		if (Response->Data.Num() == 0)
-		{
-			UE_LOG(LogReadyPlayerMe, Error, TEXT("No organizations found"));
-			return;
-		}
-		TSharedPtr<FApplicationListRequest> Request = MakeShared<FApplicationListRequest>();
-		Request->Params.Add("organizationId", Response->Data[0].Id);
-		TWeakPtr<SDeveloperLoginPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperLoginPanel>(AsShared());
-		DeveloperAccountApi->ListApplicationsAsync(Request, FOnApplicationListResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
-		{
-			if(WeakPtrThis.IsValid())
-			{
-				WeakPtrThis.Pin()->HandleApplicationListResponse(Response, bWasSuccessful);
-			}
-		}));
-		return;
-	}
-
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch organizations"));
-}
-
-void SDeveloperLoginPanel::HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
-{
-	if(bWasSuccessful)
-	{
-		OnOrgRequestComplete.ExecuteIfBound(*Response.Get());
-		return;
-	}
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch applications"));
-}
+// void SDeveloperLoginPanel::HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
+// {
+// 	if (bWasSuccessful)
+// 	{
+// 		if (Response->Data.Num() == 0)
+// 		{
+// 			UE_LOG(LogReadyPlayerMe, Error, TEXT("No organizations found"));
+// 			return;
+// 		}
+// 		TSharedPtr<FApplicationListRequest> Request = MakeShared<FApplicationListRequest>();
+// 		Request->Params.Add("organizationId", Response->Data[0].Id);
+// 		TWeakPtr<SDeveloperLoginPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperLoginPanel>(AsShared());
+// 		DeveloperAccountApi->ListApplicationsAsync(Request, FOnApplicationListResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
+// 		{
+// 			if(WeakPtrThis.IsValid())
+// 			{
+// 				WeakPtrThis.Pin()->HandleApplicationListResponse(Response, bWasSuccessful);
+// 			}
+// 		}));
+// 		return;
+// 	}
+//
+// 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch organizations"));
+// }
+//
+// void SDeveloperLoginPanel::HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
+// {
+// 	if(bWasSuccessful)
+// 	{
+// 		OnApplicationListRequestComplete.ExecuteIfBound(*Response.Get());
+// 		return;
+// 	}
+// 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch applications"));
+// }
