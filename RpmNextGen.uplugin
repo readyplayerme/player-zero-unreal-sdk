@@ -42,10 +42,6 @@
 		{
 			"Name": "glTFRuntime",
 			"Enabled": true
-		},
-		{
-			"Name": "TransientObjectSaver",
-			"Enabled": true
 		}
 	]
 }
