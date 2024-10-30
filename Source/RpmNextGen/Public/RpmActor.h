@@ -93,6 +93,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
 	void RemoveMeshComponentsOfType(const FString& AssetType);
 
+	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
+	void RemoveAssetOfType(const FAsset& Asset );
+	
+	virtual void Tick(float DeltaTime) override;
+
 protected:
 	/** Weak reference to the master pose component, used for synchronizing skeletal animations. */
 	TWeakObjectPtr<USkeletalMeshComponent> MasterPoseComponent;
