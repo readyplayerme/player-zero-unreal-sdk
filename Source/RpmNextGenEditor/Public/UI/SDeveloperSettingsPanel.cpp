@@ -241,10 +241,10 @@ void SDeveloperSettingsPanel::PopulateSettingsContent(TArray<FApplication> InApp
 		SelectedApplicationTextBlock->SetText(FText::FromString(*NewActiveItem));
 	}
 	PopulateComboBoxItems(Items, Active);
-	LoadBaseModelList();
+	LoadCharacterStyleList();
 }
 
-void SDeveloperSettingsPanel::LoadBaseModelList()
+void SDeveloperSettingsPanel::LoadCharacterStyleList()
 {
 	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
 	if (RpmSettings->ApplicationId.IsEmpty())
@@ -255,14 +255,14 @@ void SDeveloperSettingsPanel::LoadBaseModelList()
 	TSharedPtr<FAssetListRequest> Request = MakeShared<FAssetListRequest>();
 	FAssetListQueryParams Params = FAssetListQueryParams();
 	Params.ApplicationId = RpmSettings->ApplicationId;
-	Params.Type = FAssetApi::BaseModelType;
+	Params.Type = FAssetApi::CharacterStyleAssetType;
 	Request->Params = Params;
 	TWeakPtr<SDeveloperSettingsPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperSettingsPanel>(AsShared());
 	AssetApi->ListAssetsAsync(Request, FOnListAssetsResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
 	{
 		if(WeakPtrThis != nullptr && WeakPtrThis.IsValid())
 		{
-			WeakPtrThis.Pin()->HandleBaseModelListResponse(Response, bWasSuccessful);
+			WeakPtrThis.Pin()->HandleCharacterStyleListResponse(Response, bWasSuccessful);
 		}
 	}));
 }
@@ -302,7 +302,7 @@ void SDeveloperSettingsPanel::AddCharacterStyle(const FAsset& Asset)
 					.Text(FText::FromString("Import"))
 					.OnClicked_Lambda([this, Asset]() -> FReply
 					{
-						OnLoadBaseModelClicked(Asset);
+						OnLoadCharacterStyleClicked(Asset);
 						return FReply::Handled();
 					})
 				]
@@ -329,10 +329,10 @@ void SDeveloperSettingsPanel::AddCharacterStyle(const FAsset& Asset)
 	ImageLoader->LoadIconFromAsset(Asset);
 }
 
-void SDeveloperSettingsPanel::OnLoadBaseModelClicked(const FAsset& Asset)
+void SDeveloperSettingsPanel::OnLoadCharacterStyleClicked(const FAsset& Asset)
 {
 	AssetLoader = MakeShared<FEditorAssetLoader>();
-	AssetLoader->LoadBaseModelAsset(Asset);
+	AssetLoader->LoadBCharacterStyleAsset(Asset);
 }
 
 void SDeveloperSettingsPanel::OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> Image, TSharedPtr<FRpmTextureLoader> RpmTextureLoader)
@@ -346,7 +346,7 @@ void SDeveloperSettingsPanel::OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<
 	ActiveLoaders.Remove(RpmTextureLoader);
 }
 
-void SDeveloperSettingsPanel::HandleBaseModelListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
+void SDeveloperSettingsPanel::HandleCharacterStyleListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
 {
 	CharacterStyleAssets.Empty();
 	if(bWasSuccessful && Response.IsValid())

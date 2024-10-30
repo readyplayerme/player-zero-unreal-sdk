@@ -43,13 +43,13 @@ private:
 
 	void UpdateErrorMessage(const FString& Message);
 	void PopulateSettingsContent(TArray<FApplication> InApplicationList);
-	void OnLoadBaseModelClicked(const FAsset& Asset);
+	void OnLoadCharacterStyleClicked(const FAsset& Asset);
 	void OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> Image, TSharedPtr<FRpmTextureLoader> RpmTextureLoader);
 	void AddCharacterStyle(const FAsset& Asset);
-	void HandleBaseModelListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful);
+	void HandleCharacterStyleListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful);
 	void HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful);
 	void HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful);
-	void LoadBaseModelList();
+	void LoadCharacterStyleList();
 	void OnComboBoxSelectionChanged(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo);
 	void ClearLoadedCharacterModelImages();
 	FReply OnLogoutClicked();

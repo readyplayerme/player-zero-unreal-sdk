@@ -29,7 +29,7 @@ public:
 
 	/** A map of animation configurations associated with base model IDs. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Ready Player Me")
-	TMap<FString, FRpmAnimationConfig> AnimationConfigsByBaseModelId;
+	TMap<FString, FRpmAnimationConfig> AnimationConfigsByCharacterStyleId;
 
 	/** Configuration settings for loading static meshes from glTF assets. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Ready Player Me|Glb Import Settings")
@@ -88,7 +88,7 @@ public:
 	 * 
 	 * This function removes specific mesh components based on their type (e.g., base model or clothing).
 	 * 
-	 * @param AssetType The type of the asset (e.g., "BaseModelType") to remove.
+	 * @param AssetType The type of the asset (e.g., "Custom top") to remove.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
 	void RemoveMeshComponentsOfType(const FString& AssetType);

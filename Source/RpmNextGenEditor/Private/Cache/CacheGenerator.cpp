@@ -17,7 +17,7 @@
 
 const FString FCacheGenerator::ZipFileName = TEXT("CacheAssets.pak");
 
-FCacheGenerator::FCacheGenerator() : CurrentBaseModelIndex(0), MaxItemsPerCategory(10)
+FCacheGenerator::FCacheGenerator() : CurrentCharacterStyleIndex(0), MaxItemsPerCategory(10)
 {
 	Http = &FHttpModule::Get();
 	AssetApi = MakeUnique<FAssetApi>(EApiRequestStrategy::ApiOnly);
@@ -40,34 +40,34 @@ void FCacheGenerator::GenerateLocalCache(int InItemsPerCategory)
 {
 	Reset();
 	MaxItemsPerCategory = InItemsPerCategory;
-	FetchBaseModels();
+	FetchStyleAssets();
 }
 
 void FCacheGenerator::LoadAndStoreAssets()
 {
-	TArray<FAsset> BaseModelAssets = TArray<FAsset>();
+	TArray<FAsset> CharacterStyleAssets = TArray<FAsset>();
 	int TotalRefittedAssets = 0;
 	
-	// Ensure AssetMapByBaseModelId contains valid data
-	if (AssetMapByBaseModelId.Num() == 0)
+	// Ensure AssetMapByCharacterStyleId contains valid data
+	if (AssetMapByCharacterStyleId.Num() == 0)
 	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("No base models found in AssetMapByBaseModelId"));
+		UE_LOG(LogReadyPlayerMe, Error, TEXT("No Character Styles found in AssetMapByCharacterStyleId"));
 		return;
 	}
-	for ( auto BaseModel : AssetMapByBaseModelId)
+	for ( auto CharacterStyle : AssetMapByCharacterStyleId)
 	{
-		for (auto Asset : BaseModel.Value)
+		for (auto Asset : CharacterStyle.Value)
 		{
-			if(Asset.Type == FAssetApi::BaseModelType)
+			if(Asset.Type == FAssetApi::CharacterStyleAssetType)
 			{
-				BaseModelAssets.Add(Asset);
+				CharacterStyleAssets.Add(Asset);
 			}
 			TotalRefittedAssets++;
 		}
 	}
 
-	// Ensure there's at least one BaseModel
-	if (BaseModelAssets.Num() == 0)
+	// Ensure there's at least one CharacterStyle
+	if (CharacterStyleAssets.Num() == 0)
 	{
 		UE_LOG(LogReadyPlayerMe, Error, TEXT("No base model assets found"));
 		OnCacheDataLoaded.ExecuteIfBound(false);		
@@ -77,33 +77,33 @@ void FCacheGenerator::LoadAndStoreAssets()
 	int AssetIconRequestCount = 0;
 	
 	// load and store base model assets
-	for ( auto Asset : BaseModelAssets)
+	for ( auto Asset : CharacterStyleAssets)
 	{
 		LoadAndStoreAssetIcon(Asset.Id, &Asset);
 		AssetIconRequestCount++;
 	}
 	
-	// Ensure AssetMap contains the BaseModelId
-	if (AssetMapByBaseModelId.Contains(BaseModelAssets[0].Id))
+	// Ensure AssetMap contains the CharacterStyle
+	if (AssetMapByCharacterStyleId.Contains(CharacterStyleAssets[0].Id))
 	{
-		for (auto& Asset : AssetMapByBaseModelId[BaseModelAssets[0].Id])
+		for (auto& Asset : AssetMapByCharacterStyleId[CharacterStyleAssets[0].Id])
 		{
-			if (Asset.Type == FAssetApi::BaseModelType) continue;
-			LoadAndStoreAssetIcon(BaseModelAssets[0].Id, &Asset);
+			if (Asset.Type == FAssetApi::CharacterStyleAssetType) continue;
+			LoadAndStoreAssetIcon(CharacterStyleAssets[0].Id, &Asset);
 			AssetIconRequestCount++;
 		}
 	}
 	else
 	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("BaseModelId not found in AssetMapByBaseModelId"));
+		UE_LOG(LogReadyPlayerMe, Error, TEXT("CharacterStyleId not found in AssetMapByCharacterStyleId"));
 		return;
 	}
 	
 	 RequiredAssetDownloadRequest = TotalRefittedAssets + AssetIconRequestCount;
 	 const FString GlobalCachePath = FFileUtility::GetCachePath();
-	 UE_LOG(LogReadyPlayerMe, Log, TEXT("Total assets to download: %d. Total refitted assets glbs to fetch: %d"), RequiredAssetDownloadRequest, TotalRefittedAssets - BaseModelAssets.Num());
+	 UE_LOG(LogReadyPlayerMe, Log, TEXT("Total assets to download: %d. Total refitted assets glbs to fetch: %d"), RequiredAssetDownloadRequest, TotalRefittedAssets - CharacterStyleAssets.Num());
 
-	for (auto Pair : AssetMapByBaseModelId)
+	for (auto Pair : AssetMapByCharacterStyleId)
 	{
 		const FString BaseModeFolder = GlobalCachePath / Pair.Key;
 		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
@@ -119,24 +119,24 @@ void FCacheGenerator::LoadAndStoreAssets()
 	}
 }
 
-void FCacheGenerator::LoadAndStoreAssetGlb(const FString& BaseModelId, const FAsset* Asset)
+void FCacheGenerator::LoadAndStoreAssetGlb(const FString& CharacterStyleId, const FAsset* Asset)
 {
 	if (!Asset) // Ensure asset is valid
 	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("Invalid asset when loading GLB for BaseModelId: %s"), *BaseModelId);
+		UE_LOG(LogReadyPlayerMe, Error, TEXT("Invalid asset when loading GLB for CharacterStyleId: %s"), *CharacterStyleId);
 		return;
 	}
 
 	TSharedPtr<FAssetGlbLoader> AssetLoader = MakeShared<FAssetGlbLoader>();
 	AssetLoader->OnGlbLoaded.BindRaw(this, &FCacheGenerator::OnAssetGlbSaved);
-	AssetLoader->LoadGlb(*Asset, BaseModelId, true);
+	AssetLoader->LoadGlb(*Asset, CharacterStyleId, true);
 }
 
-void FCacheGenerator::LoadAndStoreAssetIcon(const FString& BaseModelId, const FAsset* Asset)
+void FCacheGenerator::LoadAndStoreAssetIcon(const FString& CharacterStyleId, const FAsset* Asset)
 {
 	if (!Asset) // Ensure asset is valid
 	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("Invalid asset when loading Icon for BaseModelId: %s"), *BaseModelId);
+		UE_LOG(LogReadyPlayerMe, Error, TEXT("Invalid asset when loading Icon for CharacterStyleId: %s"), *CharacterStyleId);
 		return;
 	}
 	TSharedPtr<FAssetIconLoader> AssetLoader = MakeShared<FAssetIconLoader>();
@@ -146,10 +146,10 @@ void FCacheGenerator::LoadAndStoreAssetIcon(const FString& BaseModelId, const FA
 
 void FCacheGenerator::Reset()
 {
-	AssetMapByBaseModelId.Empty();
+	AssetMapByCharacterStyleId.Empty();
 	AssetListRequests.Empty();
 	AssetTypes.Empty();
-	CurrentBaseModelIndex = 0;
+	CurrentCharacterStyleIndex = 0;
 	RefittedAssetRequestsCompleted = 0;
 	RequiredAssetDownloadRequest = 0;
 	NumberOfAssetsSaved = 0;
@@ -212,54 +212,15 @@ void FCacheGenerator::AddFolderToNonAssetDirectory() const
 	UE_LOG(LogReadyPlayerMe, Log, TEXT("Added folder to Additional Non-Asset Directories: %s"), *FolderToAdd);
 }
 
-// void FCacheGenerator::OnListAssetsResponse(const FAssetListResponse& AssetListResponse, bool bWasSuccessful)
-// {
-// 	if(bWasSuccessful && AssetListResponse.IsSuccess && AssetListResponse.Data.Num() > 0)
-// 	{
-// 		if (AssetListResponse.Data[0].Type == FAssetApi::BaseModelType)
-// 		{
-// 			for ( auto BaseModel : AssetListResponse.Data)
-// 			{
-// 				TArray<FAsset> AssetList = TArray<FAsset>();
-// 				AssetList.Add(BaseModel);
-// 				AssetMapByBaseModelId.Add(BaseModel.Id, AssetList);
-// 			}
-// 			UE_LOG(LogReadyPlayerMe, Log, TEXT("Fetched %d base models"), AssetListResponse.Data.Num());
-// 			FetchAssetTypes();
-// 			return;
-// 		}
-// 		UE_LOG(LogReadyPlayerMe, Log, TEXT("Fetched %d assets of type %s"), AssetListResponse.Data.Num(), *AssetListResponse.Data[0].Type);
-// 		
-// 		if(AssetListResponse.Data.Num() > 0)
-// 		{
-// 			FString BaseModelID = AssetListRequests[RefittedAssetRequestsCompleted].Params.CharacterModelAssetId;
-// 			if (!AssetMapByBaseModelId.Contains(BaseModelID))
-// 			{
-// 				AssetMapByBaseModelId.Add(BaseModelID, AssetListResponse.Data);
-// 			}
-// 			else
-// 			{
-// 				AssetMapByBaseModelId[BaseModelID].Append(AssetListResponse.Data);
-// 			}
-//
-// 		}
-// 		RefittedAssetRequestsCompleted++;
-// 		FetchNextRefittedAsset();
-// 		return;
-// 	}
-// 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch assets"));
-// 	OnCacheDataLoaded.ExecuteIfBound(false);
-// }
-
-void FCacheGenerator::OnListBaseModelsComplete(TSharedPtr<FAssetListResponse> AssetListResponse, bool bWasSuccessful)
+void FCacheGenerator::OnListCharacterStylesComplete(TSharedPtr<FAssetListResponse> AssetListResponse, bool bWasSuccessful)
 {
 	if(bWasSuccessful && AssetListResponse->IsSuccess && AssetListResponse->Data.Num() > 0)
 	{
-		for ( auto BaseModel : AssetListResponse->Data)
+		for ( auto CharacterStyle : AssetListResponse->Data)
 		{
 			TArray<FAsset> AssetList = TArray<FAsset>();
-			AssetList.Add(BaseModel);
-			AssetMapByBaseModelId.Add(BaseModel.Id, AssetList);
+			AssetList.Add(CharacterStyle);
+			AssetMapByCharacterStyleId.Add(CharacterStyle.Id, AssetList);
 		}
 		UE_LOG(LogReadyPlayerMe, Log, TEXT("Fetched %d base models"), AssetListResponse->Data.Num());
 		FetchAssetTypes();
@@ -273,21 +234,21 @@ void FCacheGenerator::OnListAssetsComplete(TSharedPtr<FAssetListResponse> AssetL
 {
 	if(bWasSuccessful && AssetListResponse->IsSuccess && AssetListResponse->Data.Num() > 0)
 	{
-		if (AssetListResponse->Data[0].Type == FAssetApi::BaseModelType)
+		if (AssetListResponse->Data[0].Type == FAssetApi::CharacterStyleAssetType)
 		{
-			UE_LOG(LogReadyPlayerMe, Log, TEXT("Unexpected asset type %s. Skipping"), *FAssetApi::BaseModelType);
+			UE_LOG(LogReadyPlayerMe, Log, TEXT("Unexpected asset type %s. Skipping"), *FAssetApi::CharacterStyleAssetType);
 			return;
 		}
 		UE_LOG(LogReadyPlayerMe, Log, TEXT("Fetched %d assets of type %s"), AssetListResponse->Data.Num(), *AssetListResponse->Data[0].Type);
 		
-		FString BaseModelID = AssetListRequests[RefittedAssetRequestsCompleted]->Params.CharacterModelAssetId;
-		if (!AssetMapByBaseModelId.Contains(BaseModelID))
+		FString CharacterStyleId = AssetListRequests[RefittedAssetRequestsCompleted]->Params.CharacterModelAssetId;
+		if (!AssetMapByCharacterStyleId.Contains(CharacterStyleId))
 		{
-			AssetMapByBaseModelId.Add(BaseModelID, AssetListResponse->Data);
+			AssetMapByCharacterStyleId.Add(CharacterStyleId, AssetListResponse->Data);
 		}
 		else
 		{
-			AssetMapByBaseModelId[BaseModelID].Append(AssetListResponse->Data);
+			AssetMapByCharacterStyleId[CharacterStyleId].Append(AssetListResponse->Data);
 		}
 		RefittedAssetRequestsCompleted++;
 		FetchNextRefittedAsset();
@@ -303,18 +264,18 @@ void FCacheGenerator::StartFetchingRefittedAssets()
 
 	URpmDeveloperSettings *Settings = GetMutableDefault<URpmDeveloperSettings>();
 	AssetListRequests = TArray<TSharedPtr<FAssetListRequest>>();
-	for ( auto BaseModel : AssetMapByBaseModelId)
+	for ( auto CharacterStyle : AssetMapByCharacterStyleId)
 	{
 		for(FString AssetType : AssetTypes)
 		{
-			if(AssetType == FAssetApi::BaseModelType)
+			if(AssetType == FAssetApi::CharacterStyleAssetType)
 			{
 				continue;
 			}
 			FAssetListQueryParams QueryParams = FAssetListQueryParams();
 			QueryParams.Type = AssetType;
 			QueryParams.ApplicationId = Settings->ApplicationId;
-			QueryParams.CharacterModelAssetId = BaseModel.Key;
+			QueryParams.CharacterModelAssetId = CharacterStyle.Key;
 			QueryParams.Limit = MaxItemsPerCategory;
 			TSharedPtr<FAssetListRequest> AssetListRequest = MakeShared<FAssetListRequest>(QueryParams);
 			AssetListRequests.Add(AssetListRequest);
@@ -323,13 +284,13 @@ void FCacheGenerator::StartFetchingRefittedAssets()
 	FetchNextRefittedAsset();
 }
 
-void FCacheGenerator::FetchBaseModels()
+void FCacheGenerator::FetchStyleAssets()
 {
 	const URpmDeveloperSettings* Settings = GetDefault<URpmDeveloperSettings>();
 	TSharedPtr<FAssetListRequest> AssetListRequest = MakeShared<FAssetListRequest>();
 	FAssetListQueryParams QueryParams = FAssetListQueryParams();
 	QueryParams.ApplicationId = Settings->ApplicationId;
-	QueryParams.Type = FAssetApi::BaseModelType;
+	QueryParams.Type = FAssetApi::CharacterStyleAssetType;
 	AssetListRequest->Params = QueryParams;
 
 	TWeakPtr<FCacheGenerator> WeakPtrThis = AsShared();
@@ -338,7 +299,7 @@ void FCacheGenerator::FetchBaseModels()
 	{
 		 if(WeakPtrThis.IsValid())
 		 {
-			 WeakPtrThis.Pin()->OnListBaseModelsComplete(Response, bWasSuccessful);
+			 WeakPtrThis.Pin()->OnListCharacterStylesComplete(Response, bWasSuccessful);
 		 }
 	}));
 

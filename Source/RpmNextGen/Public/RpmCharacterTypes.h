@@ -32,7 +32,7 @@ struct RPMNEXTGEN_API FRpmCharacterData
 	FString Id;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me")
-	FString BaseModelId;
+	FString CharacterStyleId;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me", meta = (JsonName = "assets"))
 	TMap<FString, FAsset> Assets;
@@ -40,7 +40,7 @@ struct RPMNEXTGEN_API FRpmCharacterData
 	FRpmCharacterData()
 	{
 		Id = "";
-		BaseModelId = "";
+		CharacterStyleId = "";
 		Assets = TMap<FString, FAsset>();
 	}
 };
