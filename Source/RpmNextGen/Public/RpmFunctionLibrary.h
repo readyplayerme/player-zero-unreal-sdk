@@ -17,9 +17,6 @@ class RPMNEXTGEN_API URpmFunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:	
-	UFUNCTION(BlueprintCallable, Category = "ReadyPlayerMe", meta = (WorldContext = "WorldContextObject"))
-	static void FetchFirstAssetId(UObject* WorldContextObject, const FString& AssetType, FOnAssetIdFetched OnAssetIdFetched);
-	
 	UFUNCTION(BlueprintCallable, Category = "ReadyPlayerMe/Cache")
 	static void ExtractCachePakFile();
 };

@@ -76,7 +76,11 @@ void FRpmImageHelper::LoadDataToUImage(const TArray<uint8>& ImageData, UImage*& 
 {
 	if (UTexture2D* Texture = CreateTextureFromData(ImageData))
 	{
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
+		LoadTextureToUImage(Texture, Image->GetBrush().ImageSize, Image);
+#else
 		LoadTextureToUImage(Texture, Image->Brush.ImageSize, Image);
+#endif
 		return;
 	}
 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to load data to Texture"));

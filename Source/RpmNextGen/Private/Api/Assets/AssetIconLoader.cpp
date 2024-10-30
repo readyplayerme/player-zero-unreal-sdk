@@ -2,7 +2,6 @@
 #include "Api/Assets/AssetLoaderContext.h"
 #include "HttpModule.h"
 #include "Cache/AssetCacheManager.h"
-#include "Interfaces/IHttpResponse.h"
 
 FAssetIconLoader::FAssetIconLoader()
 {
@@ -11,6 +10,7 @@ FAssetIconLoader::FAssetIconLoader()
 
 FAssetIconLoader::~FAssetIconLoader()
 {
+	CancelAllRequests();
 }
 
 void FAssetIconLoader::LoadIcon(const FAsset& Asset, bool bStoreInCache)
@@ -25,36 +25,27 @@ void FAssetIconLoader::LoadIcon(const FAsset& Asset, bool bStoreInCache)
 			return;
 		}
 	}
-	const TSharedRef<FAssetLoadingContext> Context = MakeShared<FAssetLoadingContext>(Asset, "", bStoreInCache);
-	LoadIcon(Context);
-}
-
-void FAssetIconLoader::LoadIcon(TSharedRef<FAssetLoadingContext> Context)
-{
-	TSharedRef<IHttpRequest> Request = Http->CreateRequest();
-	Request->SetURL(Context->Asset.IconUrl);
-	Request->SetVerb(TEXT("GET"));
-
-	TSharedPtr<FAssetIconLoader> ThisPtr = SharedThis(this);
-	Request->OnProcessRequestComplete().BindLambda([ThisPtr, Context](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
+	ApiRequest->Url = Asset.IconUrl;
+	ApiRequest->Method = GET;
+	TWeakPtr<FAssetIconLoader> ThisPtr = SharedThis(this);
+	SendRequest<TArray<uint8>>(ApiRequest, [ThisPtr, Asset, bStoreInCache](TSharedPtr<TArray<uint8>> Response, bool bWasSuccessful, int32 StatusCode)
 	{
-		ThisPtr->IconLoaded(Response, bWasSuccessful, Context);
-	});
-	Request->ProcessRequest();
-}
-
-void FAssetIconLoader::IconLoaded(TSharedPtr<IHttpResponse> Response, bool bWasSuccessful,	const TSharedRef<FAssetLoadingContext>& Context)
-{
-	if (bWasSuccessful && Response.IsValid())
-	{
-		Context->Data = Response->GetContent();
-		if (Context->bStoreInCache)
+		if(ThisPtr.IsValid())
 		{
-			FAssetCacheManager::Get().StoreAndTrackIcon(*Context);
+			if (bWasSuccessful && Response.IsValid())
+			{
+				FAssetLoadingContext Context(Asset, "", bStoreInCache);
+				Context.Data = *Response.Get();
+				if (bStoreInCache)
+				{
+					FAssetCacheManager::Get().StoreAndTrackIcon(Context);
+				}
+				ThisPtr.Pin()->OnIconLoaded.ExecuteIfBound(Asset, Context.Data);
+				return;
+			}
+			UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to load icon from URL: %s"), *Asset.IconUrl);
+			ThisPtr.Pin()->OnIconLoaded.ExecuteIfBound(Asset, TArray<uint8>());
 		}
-		OnIconLoaded.ExecuteIfBound(Context->Asset, Context->Data);
-		return;
-	}
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to load icon from URL: %s"), *Context->Asset.IconUrl);
-	OnIconLoaded.ExecuteIfBound(Context->Asset, TArray<uint8>());
+	});
 }
