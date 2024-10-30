@@ -25,9 +25,9 @@ void ARpmActor::BeginPlay()
 void ARpmActor::LoadCharacter(const FRpmCharacterData& InCharacterData, UglTFRuntimeAsset* GltfAsset)
 {
 	CharacterData = InCharacterData;
-	if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
+	if(AnimationConfigsByCharacterStyleId.Contains(CharacterData.CharacterStyleId))
 	{
-		AnimationConfig = AnimationConfigsByBaseModelId[CharacterData.BaseModelId];
+		AnimationConfig = AnimationConfigsByCharacterStyleId[CharacterData.CharacterStyleId];
 		SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
 		SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
 	}
@@ -41,12 +41,12 @@ void ARpmActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset)
 		UE_LOG(LogGLTFRuntime, Warning, TEXT("No asset to setup"));
 		return;
 	}
-	if(Asset.Type == FAssetApi::BaseModelType)
+	if(Asset.Type == FAssetApi::CharacterStyleAssetType)
 	{
-		CharacterData.BaseModelId = Asset.Id;
-		if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
+		CharacterData.CharacterStyleId = Asset.Id;
+		if(AnimationConfigsByCharacterStyleId.Contains(CharacterData.CharacterStyleId))
 		{
-			AnimationConfig = AnimationConfigsByBaseModelId[CharacterData.BaseModelId];
+			AnimationConfig = AnimationConfigsByCharacterStyleId[CharacterData.CharacterStyleId];
 			SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
 			SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
 		}
@@ -58,17 +58,17 @@ void ARpmActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset)
 	if (NewMeshComponents.Num() > 0)
 	{
 		LoadedMeshComponentsByAssetType.Add(Asset.Type, NewMeshComponents);
-		if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
+		if(AnimationConfigsByCharacterStyleId.Contains(CharacterData.CharacterStyleId))
 		{
 			if (MasterPoseComponent == nullptr)
 			{
-				UE_LOG(LogReadyPlayerMe, Error, TEXT("MasterPoseComponent is null for base model %s"), *CharacterData.BaseModelId);
+				UE_LOG(LogReadyPlayerMe, Error, TEXT("MasterPoseComponent is null for base model %s"), *CharacterData.CharacterStyleId);
 				return;
 			}
 
 			if (!AnimationConfig.AnimationBlueprint)
 			{
-				UE_LOG(LogReadyPlayerMe, Error, TEXT("AnimationBlueprint is null for base model %s"), *CharacterData.BaseModelId);
+				UE_LOG(LogReadyPlayerMe, Error, TEXT("AnimationBlueprint is null for base model %s"), *CharacterData.CharacterStyleId);
 				return;
 			}
 			
@@ -100,7 +100,7 @@ void ARpmActor::RemoveMeshComponentsOfType(const FString& AssetType)
 	}
 
 	// Remove components by type, or remove all if AssetType is empty or it's a new base model
-	if (AssetType.IsEmpty() || AssetType == FAssetApi::BaseModelType)
+	if (AssetType.IsEmpty() || AssetType == FAssetApi::CharacterStyleAssetType)
 	{
 		RemoveAllMeshes();
 	}
@@ -150,7 +150,7 @@ TArray<USceneComponent*> ARpmActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAs
 {
 	TArray<FglTFRuntimeNode> AllNodes = GltfAsset->GetNodes();
 	TArray<USceneComponent*> NewMeshComponents;
-	bool bIsMasterPoseUpdateRequired = AssetType == FAssetApi::BaseModelType || AssetType.IsEmpty();
+	bool bIsMasterPoseUpdateRequired = AssetType == FAssetApi::CharacterStyleAssetType || AssetType.IsEmpty();
 	
 	// Loop through all nodes to create mesh components
 	for (const FglTFRuntimeNode& Node : AllNodes)

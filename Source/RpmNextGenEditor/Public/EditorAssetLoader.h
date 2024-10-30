@@ -16,7 +16,7 @@ public:
 	virtual ~FEditorAssetLoader() override;
 
 	void LoadAssetToWorldAsURpmActor(UglTFRuntimeAsset* GltfAsset, FString AssetId = "");
-	void LoadBaseModelAsset(const FAsset& Asset);
+	void LoadBCharacterStyleAsset(const FAsset& Asset);
 	
 	USkeletalMesh* SaveAsUAsset(UglTFRuntimeAsset* GltfAsset, const FString& LoadedAssetId) const;
 

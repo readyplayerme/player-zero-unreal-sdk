@@ -6,11 +6,11 @@
 struct FAssetLoadingContext
 {
 	FAsset Asset;
-	FString BaseModelId;
+	FString CharacterStyleId;
 	TArray<uint8> Data;
 	bool bStoreInCache;
-	FAssetLoadingContext(const FAsset& InAsset, const FString& InBaseModelId, bool bInStoreInCache)
-		: Asset(InAsset), BaseModelId(InBaseModelId), bStoreInCache(bInStoreInCache)
+	FAssetLoadingContext(const FAsset& InAsset, const FString& InCharacterStyleId, bool bInStoreInCache)
+		: Asset(InAsset), CharacterStyleId(InCharacterStyleId), bStoreInCache(bInStoreInCache)
 	{
 	}
 };

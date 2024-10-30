@@ -23,7 +23,7 @@ struct RPMNEXTGEN_API FCachedAssetData
 	FString IconUrl;
 		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me")
-	TMap<FString, FString> RelativeGlbPathsByBaseModelId;
+	TMap<FString, FString> RelativeGlbPathsByCharacterStyleId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me")
 	FString RelativeIconFilePath;
@@ -43,7 +43,7 @@ struct RPMNEXTGEN_API FCachedAssetData
 		Name = FString();
 		GlbUrl = FString();
 		IconUrl = FString();
-		RelativeGlbPathsByBaseModelId = TMap<FString, FString>();
+		RelativeGlbPathsByCharacterStyleId = TMap<FString, FString>();
 		RelativeIconFilePath = FString();
 		Type = FString();
 		CreatedAt = FDateTime();
@@ -55,23 +55,23 @@ struct RPMNEXTGEN_API FCachedAssetData
 		Name = InAsset.Name;
 		GlbUrl = InAsset.GlbUrl;
 		IconUrl = InAsset.IconUrl;
-		RelativeGlbPathsByBaseModelId = TMap<FString, FString>();
+		RelativeGlbPathsByCharacterStyleId = TMap<FString, FString>();
 		RelativeIconFilePath = FString::Printf(TEXT("%s/Icons/%s.png"), *FFileUtility::RelativeCachePath, *Id);
 		Type = InAsset.Type;
 		CreatedAt = InAsset.CreatedAt;
 		UpdatedAt = InAsset.UpdatedAt;
 	}
 
-	FCachedAssetData(const FAsset& InAsset, const FString& InBaseModelId)
+	FCachedAssetData(const FAsset& InAsset, const FString& InCharacterStyleId)
 	{
 		Id = InAsset.Id;
 		Name = InAsset.Name;
 		GlbUrl = InAsset.GlbUrl;
 		IconUrl = InAsset.IconUrl;
-		RelativeGlbPathsByBaseModelId = TMap<FString, FString>();
-		if(InBaseModelId != FString())
+		RelativeGlbPathsByCharacterStyleId = TMap<FString, FString>();
+		if(InCharacterStyleId != FString())
 		{
-			RelativeGlbPathsByBaseModelId.Add(InBaseModelId, FString::Printf(TEXT("%s/%s/%s.glb"), *FFileUtility::RelativeCachePath, *InBaseModelId, *Id));
+			RelativeGlbPathsByCharacterStyleId.Add(InCharacterStyleId, FString::Printf(TEXT("%s/%s/%s.glb"), *FFileUtility::RelativeCachePath, *InCharacterStyleId, *Id));
 		}
 		RelativeIconFilePath = FString::Printf(TEXT("%s/Icons/%s.png"), *FFileUtility::RelativeCachePath, *Id);
 		Type = InAsset.Type;
@@ -82,7 +82,7 @@ struct RPMNEXTGEN_API FCachedAssetData
 	bool IsValid () const
 	{
 		bool Valid = true;
-		if(RelativeGlbPathsByBaseModelId.Num() == 0)
+		if(RelativeGlbPathsByCharacterStyleId.Num() == 0)
 		{
 			Valid = false;
 		}
@@ -120,11 +120,11 @@ struct RPMNEXTGEN_API FCachedAssetData
 		JsonObject->SetStringField(TEXT("UpdatedAt"), UpdatedAt.ToString());
 		
 		TSharedPtr<FJsonObject> GlbPathsObject = MakeShared<FJsonObject>();
-		for (const auto& Entry : RelativeGlbPathsByBaseModelId)
+		for (const auto& Entry : RelativeGlbPathsByCharacterStyleId)
 		{
 			GlbPathsObject->SetStringField(Entry.Key, Entry.Value);
 		}
-		JsonObject->SetObjectField(TEXT("GlbPathsByBaseModelId"), GlbPathsObject);
+		JsonObject->SetObjectField(TEXT("GlbPathsByCharacterStyleId"), GlbPathsObject);
 
 		return JsonObject;
 	}
@@ -142,20 +142,20 @@ struct RPMNEXTGEN_API FCachedAssetData
 		FDateTime::Parse(JsonObject->GetStringField(TEXT("CreatedAt")), StoredAsset.CreatedAt);
 		FDateTime::Parse(JsonObject->GetStringField(TEXT("UpdatedAt")), StoredAsset.UpdatedAt);
 		
-		TSharedPtr<FJsonObject> GlbPathsObject = JsonObject->GetObjectField(TEXT("GlbPathsByBaseModelId"));
+		TSharedPtr<FJsonObject> GlbPathsObject = JsonObject->GetObjectField(TEXT("GlbPathsByCharacterStyleId"));
 		for (const auto& Entry : GlbPathsObject->Values)
 		{
-			StoredAsset.RelativeGlbPathsByBaseModelId.Add(Entry.Key, Entry.Value->AsString());
+			StoredAsset.RelativeGlbPathsByCharacterStyleId.Add(Entry.Key, Entry.Value->AsString());
 		}
 
 		return StoredAsset;
 	}
 
-	FString GetGlbPathForBaseModelId(FString BaseModelId)
+	FString GetGlbPathForCharacterStyleId(FString CharacterStyleId)
 	{
-		if(RelativeGlbPathsByBaseModelId.Num() > 0 && !BaseModelId.IsEmpty())
+		if(RelativeGlbPathsByCharacterStyleId.Num() > 0 && !CharacterStyleId.IsEmpty())
 		{
-			return FFileUtility::GetFullPersistentPath(RelativeGlbPathsByBaseModelId[BaseModelId]);
+			return FFileUtility::GetFullPersistentPath(RelativeGlbPathsByCharacterStyleId[CharacterStyleId]);
 		}
 		
 		return "";

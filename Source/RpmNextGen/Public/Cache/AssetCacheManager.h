@@ -96,8 +96,8 @@ public:
 	
 	void StoreAndTrackGlb(const FAssetLoadingContext& Context, const bool bSaveManifest = true)
 	{
-		FCachedAssetData StoredAsset = FCachedAssetData(Context.Asset, Context.BaseModelId);
-		const FString& GlbPath = StoredAsset.GetGlbPathForBaseModelId(Context.BaseModelId);
+		FCachedAssetData StoredAsset = FCachedAssetData(Context.Asset, Context.CharacterStyleId);
+		const FString& GlbPath = StoredAsset.GetGlbPathForCharacterStyleId(Context.CharacterStyleId);
 		FFileUtility::SaveToFile(Context.Data, GlbPath);
 		
 		StoreAndTrackAsset(StoredAsset, bSaveManifest);
@@ -105,9 +105,9 @@ public:
 
 	void UpdateExistingCachedAsset(const FCachedAssetData& StoredAsset, FCachedAssetData* ExistingStoredAsset)
 	{
-		if(!StoredAsset.RelativeGlbPathsByBaseModelId.IsEmpty())
+		if(!StoredAsset.RelativeGlbPathsByCharacterStyleId.IsEmpty())
 		{
-			MergeTMaps(ExistingStoredAsset->RelativeGlbPathsByBaseModelId, StoredAsset.RelativeGlbPathsByBaseModelId);
+			MergeTMaps(ExistingStoredAsset->RelativeGlbPathsByCharacterStyleId, StoredAsset.RelativeGlbPathsByCharacterStyleId);
 		}
 		if(ExistingStoredAsset->RelativeIconFilePath.IsEmpty() && !StoredAsset.RelativeIconFilePath.IsEmpty())
 		{
@@ -115,9 +115,9 @@ public:
 		}
 	}
 
-	void StoreAndTrackAsset(const FAsset& Asset, const FString& baseModelId = TEXT(""), const bool bSaveManifest = true)
+	void StoreAndTrackAsset(const FAsset& Asset, const FString& CharacterStyleId = TEXT(""), const bool bSaveManifest = true)
 	{
-		FCachedAssetData NewCachedAsset = FCachedAssetData(Asset, baseModelId);
+		FCachedAssetData NewCachedAsset = FCachedAssetData(Asset, CharacterStyleId);
 		StoreAndTrackAsset(NewCachedAsset, bSaveManifest);
 	}
 
@@ -213,7 +213,7 @@ public:
 		FCachedAssetData CachedAsset = StoredAssets[AssetId];
 		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 
-		for (const auto& GlbPath : CachedAsset.RelativeGlbPathsByBaseModelId)
+		for (const auto& GlbPath : CachedAsset.RelativeGlbPathsByCharacterStyleId)
 		{
 			const FString FullGlbPath = FFileUtility::GetFullPersistentPath(GlbPath.Value);
 			if (PlatformFile.FileExists(*FullGlbPath))
