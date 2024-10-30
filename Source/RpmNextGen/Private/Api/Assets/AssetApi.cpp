@@ -9,7 +9,7 @@
 
 struct FCachedAssetData;
 struct FAssetTypeListRequest;
-const FString FAssetApi::BaseModelType = TEXT("baseModel");
+const FString FAssetApi::CharacterStyleAssetType = TEXT("baseModel");
 
 FAssetApi::FAssetApi() : ApiRequestStrategy(EApiRequestStrategy::FallbackToCache)
 {

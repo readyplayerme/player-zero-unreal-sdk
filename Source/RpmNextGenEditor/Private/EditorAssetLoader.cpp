@@ -74,7 +74,7 @@ USkeletalMesh* FEditorAssetLoader::SaveAsUAsset(UglTFRuntimeAsset* GltfAsset, co
 	return SkeletalMesh;
 }
 
-void FEditorAssetLoader::LoadBaseModelAsset(const FAsset& Asset)
+void FEditorAssetLoader::LoadBCharacterStyleAsset(const FAsset& Asset)
 {
 	LoadGlb(Asset, Asset.Id, false);
 }

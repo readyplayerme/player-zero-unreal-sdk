@@ -30,16 +30,16 @@ public:
 	void GenerateLocalCache(int InItemsPerCategory);
 	void ExtractCache();
 	void LoadAndStoreAssets();
-	void LoadAndStoreAssetGlb(const FString& BaseModelId, const FAsset* Asset);
-	void LoadAndStoreAssetIcon(const FString& BaseModelId, const FAsset* Asset);
+	void LoadAndStoreAssetGlb(const FString& CharacterStyleId, const FAsset* Asset);
+	void LoadAndStoreAssetIcon(const FString& CharacterStyleId, const FAsset* Asset);
 	void Reset();
 
 protected:
 	TUniquePtr<FAssetApi> AssetApi;
 	TArray<FString> AssetTypes;
-	TMap<FString, TArray<FAsset>> AssetMapByBaseModelId;
+	TMap<FString, TArray<FAsset>> AssetMapByCharacterStyleId;
 	TArray<TSharedPtr<FAssetListRequest>> AssetListRequests;
-	int32 CurrentBaseModelIndex;
+	int32 CurrentCharacterStyleIndex;
 	
 	UFUNCTION()
 	void OnAssetGlbSaved(const FAsset& Asset, const TArray<uint8>& Data);
@@ -47,7 +47,7 @@ protected:
 	void OnAssetIconSaved(const FAsset& Asset, const TArray<uint8>& Data);
 
 	void AddFolderToNonAssetDirectory() const;
-	void FetchBaseModels();
+	void FetchStyleAssets();
 	void FetchAssetTypes();
 	void FetchNextRefittedAsset();
 	
@@ -64,7 +64,7 @@ private:
 	int NumberOfAssetsSaved = 0;
 	
 	void StartFetchingRefittedAssets();
-	void OnListBaseModelsComplete(TSharedPtr<FAssetListResponse> AssetListResponse, bool bWasSuccessful);
+	void OnListCharacterStylesComplete(TSharedPtr<FAssetListResponse> AssetListResponse, bool bWasSuccessful);
 	void OnListAssetsComplete(TSharedPtr<FAssetListResponse> AssetListResponse, bool bWasSuccessful);
 	void OnListAssetTypesComplete(TSharedPtr<FAssetTypeListResponse> AssetTypeListResponse, bool bWasSuccessful);
 };

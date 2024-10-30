@@ -13,13 +13,13 @@ FAssetGlbLoader::~FAssetGlbLoader()
     CancelAllRequests();
 }
 
-void FAssetGlbLoader::LoadGlb(const FAsset& Asset, const FString& BaseModelId, bool bStoreInCache)
+void FAssetGlbLoader::LoadGlb(const FAsset& Asset, const FString& CharacterStyleId, bool bStoreInCache)
 {
     FCachedAssetData StoredAsset;
     if (FAssetCacheManager::Get().GetCachedAsset(Asset.Id, StoredAsset))
     {
         TArray<uint8> GlbData;
-        const FString StoredGlbPath = StoredAsset.GetGlbPathForBaseModelId(BaseModelId);
+        const FString StoredGlbPath = StoredAsset.GetGlbPathForCharacterStyleId(CharacterStyleId);
         if(FFileHelper::LoadFileToArray(GlbData, *StoredGlbPath))
         {
             OnGlbLoaded.ExecuteIfBound(Asset, GlbData);
@@ -32,13 +32,13 @@ void FAssetGlbLoader::LoadGlb(const FAsset& Asset, const FString& BaseModelId, b
     ApiRequest->Method = GET;
 
     TWeakPtr<FAssetGlbLoader> ThisPtr = SharedThis(this);
-    SendRequest<TArray<uint8> >(ApiRequest, [ThisPtr, Asset, BaseModelId, bStoreInCache](TSharedPtr<TArray<uint8>> Response, bool bWasSuccessful, int32 StatusCode)
+    SendRequest<TArray<uint8> >(ApiRequest, [ThisPtr, Asset, CharacterStyleId, bStoreInCache](TSharedPtr<TArray<uint8>> Response, bool bWasSuccessful, int32 StatusCode)
     {
         if (ThisPtr.IsValid())
         {
             if (bWasSuccessful && Response.IsValid())
             {
-                FAssetLoadingContext Context(Asset, BaseModelId, bStoreInCache);
+                FAssetLoadingContext Context(Asset, CharacterStyleId, bStoreInCache);
                 Context.Data = *Response.Get();
                 if (bStoreInCache)
                 {

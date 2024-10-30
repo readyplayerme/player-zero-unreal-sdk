@@ -66,7 +66,7 @@ protected:
 	virtual void CreateCharacterFromFirstStyle();
 	
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void CreateCharacter(const FString& BaseModelId);
+	virtual void CreateCharacter(const FString& CharacterStyleId);
 
 	virtual void UpdateCharacter(const TMap<FString, FString>& Assets);
 

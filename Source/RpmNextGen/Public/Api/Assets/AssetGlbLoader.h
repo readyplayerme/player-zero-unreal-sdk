@@ -17,7 +17,7 @@ public:
 	FOnGlbLoaded OnGlbLoaded;
 	FAssetGlbLoader();
 	virtual ~FAssetGlbLoader();
-	void LoadGlb(const FAsset& Asset, const FString& BaseModelId, bool bStoreInCache);
+	void LoadGlb(const FAsset& Asset, const FString& CharacterStyleId, bool bStoreInCache);
     
 private:
 	FHttpModule* Http;

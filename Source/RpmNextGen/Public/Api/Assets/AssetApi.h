@@ -15,7 +15,7 @@ DECLARE_DELEGATE_TwoParams(FOnListAssetTypesResponse, TSharedPtr<FAssetTypeListR
 class RPMNEXTGEN_API FAssetApi :  public FWebApiWithAuth
 {
 public:
-	static const FString BaseModelType;
+	static const FString CharacterStyleAssetType;
 	
 	FAssetApi();
 	FAssetApi(EApiRequestStrategy InApiRequestStrategy);

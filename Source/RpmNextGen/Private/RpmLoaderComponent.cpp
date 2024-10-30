@@ -47,7 +47,7 @@ void URpmLoaderComponent::CreateCharacterFromFirstStyle()
 	TSharedPtr<FAssetListRequest> AssetListRequest = MakeShared<FAssetListRequest>(FAssetListQueryParams());
 	AssetListRequest->Params.ApplicationId = AppId;
 	AssetListRequest->Params.Limit = 1;
-	AssetListRequest->Params.Type = FAssetApi::BaseModelType;
+	AssetListRequest->Params.Type = FAssetApi::CharacterStyleAssetType;
 	TWeakObjectPtr<URpmLoaderComponent> WeakAssetApi = TWeakObjectPtr<URpmLoaderComponent>(this);
 	AssetApi->ListAssetsAsync(AssetListRequest, FOnListAssetsResponse::CreateLambda( [WeakAssetApi](TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
 	{
@@ -63,16 +63,16 @@ void URpmLoaderComponent::CreateCharacterFromFirstStyle()
 	}));
 }
 
-void URpmLoaderComponent::CreateCharacter(const FString& BaseModelId)
+void URpmLoaderComponent::CreateCharacter(const FString& CharacterStyleId)
 {
-	CharacterData.BaseModelId = BaseModelId;
-	FAsset BaseModelAsset = FAsset();
-	BaseModelAsset.Id = BaseModelId;
-	BaseModelAsset.Type = FAssetApi::BaseModelType;
-	CharacterData.Assets.Add( FAssetApi::BaseModelType, BaseModelAsset);
+	CharacterData.CharacterStyleId = CharacterStyleId;
+	FAsset StyleAsset = FAsset();
+	StyleAsset.Id = CharacterStyleId;
+	StyleAsset.Type = FAssetApi::CharacterStyleAssetType;
+	CharacterData.Assets.Add( FAssetApi::CharacterStyleAssetType, StyleAsset);
 	TSharedPtr<FCharacterCreateRequest> CharacterCreateRequest = MakeShared<FCharacterCreateRequest>();
 	CharacterCreateRequest->Data.Assets = TMap<FString, FString>();
-	CharacterCreateRequest->Data.Assets.Add(FAssetApi::BaseModelType, BaseModelId);
+	CharacterCreateRequest->Data.Assets.Add(FAssetApi::CharacterStyleAssetType, CharacterStyleId);
 	CharacterCreateRequest->Data.ApplicationId = AppId;
 	CharacterApi->CreateAsync(CharacterCreateRequest, FOnCharacterCreateResponse::CreateUObject(this, &URpmLoaderComponent::HandleCharacterCreateResponse));
 }
@@ -103,7 +103,7 @@ void URpmLoaderComponent::LoadGltfRuntimeAssetFromCache(const FAsset& Asset)
 	{
 		CharacterData.Assets.Add(ExistingAsset.Type, Asset);
 		TArray<uint8> Data;
-		if(FFileApi::LoadFileFromPath(ExistingAsset.GetGlbPathForBaseModelId(CharacterData.BaseModelId), Data))
+		if(FFileApi::LoadFileFromPath(ExistingAsset.GetGlbPathForCharacterStyleId(CharacterData.CharacterStyleId), Data))
 		{
 			UglTFRuntimeAsset* GltfRuntimeAsset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(Data, GltfConfig);
 			if(!GltfRuntimeAsset)
@@ -130,7 +130,7 @@ void URpmLoaderComponent::LoadAssetsFromCacheWithNewStyle()
 {
 	for (auto PreviewAssets : CharacterData.Assets)
 	{
-		if(PreviewAssets.Value.Type == FAssetApi::BaseModelType)
+		if(PreviewAssets.Value.Type == FAssetApi::CharacterStyleAssetType)
 		{
 			continue;
 		}
@@ -140,17 +140,17 @@ void URpmLoaderComponent::LoadAssetsFromCacheWithNewStyle()
 
 void URpmLoaderComponent::LoadAssetPreview(FAsset AssetData)
 {
-	if (CharacterData.BaseModelId.IsEmpty())
+	if (CharacterData.CharacterStyleId.IsEmpty())
 	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("BaseModelId is empty"));
+		UE_LOG(LogReadyPlayerMe, Error, TEXT("CharacterStyleId is empty"));
 		return;
 	}
-	const bool bIsBaseModel = AssetData.Type == FAssetApi::BaseModelType;
-	if(bIsBaseModel)
+	const bool bIsStyleAsset = AssetData.Type == FAssetApi::CharacterStyleAssetType;
+	if(bIsStyleAsset)
 	{
-		CharacterData.BaseModelId = AssetData.Id;
+		CharacterData.CharacterStyleId = AssetData.Id;
 	}
-	bool bShouldRemoveAsset = !bIsBaseModel && CharacterData.Assets.Contains(AssetData.Type) && CharacterData.Assets[AssetData.Type].Id == AssetData.Id;
+	bool bShouldRemoveAsset = !bIsStyleAsset && CharacterData.Assets.Contains(AssetData.Type) && CharacterData.Assets[AssetData.Type].Id == AssetData.Id;
 
 	if(bShouldRemoveAsset)
 	{
@@ -170,7 +170,7 @@ void URpmLoaderComponent::LoadAssetPreview(FAsset AssetData)
 			return;
 		}
 		LoadGltfRuntimeAssetFromCache(AssetData);
-		if(bIsBaseModel && CharacterData.Assets.Num() > 1)
+		if(bIsStyleAsset && CharacterData.Assets.Num() > 1)
 		{
 			LoadAssetsFromCacheWithNewStyle();
 		}
