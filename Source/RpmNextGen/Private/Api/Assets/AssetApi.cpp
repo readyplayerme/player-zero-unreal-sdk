@@ -30,10 +30,6 @@ void FAssetApi::Initialize()
 {
 	const URpmDeveloperSettings* Settings = GetDefault<URpmDeveloperSettings>();
 	ApiBaseUrl = Settings->GetApiBaseUrl();
-	if (Settings->ApplicationId.IsEmpty())
-	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("Application ID is empty. Please set the Application ID in the Ready Player Me Developer Settings"));
-	}
 }
 
 void FAssetApi::SetAuthenticationStrategy(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy)
