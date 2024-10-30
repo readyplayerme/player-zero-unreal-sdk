@@ -13,7 +13,11 @@ void URpmAssetButtonWidget::NativeConstruct()
     if (AssetButton)
     {
         AssetButton->OnClicked.AddDynamic(this, &URpmAssetButtonWidget::HandleButtonClicked);
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
+        DefaultColor = AssetButton->GetBackgroundColor();
+#else
         DefaultColor = AssetButton->BackgroundColor;
+#endif
 
     }
     if(!TextureLoader.IsValid())
@@ -53,5 +57,9 @@ void URpmAssetButtonWidget::SetSelected(const bool bInIsSelected)
 
 void URpmAssetButtonWidget::OnTextureLoaded(UTexture2D* Texture2D)
 {
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
+    FRpmImageHelper::LoadTextureToUImage(Texture2D, AssetImage->GetBrush().ImageSize, AssetImage);
+#else
     FRpmImageHelper::LoadTextureToUImage(Texture2D, AssetImage->Brush.ImageSize, AssetImage);
+#endif
 }

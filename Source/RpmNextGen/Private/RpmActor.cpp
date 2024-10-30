@@ -60,14 +60,12 @@ void ARpmActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset)
 		LoadedMeshComponentsByAssetType.Add(Asset.Type, NewMeshComponents);
 		if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
 		{
-			// Check if MasterPoseComponent is valid before using it
 			if (MasterPoseComponent == nullptr)
 			{
 				UE_LOG(LogReadyPlayerMe, Error, TEXT("MasterPoseComponent is null for base model %s"), *CharacterData.BaseModelId);
 				return;
 			}
 
-			// Check if Animation Blueprint is valid
 			if (!AnimationConfig.AnimationBlueprint)
 			{
 				UE_LOG(LogReadyPlayerMe, Error, TEXT("AnimationBlueprint is null for base model %s"), *CharacterData.BaseModelId);
@@ -76,7 +74,6 @@ void ARpmActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset)
 			
 			MasterPoseComponent->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 			MasterPoseComponent->SetAnimClass(AnimationConfig.AnimationBlueprint);
-			UE_LOG(LogReadyPlayerMe, Log, TEXT("Set Animation Blueprint for %s"), *CharacterData.BaseModelId);
 		}
 
 		UE_LOG(LogReadyPlayerMe, Log, TEXT("Asset loaded in %f seconds"), FPlatformTime::Seconds() - LoadingStartTime);
@@ -130,26 +127,29 @@ void ARpmActor::RemoveAssetOfType(const FAsset& Asset)
 
 void ARpmActor::RemoveAllMeshes()
 {
-	for (const auto Pairs : LoadedMeshComponentsByAssetType){
-		
-		TArray<USceneComponent*> ComponentsToRemove = Pairs.Value;
-		for (USceneComponent* ComponentToRemove : ComponentsToRemove)
-		{
-			if (ComponentToRemove)
-			{
-				ComponentToRemove->DestroyComponent();
-				ComponentToRemove = nullptr;
-			}
-		}
+	for (const auto& Pair : LoadedMeshComponentsByAssetType)
+	{
+		RemoveMeshComponents(Pair.Value);
 	}
 	LoadedMeshComponentsByAssetType.Empty();
+}
+
+void ARpmActor::RemoveMeshComponents(const TArray<USceneComponent*>& Components)
+{
+	for (USceneComponent* Component : Components)
+	{
+		if (Component)
+		{
+			Component->DestroyComponent();
+			Component = nullptr;
+		}
+	}
 }
 
 TArray<USceneComponent*> ARpmActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAsset, const FString& AssetType)
 {
 	TArray<FglTFRuntimeNode> AllNodes = GltfAsset->GetNodes();
 	TArray<USceneComponent*> NewMeshComponents;
-	//if baseModel or full character asset changes we need to update master pose component
 	bool bIsMasterPoseUpdateRequired = AssetType == FAssetApi::BaseModelType || AssetType.IsEmpty();
 	
 	// Loop through all nodes to create mesh components
@@ -166,13 +166,16 @@ TArray<USceneComponent*> ARpmActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAs
 			USkeletalMeshComponent* SkeletalMeshComponent = CreateSkeletalMeshComponent(GltfAsset, Node);
 			if(bIsMasterPoseUpdateRequired)
 			{
-				UE_LOG( LogReadyPlayerMe, Log, TEXT("Setting master pose component"));
 				MasterPoseComponent = SkeletalMeshComponent;
 				NewMeshComponents.Add(SkeletalMeshComponent);
 				bIsMasterPoseUpdateRequired = false;
 				continue;
 			}
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
+			SkeletalMeshComponent->SetLeaderPoseComponent(MasterPoseComponent.Get());
+#else
 			SkeletalMeshComponent->SetMasterPoseComponent(MasterPoseComponent.Get());
+#endif
 			NewMeshComponents.Add(SkeletalMeshComponent);
 		}
 		else
@@ -189,7 +192,7 @@ USkeletalMeshComponent* ARpmActor::CreateSkeletalMeshComponent(UglTFRuntimeAsset
 	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
 
 	if (SkeletalMeshConfig.bPerPolyCollision)
-	{
+	{              
 		SkeletalMeshComponent = NewObject<UglTFRuntimeSkeletalMeshComponent>(this, GetSafeNodeName<UglTFRuntimeSkeletalMeshComponent>(Node));
 		SkeletalMeshComponent->bEnablePerPolyCollision = true;
 		SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -200,6 +203,11 @@ USkeletalMeshComponent* ARpmActor::CreateSkeletalMeshComponent(UglTFRuntimeAsset
 	}
 
 	USkeletalMesh* SkeletalMesh = GltfAsset->LoadSkeletalMesh(Node.MeshIndex, Node.SkinIndex, SkeletalMeshConfig);
+	if (!SkeletalMesh)
+	{
+		UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to load skeletal mesh for node %s"), *Node.Name);
+		return nullptr;
+	}
 	SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
 	SkeletalMeshComponent->SetupAttachment(AssetRoot);
 	SkeletalMeshComponent->SetRelativeTransform(Node.Transform);
@@ -236,9 +244,4 @@ UStaticMeshComponent* ARpmActor::CreateStaticMeshComponent(UglTFRuntimeAsset* Gl
 	AddInstanceComponent(StaticMeshComponent);
 	
 	return StaticMeshComponent;
-}
-
-void ARpmActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }

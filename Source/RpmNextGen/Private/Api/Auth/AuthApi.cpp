@@ -1,54 +1,70 @@
-﻿#include "Api/Auth/AuthApi.h"
-
-#include "RpmNextGen.h"
-#include "Interfaces/IHttpResponse.h"
-#include "Api/Auth/Models/RefreshTokenRequest.h"
+﻿
+#include "Api/Auth/AuthApi.h"
+#include "Api/Auth/Models/CreateUserResponse.h"
+#include "Api/Auth/Models/LoginWithCodeResponse.h"
 #include "Api/Auth/Models/RefreshTokenResponse.h"
 #include "Settings/RpmDeveloperSettings.h"
+// ReSharper disable All
+#include "Api/Auth/Models/RefreshTokenRequest.h"
+#include "Api/Auth/Models/SendLoginCodeRequest.h"
+#include "Api/Auth/Models/LoginWithCodeRequest.h"
+#include "Api/Auth/Models/CreateUserRequest.h"
+// ReSharper restore All
 
 FAuthApi::FAuthApi()
 {
-	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
-	ApiUrl = FString::Printf(TEXT("%s/refresh"), *RpmSettings->ApiBaseAuthUrl);
-	OnRequestComplete.BindRaw(this, &FAuthApi::OnProcessComplete);
+	RpmSettings = GetDefault<URpmDeveloperSettings>();
 }
 
-void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request)
+void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request, FOnRefreshTokenResponse OnComplete)
 {
-	TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
-	ApiRequest->Url = ApiUrl;
+	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
+	ApiRequest->Url = FString::Printf(TEXT("%s/refresh"), *RpmSettings->ApiBaseAuthUrl);
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	ApiRequest->Payload = Request.ToJsonString();
-	DispatchRaw(ApiRequest);
+	ApiRequest->Payload = ConvertToJsonString(Request);
+	SendRequest<FRefreshTokenResponse>(ApiRequest, [OnComplete](TSharedPtr<FRefreshTokenResponse> Response, bool bWasSuccessful, int32 StatusCode)
+	{
+		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
+	});
 }
 
-void FAuthApi::OnProcessComplete(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful)
+void FAuthApi::SendLoginCode(const FSendLoginCodeRequest& Request, FOnSendLoginCodeResponse OnComplete)
 {
-	if (!ApiRequest.IsValid())
+	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
+	ApiRequest->Url = FString::Printf(TEXT("%s/v1/auth/request-login-code"), *RpmSettings->GetApiBaseUrl());
+	ApiRequest->Method = POST;
+	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
+	ApiRequest->Payload = ConvertToJsonString(Request);
+	// TODO confirm this works since this request has no return data
+	SendRequest<FApiResponse>(ApiRequest, [OnComplete](TSharedPtr<FApiResponse> Response, bool bWasSuccessful, int32 StatusCode)
 	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("Invalid ApiRequest in FAuthApi::OnProcessComplete."));
-		return;
-	}
+		OnComplete.ExecuteIfBound(bWasSuccessful && Response.IsValid());
+	});
+}
 
-	if (bWasSuccessful && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+void FAuthApi::LoginWithCode(const FLoginWithCodeRequest& Request, FOnLoginWithCodeResponse OnComplete)
+{
+	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
+	ApiRequest->Url = FString::Printf(TEXT("%s/v1/auth/login"), *RpmSettings->GetApiBaseUrl());
+	ApiRequest->Method = POST;
+	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
+	ApiRequest->Payload = ConvertToJsonString(Request);
+	SendRequest<FLoginWithCodeResponse>(ApiRequest, [OnComplete](TSharedPtr<FLoginWithCodeResponse> Response, bool bWasSuccessful, int32 StatusCode)
 	{
-		FString Data = Response->GetContentAsString();
-		FRefreshTokenResponse TokenResponse;
+		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
+	});
+}
 
-		if (!Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &TokenResponse, 0, 0))
-		{
-			if (OnRefreshTokenResponse.IsBound())
-			{
-				OnRefreshTokenResponse.ExecuteIfBound(ApiRequest, TokenResponse, true);
-			}
-			return;
-		}
-	}
-
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to refresh token"));
-	if (OnRefreshTokenResponse.IsBound())
+void FAuthApi::CreateUser(const FCreateUserRequest& Request, FOnCreateUserResponse OnComplete)
+{
+	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
+	ApiRequest->Url = FString::Printf(TEXT("%s/v1/users"), *RpmSettings->GetApiBaseUrl());
+	ApiRequest->Method = POST;
+	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
+	ApiRequest->Payload = ConvertToJsonString(Request);
+	SendRequest<FCreateUserResponse>(ApiRequest, [OnComplete](TSharedPtr<FCreateUserResponse> Response, bool bWasSuccessful, int32 StatusCode)
 	{
-		OnRefreshTokenResponse.ExecuteIfBound(ApiRequest, FRefreshTokenResponse(), false);
-	}
+		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
+	});
 }
