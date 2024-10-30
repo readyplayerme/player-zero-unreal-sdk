@@ -10,6 +10,7 @@
 #include "RpmCharacterTypes.h"
 #include "RpmLoaderComponent.generated.h"
 
+class FAssetApi;
 class FFileApi;
 class FGlbLoader;
 struct FCharacterCreateResponse;
@@ -45,8 +46,8 @@ public:
 	
 	void SetGltfConfig(const FglTFRuntimeConfig* Config);
 
-	void HandleAssetLoaded(const TArray<unsigned char>* Data, const FAsset& Asset);
-	void HandleCharacterAssetLoaded(const TArray<unsigned char>* Array, const FString& FileName);
+	void HandleAssetLoaded(const TArray<uint8>& Data, const FAsset& Asset);
+	void HandleCharacterAssetLoaded(const TArray<uint8>& Array, const FString& FileName);
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -57,9 +58,16 @@ protected:
 	FRpmCharacterData CharacterData;
 	
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
+	virtual void CreateCharacterFromFirstStyle();
 	
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
 	virtual void CreateCharacter(const FString& BaseModelId);
+
+	virtual void UpdateCharacter(const TMap<FString, FString>& Assets);
+
+	virtual void FindCharacterById(const FString CharacterId);
 
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
 	virtual void LoadCharacterFromUrl(FString Url);
@@ -73,16 +81,13 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
 	virtual void LoadAssetPreview(FAsset AssetData, bool bUseCache);
 	
-	UFUNCTION()
-	virtual void HandleCharacterCreateResponse(FCharacterCreateResponse CharacterCreateResponse, bool bWasSuccessful);
-	UFUNCTION()
-	virtual void HandleCharacterUpdateResponse(FCharacterUpdateResponse CharacterUpdateResponse, bool bWasSuccessful);
-	UFUNCTION()
-	virtual void HandleCharacterFindResponse(FCharacterFindByIdResponse CharacterFindByIdResponse, bool bWasSuccessful);
+	virtual void HandleCharacterCreateResponse(TSharedPtr<FCharacterCreateResponse> Response, bool bWasSuccessful);
+	virtual void HandleCharacterUpdateResponse(TSharedPtr<FCharacterUpdateResponse> CharacterUpdateResponse, bool bWasSuccessful);
+	virtual void HandleCharacterFindResponse(TSharedPtr<FCharacterFindByIdResponse> CharacterFindByIdResponse, bool bWasSuccessful);
 	
 private:
 	TSharedPtr<FCharacterApi> CharacterApi;
 	TSharedPtr<FFileApi> FileApi;
-
+	TSharedPtr<FAssetApi> AssetApi;
 	void LoadAssetsFromCacheWithNewStyle();
 };

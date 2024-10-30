@@ -32,7 +32,7 @@ public:
 
 	void Construct(const FArguments& InArgs);
 	virtual ~SRpmDeveloperLoginWidget() override;
-
+	
 private:
 	TSharedPtr<SVerticalBox> ContentBox;
 	TSharedPtr<SEditableTextBox> EmailTextBox;
@@ -67,10 +67,11 @@ private:
 	void GetOrgList();
 	void ClearLoadedCharacterModelImages();
 	void LoadBaseModelList();
-	void HandleLoginResponse(const FDeveloperLoginResponse& Response, bool bWasSuccessful);
-	void HandleOrganizationListResponse(const FOrganizationListResponse& Response, bool bWasSuccessful);
-	void HandleApplicationListResponse(const FApplicationListResponse& Response, bool bWasSuccessful);
-	void HandleBaseModelListResponse(const FAssetListResponse& Response, bool bWasSuccessful);
+	void HandleLoginResponse(TSharedPtr<FDeveloperLoginResponse> Response, bool bWasSuccessful);
+	void HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful);
+	void HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful);
+	void HandleBaseModelListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful);
+	
 	void OnLoadBaseModelClicked(const FAsset& Asset);
 	void SetLoggedInState(const bool IsLoggedIn);
 	void PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem);

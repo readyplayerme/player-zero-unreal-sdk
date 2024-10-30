@@ -1,58 +1,46 @@
 ﻿#include "Auth/DeveloperTokenAuthStrategy.h"
-#include "RpmNextGen.h"
 #include "Auth/DevAuthTokenCache.h"
 #include "Api/Auth/Models/RefreshTokenRequest.h"
 #include "Api/Auth/Models/RefreshTokenResponse.h"
 #include "Auth/Models/DeveloperAuth.h"
 
-DeveloperTokenAuthStrategy::DeveloperTokenAuthStrategy() 
+FDeveloperTokenAuthStrategy::FDeveloperTokenAuthStrategy()
 {
-	AuthApi = MakeShared<FAuthApi>();
-	AuthApi->OnRefreshTokenResponse.BindRaw(this, &DeveloperTokenAuthStrategy::OnRefreshTokenResponse);
 }
 
-void DeveloperTokenAuthStrategy::AddAuthToRequest(TSharedPtr<FApiRequest> ApiRequest) 
+FDeveloperTokenAuthStrategy::FDeveloperTokenAuthStrategy(const FString& InApiKey) : FApiKeyAuthStrategy(InApiKey)
 {
-	const FString Key = TEXT("Authorization");
-	const FString Token = FDevAuthTokenCache::GetAuthData().Token;
-	if(Token.IsEmpty())
-	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("Token is empty"));
-		OnAuthComplete.ExecuteIfBound(ApiRequest, false);
-		return;
-	}
-	if (ApiRequest->Headers.Contains(Key))
-	{
-		ApiRequest->Headers.Remove(Key);
-	}
-	ApiRequest->Headers.Add(Key, FString::Printf(TEXT("Bearer %s"), *Token));
-	OnAuthComplete.ExecuteIfBound(ApiRequest, true);
 }
 
-void DeveloperTokenAuthStrategy::TryRefresh(TSharedPtr<FApiRequest> ApiRequest)
+FDeveloperTokenAuthStrategy::~FDeveloperTokenAuthStrategy()
 {
-	ApiRequestToRetry = ApiRequest;
+	CancelAllRequests();
+}
+
+void FDeveloperTokenAuthStrategy::TryRefresh(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, const FRefreshTokenResponse&, bool)> OnTokenRefreshed)
+{
 	FRefreshTokenRequest RefreshRequest;
 	RefreshRequest.Data.Token = FDevAuthTokenCache::GetAuthData().Token;
 	RefreshRequest.Data.RefreshToken = FDevAuthTokenCache::GetAuthData().RefreshToken;
-	RefreshTokenAsync(RefreshRequest);
-}
+    
+	TWeakPtr<FAuthApi> WeakPtrThis = SharedThis(this);
 
-void DeveloperTokenAuthStrategy::OnRefreshTokenResponse(TSharedPtr<FApiRequest> Request, const FRefreshTokenResponse& Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful && !Response.Data.Token.IsEmpty())
+	RefreshToken(RefreshRequest, FOnRefreshTokenResponse::CreateLambda([WeakPtrThis, ApiRequest, OnTokenRefreshed](TSharedPtr<FRefreshTokenResponse> Response, bool bWasSuccessful)
 	{
-		FDeveloperAuth DeveloperAuth = FDevAuthTokenCache::GetAuthData();
-		DeveloperAuth.Token = Response.Data.Token;
-		DeveloperAuth.RefreshToken = Response.Data.RefreshToken;
-		FDevAuthTokenCache::SetAuthData(DeveloperAuth);
-		OnTokenRefreshed.ExecuteIfBound(ApiRequestToRetry, Response.Data, true);
-		return;
-	}
-	OnTokenRefreshed.ExecuteIfBound(ApiRequestToRetry, Response.Data, false);
+		if (WeakPtrThis.IsValid())
+		{
+			if (bWasSuccessful && !Response->Data.Token.IsEmpty())
+			{
+				FDeveloperAuth DeveloperAuth = FDevAuthTokenCache::GetAuthData();
+				DeveloperAuth.Token = Response->Data.Token;
+				DeveloperAuth.RefreshToken = Response->Data.RefreshToken;
+				FDevAuthTokenCache::SetAuthData(DeveloperAuth);
+                
+				OnTokenRefreshed(ApiRequest, *Response, true);
+				return;
+			}
+			OnTokenRefreshed(ApiRequest, *Response, false);
+		}
+	}));
 }
 
-void DeveloperTokenAuthStrategy::RefreshTokenAsync(const FRefreshTokenRequest& Request)
-{	
-	AuthApi->RefreshToken(Request);
-}
