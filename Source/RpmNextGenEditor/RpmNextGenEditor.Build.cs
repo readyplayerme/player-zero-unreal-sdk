@@ -31,7 +31,6 @@ public class RpmNextGenEditor : ModuleRules
 				"RpmNextGen",
 				"EditorStyle",
 				"glTFRuntime",
-				"TransientObjectSaver",
 				"UnrealEd",
 				"PropertyEditor",
 				"Slate",
@@ -52,6 +51,8 @@ public class RpmNextGenEditor : ModuleRules
 				"Json", 
 				"UMG",
 				"ImageWrapper",
+				"MeshBuilder",
+				"SkeletalMeshUtilitiesCommon"
 			}
 			);
 		

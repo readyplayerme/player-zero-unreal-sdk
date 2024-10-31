@@ -1,10 +1,9 @@
 #include "EditorAssetLoader.h"
-#include "TransientObjectSaverLibrary.h"
-#include "AssetNameGenerator.h"
+#include "AssetSaver/AssetNameGenerator.h"
 #include "glTFRuntimeFunctionLibrary.h"
 #include "RpmActor.h"
 #include "RpmNextGen.h"
-
+#include "AssetSaver/RpmAssetSaver.h"
 
 FEditorAssetLoader::FEditorAssetLoader()
 {
@@ -65,10 +64,7 @@ USkeletalMesh* FEditorAssetLoader::SaveAsUAsset(UglTFRuntimeAsset* GltfAsset, co
 	const FString SkeletalMeshAssetPath = FString::Printf(TEXT("%s%s_SkeletalMesh"), *CoreAssetPath, *LoadedAssetId);
 	UE_LOG(LogTemp, Log, TEXT("Saving SkeletalMesh to path: %s"), *SkeletalMeshAssetPath);
 	UE_LOG(LogTemp, Log, TEXT("Saving Skeleton to path: %s"), *SkeletonAssetPath);
-	const auto NameGenerator = NewObject<UAssetNameGenerator>();
-	NameGenerator->SetPath(CoreAssetPath);
-
-	UTransientObjectSaverLibrary::SaveTransientSkeletalMesh(SkeletalMesh, SkeletalMeshAssetPath, SkeletonAssetPath, TEXT(""), NameGenerator->MaterialNameGeneratorDelegate, NameGenerator->TextureNameGeneratorDelegate);
+	FRpmAssetSaver::SaveSkeletalMeshAsset(SkeletalMesh, SkeletalMeshAssetPath, SkeletonAssetPath, TEXT(""));
 
 	UE_LOG(LogReadyPlayerMe, Log, TEXT("Character model saved: %s"), *LoadedAssetId);
 	return SkeletalMesh;
