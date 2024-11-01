@@ -115,7 +115,7 @@ public:
 		}
 	}
 
-	void StoreAndTrackAsset(const FAsset& Asset, const FString& CharacterStyleId = TEXT(""), const bool bSaveManifest = true)
+	void StoreAndTrackAsset(const FRpmAsset& Asset, const FString& CharacterStyleId = TEXT(""), const bool bSaveManifest = true)
 	{
 		FCachedAssetData NewCachedAsset = FCachedAssetData(Asset, CharacterStyleId);
 		StoreAndTrackAsset(NewCachedAsset, bSaveManifest);

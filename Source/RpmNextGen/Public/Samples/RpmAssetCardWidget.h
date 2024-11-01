@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Blueprint/UserWidget.h"
 #include "RpmAssetCardWidget.generated.h"
 
@@ -33,14 +33,14 @@ public:
 	void OnTextureLoaded(UTexture2D* Texture2D);
 
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void InitializeCard(const FAsset& Asset);
+	virtual void InitializeCard(const FRpmAsset& Asset);
 
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	void LoadImage(const FAsset& Asset);
+	void LoadImage(const FRpmAsset& Asset);
 
 	virtual void NativeConstruct() override;
 	
 private:
-	FAsset AssetData;
+	FRpmAsset AssetData;
 	TSharedPtr<FRpmTextureLoader> TextureLoader;
 };

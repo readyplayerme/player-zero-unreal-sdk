@@ -27,7 +27,7 @@ void URpmAssetButtonWidget::NativeConstruct()
     }
 }
 
-void URpmAssetButtonWidget::InitializeButton(const FAsset& InAssetData, const FVector2D& InImageSize)
+void URpmAssetButtonWidget::InitializeButton(const FRpmAsset& InAssetData, const FVector2D& InImageSize)
 {    
     AssetData = InAssetData;
 

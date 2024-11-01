@@ -41,7 +41,7 @@ protected:
 	TMap<FString, int32> IndexMapByCategory;
 	
 	UFUNCTION()
-	void HandleAssetSelectedFromPanel(const FAsset& AssetData);
+	void HandleAssetSelectedFromPanel(const FRpmAsset& AssetData);
 	
 	virtual void SynchronizeProperties() override;
 

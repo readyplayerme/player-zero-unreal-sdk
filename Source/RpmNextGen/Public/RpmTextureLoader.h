@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Engine/Texture2D.h"
 
 class FAssetIconLoader;
@@ -13,9 +13,9 @@ public:
 	FRpmTextureLoader();
 	DECLARE_DELEGATE_OneParam(FOnTextureLoaded, UTexture2D*);
 	
-	void LoadIconFromAsset(const FAsset& Asset, bool bStoreInCache = false);
+	void LoadIconFromAsset(const FRpmAsset& Asset, bool bStoreInCache = false);
 	UFUNCTION()
-	void OnIconLoaded(const FAsset& Asset, const TArray<unsigned char>& Array);
+	void OnIconLoaded(const FRpmAsset& Asset, const TArray<unsigned char>& Array);
 
 	FOnTextureLoaded OnTextureLoaded;
 private:

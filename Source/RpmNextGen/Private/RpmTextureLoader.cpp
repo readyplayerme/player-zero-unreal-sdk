@@ -11,12 +11,12 @@ FRpmTextureLoader::FRpmTextureLoader()
 	AssetIconLoader->OnIconLoaded.BindRaw( this, &FRpmTextureLoader::OnIconLoaded);
 }
 
-void FRpmTextureLoader::LoadIconFromAsset(const FAsset& Asset, bool bStoreInCache)
+void FRpmTextureLoader::LoadIconFromAsset(const FRpmAsset& Asset, bool bStoreInCache)
 {
 	AssetIconLoader->LoadIcon(Asset, bStoreInCache);
 }
 
-void FRpmTextureLoader::OnIconLoaded(const FAsset& Asset, const TArray<unsigned char>& Array)
+void FRpmTextureLoader::OnIconLoaded(const FRpmAsset& Asset, const TArray<unsigned char>& Array)
 {
 	if (UTexture2D* Texture = FRpmImageHelper::CreateTextureFromData(Array))
 	{

@@ -2,7 +2,7 @@
 
 #include "HttpModule.h"
 #include "RpmNextGen.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Interfaces/IHttpResponse.h"
 
 FFileApi::FFileApi()
@@ -22,7 +22,7 @@ void FFileApi::LoadFileFromUrl(const FString& URL)
 	HttpRequest->ProcessRequest();
 }
 
-void FFileApi::LoadAssetFileFromUrl(const FString& URL, const FAsset& Asset)
+void FFileApi::LoadAssetFileFromUrl(const FString& URL, const FRpmAsset& Asset)
 {
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->OnProcessRequestComplete().BindRaw(this, &FFileApi::AssetFileRequestComplete, Asset);
@@ -48,7 +48,7 @@ void FFileApi::FileRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Res
 	OnFileRequestComplete.ExecuteIfBound(TArray<uint8>(), FileName);
 }
 
-void FFileApi::AssetFileRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, FAsset Asset)
+void FFileApi::AssetFileRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, FRpmAsset Asset)
 {
 	if (bWasSuccessful && Response.IsValid() && Response->GetContentLength() > 0)
 	{

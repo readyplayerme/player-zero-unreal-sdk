@@ -6,7 +6,7 @@
 #include "glTFRuntimeFunctionLibrary.h"
 #include "RpmFunctionLibrary.h"
 #include "Api/Assets/AssetApi.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Api/Assets/Models/AssetListRequest.h"
 #include "Api/Assets/Models/AssetListResponse.h"
 #include "Api/Characters/CharacterApi.h"
@@ -66,7 +66,7 @@ void URpmLoaderComponent::CreateCharacterFromFirstStyle()
 void URpmLoaderComponent::CreateCharacter(const FString& CharacterStyleId)
 {
 	CharacterData.CharacterStyleId = CharacterStyleId;
-	FAsset StyleAsset = FAsset();
+	FRpmAsset StyleAsset = FRpmAsset();
 	StyleAsset.Id = CharacterStyleId;
 	StyleAsset.Type = FAssetApi::CharacterStyleAssetType;
 	CharacterData.Assets.Add( FAssetApi::CharacterStyleAssetType, StyleAsset);
@@ -96,7 +96,7 @@ void URpmLoaderComponent::LoadCharacterFromUrl(FString Url)
 	FileApi->LoadFileFromUrl(Url);
 }
 
-void URpmLoaderComponent::LoadGltfRuntimeAssetFromCache(const FAsset& Asset)
+void URpmLoaderComponent::LoadGltfRuntimeAssetFromCache(const FRpmAsset& Asset)
 {
 	FCachedAssetData ExistingAsset;
 	if(FAssetCacheManager::Get().GetCachedAsset(Asset.Id, ExistingAsset))
@@ -118,7 +118,7 @@ void URpmLoaderComponent::LoadGltfRuntimeAssetFromCache(const FAsset& Asset)
 	OnAssetLoaded.Broadcast(Asset, nullptr);
 }
 
-void URpmLoaderComponent::LoadCharacterAssetsFromCache(TMap<FString, FAsset> AssetMap)
+void URpmLoaderComponent::LoadCharacterAssetsFromCache(TMap<FString, FRpmAsset> AssetMap)
 {
 	for (auto Element : AssetMap)
 	{
@@ -138,7 +138,7 @@ void URpmLoaderComponent::LoadAssetsFromCacheWithNewStyle()
 	}
 }
 
-void URpmLoaderComponent::LoadAssetPreview(FAsset AssetData)
+void URpmLoaderComponent::LoadAssetPreview(FRpmAsset AssetData)
 {
 	if (CharacterData.CharacterStyleId.IsEmpty())
 	{
@@ -189,7 +189,7 @@ void URpmLoaderComponent::LoadAssetPreview(FAsset AssetData)
 	FileApi->LoadFileFromUrl(Url);
 }
 
-void URpmLoaderComponent::HandleAssetLoaded(const TArray<uint8>& Data, const FAsset& Asset)
+void URpmLoaderComponent::HandleAssetLoaded(const TArray<uint8>& Data, const FRpmAsset& Asset)
 {
 	if(Data.Num() == 0)
 	{

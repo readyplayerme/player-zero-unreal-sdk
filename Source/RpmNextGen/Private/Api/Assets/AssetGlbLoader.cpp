@@ -13,7 +13,7 @@ FAssetGlbLoader::~FAssetGlbLoader()
     CancelAllRequests();
 }
 
-void FAssetGlbLoader::LoadGlb(const FAsset& Asset, const FString& CharacterStyleId, bool bStoreInCache)
+void FAssetGlbLoader::LoadGlb(const FRpmAsset& Asset, const FString& CharacterStyleId, bool bStoreInCache)
 {
     FCachedAssetData StoredAsset;
     if (FAssetCacheManager::Get().GetCachedAsset(Asset.Id, StoredAsset))

@@ -13,7 +13,7 @@ FAssetIconLoader::~FAssetIconLoader()
 	CancelAllRequests();
 }
 
-void FAssetIconLoader::LoadIcon(const FAsset& Asset, bool bStoreInCache)
+void FAssetIconLoader::LoadIcon(const FRpmAsset& Asset, bool bStoreInCache)
 {
 	FCachedAssetData StoredAsset;
 	if (FAssetCacheManager::Get().GetCachedAsset(Asset.Id, StoredAsset))

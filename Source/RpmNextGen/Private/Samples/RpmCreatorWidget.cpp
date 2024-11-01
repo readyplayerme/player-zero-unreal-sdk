@@ -60,7 +60,7 @@ void URpmCreatorWidget::SynchronizeProperties()
 	Super::SynchronizeProperties();
 }
 
-void URpmCreatorWidget::HandleAssetSelectedFromPanel(const FAsset& AssetData)
+void URpmCreatorWidget::HandleAssetSelectedFromPanel(const FRpmAsset& AssetData)
 {
 	OnAssetSelected.Broadcast(AssetData);
 }

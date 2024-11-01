@@ -51,7 +51,7 @@ void FCacheGenerator::GenerateLocalCache(int InItemsPerCategory)
 
 void FCacheGenerator::LoadAndStoreAssets()
 {
-	TArray<FAsset> CharacterStyleAssets = TArray<FAsset>();
+	TArray<FRpmAsset> CharacterStyleAssets = TArray<FRpmAsset>();
 	int TotalRefittedAssets = 0;
 	
 	// Ensure AssetMapByCharacterStyleId contains valid data
@@ -125,7 +125,7 @@ void FCacheGenerator::LoadAndStoreAssets()
 	}
 }
 
-void FCacheGenerator::LoadAndStoreAssetGlb(const FString& CharacterStyleId, const FAsset* Asset)
+void FCacheGenerator::LoadAndStoreAssetGlb(const FString& CharacterStyleId, const FRpmAsset* Asset)
 {
 	if (!Asset) // Ensure asset is valid
 	{
@@ -136,7 +136,7 @@ void FCacheGenerator::LoadAndStoreAssetGlb(const FString& CharacterStyleId, cons
 	TSharedPtr<FAssetGlbLoader> AssetLoader = MakeShared<FAssetGlbLoader>();
 	ActiveGlbLoaders.Add(AssetLoader);
 	TWeakPtr<FCacheGenerator> WeakPtrThis = AsShared();
-	AssetLoader->OnGlbLoaded.BindLambda([this, AssetLoader, WeakPtrThis](const FAsset& LoadedAsset, const TArray<uint8>& Data)
+	AssetLoader->OnGlbLoaded.BindLambda([this, AssetLoader, WeakPtrThis](const FRpmAsset& LoadedAsset, const TArray<uint8>& Data)
 	{		
 		if(WeakPtrThis.IsValid())
 		{
@@ -147,7 +147,7 @@ void FCacheGenerator::LoadAndStoreAssetGlb(const FString& CharacterStyleId, cons
 	AssetLoader->LoadGlb(*Asset, CharacterStyleId, true);
 }
 
-void FCacheGenerator::LoadAndStoreAssetIcon(const FString& CharacterStyleId, const FAsset* Asset)
+void FCacheGenerator::LoadAndStoreAssetIcon(const FString& CharacterStyleId, const FRpmAsset* Asset)
 {
 	if (!Asset) // Ensure asset is valid
 	{
@@ -157,7 +157,7 @@ void FCacheGenerator::LoadAndStoreAssetIcon(const FString& CharacterStyleId, con
 	TSharedPtr<FAssetIconLoader> AssetLoader = MakeShared<FAssetIconLoader>();
 	ActiveIconLoaders.Add(AssetLoader);
 	TWeakPtr<FCacheGenerator> WeakPtrThis = AsShared();
-	AssetLoader->OnIconLoaded.BindLambda([this, AssetLoader, WeakPtrThis](const FAsset& LoadedAsset, const TArray<uint8>& Data)
+	AssetLoader->OnIconLoaded.BindLambda([this, AssetLoader, WeakPtrThis](const FRpmAsset& LoadedAsset, const TArray<uint8>& Data)
 	{		
 		if(WeakPtrThis.IsValid())
 		{
@@ -180,7 +180,7 @@ void FCacheGenerator::Reset()
 	FAssetCacheManager::Get().ClearAllCache();
 }
 
-void FCacheGenerator::OnAssetGlbSaved(const FAsset& Asset, const TArray<uint8>& Data)
+void FCacheGenerator::OnAssetGlbSaved(const FRpmAsset& Asset, const TArray<uint8>& Data)
 {
 	NumberOfAssetsSaved++;
 	if(NumberOfAssetsSaved >= RequiredAssetDownloadRequest)
@@ -192,7 +192,7 @@ void FCacheGenerator::OnAssetGlbSaved(const FAsset& Asset, const TArray<uint8>& 
 	}
 }
 
-void FCacheGenerator::OnAssetIconSaved(const FAsset& Asset, const TArray<uint8>& Data)
+void FCacheGenerator::OnAssetIconSaved(const FRpmAsset& Asset, const TArray<uint8>& Data)
 {
 	NumberOfAssetsSaved++;
 	if(NumberOfAssetsSaved >= RequiredAssetDownloadRequest)
@@ -242,7 +242,7 @@ void FCacheGenerator::OnListCharacterStylesComplete(TSharedPtr<FAssetListRespons
 	{
 		for ( auto CharacterStyle : AssetListResponse->Data)
 		{
-			TArray<FAsset> AssetList = TArray<FAsset>();
+			TArray<FRpmAsset> AssetList = TArray<FRpmAsset>();
 			AssetList.Add(CharacterStyle);
 			AssetMapByCharacterStyleId.Add(CharacterStyle.Id, AssetList);
 		}
