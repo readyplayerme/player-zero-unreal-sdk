@@ -30,7 +30,6 @@ public:
 	
 private:
 	void HandleLogin(const FString& String);
-	void HandleApplicationList(const FApplicationListResponse& ApplicationListResponse);
 	void HandleLogout();
 	TSharedPtr<SDeveloperLoginPanel> LoginPanel;
 	TSharedPtr<SDeveloperSettingsPanel> SettingsPanel;

@@ -2,6 +2,8 @@
 #include "Api/Assets/Models/AssetListResponse.h"
 #include "Api/Assets/Models/AssetListRequest.h"
 
+class FAssetGlbLoader;
+class FAssetIconLoader;
 class FTaskManager;
 struct FCachedAssetData;
 class FAssetSaver;
@@ -35,7 +37,7 @@ public:
 	void Reset();
 
 protected:
-	TUniquePtr<FAssetApi> AssetApi;
+	TSharedPtr<FAssetApi> AssetApi;
 	TArray<FString> AssetTypes;
 	TMap<FString, TArray<FAsset>> AssetMapByCharacterStyleId;
 	TArray<TSharedPtr<FAssetListRequest>> AssetListRequests;
@@ -55,7 +57,8 @@ protected:
 	
 private:
 	static const FString ZipFileName;
-
+	TArray<TSharedPtr<FAssetGlbLoader>> ActiveGlbLoaders;
+	TArray<TSharedPtr<FAssetIconLoader>> ActiveIconLoaders;
 	FHttpModule* Http;
 	
 	int MaxItemsPerCategory;
