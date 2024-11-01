@@ -2,6 +2,11 @@
 
 #include "Settings/RpmDeveloperSettings.h"
 
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1)
+#include "UObject/ObjectSaveContext.h"
+#endif
+
+
 URpmDeveloperSettings::URpmDeveloperSettings() : ApiBaseUrl(TEXT("https://api.readyplayer.me")), ApiBaseAuthUrl(TEXT("https://readyplayer.me/api/auth"))
 {
 	LoadConfig();
