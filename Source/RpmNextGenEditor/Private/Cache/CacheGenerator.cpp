@@ -27,7 +27,7 @@ FCacheGenerator::~FCacheGenerator()
 {
 	if(AssetApi.IsValid())
 	{
-		AssetApi.Reset();
+		AssetApi->CancelAllRequests();
 	}
 	ActiveGlbLoaders.Empty();
 	ActiveIconLoaders.Empty();

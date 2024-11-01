@@ -148,6 +148,7 @@ void URpmAssetPanelWidget::LoadNextPage()
 		return;
 	}
 	ClearAllButtons();
+	AssetApi->CancelAllRequests();
 	Pagination.Page++;
 	LoadAssetsOfType(CurrentAssetType);
 }
