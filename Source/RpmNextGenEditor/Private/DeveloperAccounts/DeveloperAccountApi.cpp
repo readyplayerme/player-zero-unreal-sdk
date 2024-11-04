@@ -26,7 +26,7 @@ void FDeveloperAccountApi::ListApplicationsAsync(TSharedPtr<FApplicationListRequ
     const FString Url = FString::Printf(TEXT("%s/v1/applications%s"), *ApiBaseUrl, *QueryString);
     TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
     ApiRequest->Url = Url;
-    SendRequest<FApplicationListResponse>(ApiRequest, [OnComplete](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful, int32 StatusCode)
+    SendRequestWithAuth<FApplicationListResponse>(ApiRequest, [OnComplete](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful, int32 StatusCode)
     {
         //UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed "));
         OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
@@ -42,7 +42,7 @@ void FDeveloperAccountApi::ListOrganizationsAsync(TSharedPtr<FOrganizationListRe
     const FString Url = FString::Printf(TEXT("%s/v1/organizations%s"), *ApiBaseUrl, *QueryString);
     TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
     ApiRequest->Url = Url;
-    SendRequest<FOrganizationListResponse>(ApiRequest, [OnComplete](TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful, int32 StatusCode)
+    SendRequestWithAuth<FOrganizationListResponse>(ApiRequest, [OnComplete](TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful, int32 StatusCode)
     {
         //UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed "));
         OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());

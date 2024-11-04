@@ -1,8 +1,7 @@
-﻿#include "SDeveloperSettingsPanel.h"
+﻿#include "UI/SDeveloperSettingsPanel.h"
 #include "EditorAssetLoader.h"
 #include "RpmNextGen.h"
 #include "RpmTextureLoader.h"
-#include "SDeveloperLoginPanel.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Api/Assets/AssetApi.h"
 #include "Api/Assets/Models/RpmAsset.h"
@@ -124,6 +123,13 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 	InUserName.IsEmpty() ? UserName = TEXT("User") : UserName = InUserName;
 	UpdateErrorMessage("");
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
+	auto IsTokenEmpty = DevAuthData.Token.IsEmpty();
+	auto isRefreshTokenEmpty = DevAuthData.RefreshToken.IsEmpty();
+	if (IsTokenEmpty || isRefreshTokenEmpty || !DevAuthData.IsValid())
+	{
+		UpdateErrorMessage("No authentication data found. Please login again.");
+		return;
+	}
 	if (!AssetApi.IsValid())
 	{
 		CharacterStyleAssets = TMap<FString, FRpmAsset>();
@@ -134,19 +140,10 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 	{
 		AssetApi->CancelAllRequests();
 	}
-	if (!DevAuthData.IsDemo)
-	{
-		AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
-	}
-	else
-	{
-		AssetApi->SetAuthenticationStrategy(nullptr);
-	}
 
 	if(!DeveloperAccountApi.IsValid())
 	{
 		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>();
-
 	}
 	else
 	{
@@ -154,11 +151,17 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 	}
 	if(!DevAuthData.IsDemo)
 	{
+		AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
 		DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
+		UE_LOG(LogReadyPlayerMe, Log, TEXT("Setting up API's with token (FDeveloperTokenAuthStrategy)") );
+
 	}
 	else
 	{
 		DeveloperAccountApi->SetAuthenticationStrategy(nullptr);
+		AssetApi->SetAuthenticationStrategy(nullptr);
+		UE_LOG(LogReadyPlayerMe, Log, TEXT("Setting up API's with NULL strategy") );
+
 	}
 
 	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
