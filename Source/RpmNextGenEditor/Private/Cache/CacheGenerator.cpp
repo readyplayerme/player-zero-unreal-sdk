@@ -226,7 +226,7 @@ void FCacheGenerator::AddFolderToNonAssetDirectory() const
 			return;
 		}
 	}
-
+	
 	// Add the folder to the config
 	GConfig->SetString(*SectionName, *KeyName, *FolderToAdd, ConfigFilePath);
 
@@ -365,20 +365,6 @@ void FCacheGenerator::FetchNextRefittedAsset()
 	}));
 }
 
-// void FCacheGenerator::OnListAssetTypesResponse(const FAssetTypeListResponse& AssetListResponse, bool bWasSuccessful)
-// {
-// 	if(bWasSuccessful && AssetListResponse.IsSuccess)
-// 	{
-// 		UE_LOG(LogReadyPlayerMe, Log, TEXT("Fetched %d asset types"), AssetListResponse.Data.Num());
-// 		AssetTypes.Append(AssetListResponse.Data);
-// 		FAssetCacheManager::Get().StoreAssetTypes(AssetTypes);
-// 		StartFetchingRefittedAssets();
-// 		return;
-// 	}
-// 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch asset types"));
-// 	OnCacheDataLoaded.ExecuteIfBound(false);
-// }
-
 void FCacheGenerator::OnListAssetTypesComplete(TSharedPtr<FAssetTypeListResponse> AssetTypeListResponse, bool bWasSuccessful)
 {
 	if(bWasSuccessful && AssetTypeListResponse.IsValid() &&  AssetTypeListResponse->IsSuccess)
@@ -425,9 +411,4 @@ void FCacheGenerator::OnDownloadRemoteCacheComplete(TSharedPtr<IHttpRequest> Req
 	}
 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to download the remote cache"));
 	OnDownloadRemoteCacheDelegate.ExecuteIfBound(false);
-}
-
-void FCacheGenerator::ExtractCache()
-{
-	//FPakFileUtility::ExtractFilesFromPak( FRpmNextGenModule::GetGlobalAssetCachePath() / TEXT("/") / ZipFileName);
 }
