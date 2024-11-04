@@ -30,7 +30,6 @@ public:
 	
 	void DownloadRemoteCacheFromUrl(const FString& Url);
 	void GenerateLocalCache(int InItemsPerCategory);
-	void ExtractCache();
 	void LoadAndStoreAssets();
 	void LoadAndStoreAssetGlb(const FString& CharacterStyleId, const FRpmAsset* Asset);
 	void LoadAndStoreAssetIcon(const FString& CharacterStyleId, const FRpmAsset* Asset);
