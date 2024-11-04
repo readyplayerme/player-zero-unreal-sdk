@@ -63,7 +63,7 @@ void FWebApiWithAuth::SendAuthenticatedRequest(TSharedPtr<FApiRequest> ApiReques
     {
         if (WeakPtrThis.IsValid())
         {
-            if (!bWasSuccessful && StatusCode == 401)
+            if (StatusCode == 401)
             {
                 WeakPtrThis.Pin()->HandleFailedRequestWithRefresh<T>(ApiRequest, OnResponse, StatusCode);
             }
