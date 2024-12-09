@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #include "Samples/RpmCategoryPanelWidget.h"
 #include "RpmNextGen.h"

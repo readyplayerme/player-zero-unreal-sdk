@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #include "Samples/RpmAssetButtonWidget.h"
 #include "RpmTextureLoader.h"
@@ -27,7 +27,7 @@ void URpmAssetButtonWidget::NativeConstruct()
     }
 }
 
-void URpmAssetButtonWidget::InitializeButton(const FAsset& InAssetData, const FVector2D& InImageSize)
+void URpmAssetButtonWidget::InitializeButton(const FRpmAsset& InAssetData, const FVector2D& InImageSize)
 {    
     AssetData = InAssetData;
 

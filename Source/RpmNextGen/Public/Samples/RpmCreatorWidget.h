@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #pragma once
 
@@ -41,7 +41,7 @@ protected:
 	TMap<FString, int32> IndexMapByCategory;
 	
 	UFUNCTION()
-	void HandleAssetSelectedFromPanel(const FAsset& AssetData);
+	void HandleAssetSelectedFromPanel(const FRpmAsset& AssetData);
 	
 	virtual void SynchronizeProperties() override;
 

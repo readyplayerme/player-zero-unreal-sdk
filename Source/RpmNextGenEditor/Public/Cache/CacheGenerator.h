@@ -2,12 +2,14 @@
 #include "Api/Assets/Models/AssetListResponse.h"
 #include "Api/Assets/Models/AssetListRequest.h"
 
+class FAssetGlbLoader;
+class FAssetIconLoader;
 class FTaskManager;
 struct FCachedAssetData;
 class FAssetSaver;
 struct FAssetTypeListResponse;
 class FAssetApi;
-struct FAsset;
+struct FRpmAsset;
 class IHttpResponse;
 class IHttpRequest;
 class FHttpModule;
@@ -28,23 +30,22 @@ public:
 	
 	void DownloadRemoteCacheFromUrl(const FString& Url);
 	void GenerateLocalCache(int InItemsPerCategory);
-	void ExtractCache();
 	void LoadAndStoreAssets();
-	void LoadAndStoreAssetGlb(const FString& CharacterStyleId, const FAsset* Asset);
-	void LoadAndStoreAssetIcon(const FString& CharacterStyleId, const FAsset* Asset);
+	void LoadAndStoreAssetGlb(const FString& CharacterStyleId, const FRpmAsset* Asset);
+	void LoadAndStoreAssetIcon(const FString& CharacterStyleId, const FRpmAsset* Asset);
 	void Reset();
 
 protected:
-	TUniquePtr<FAssetApi> AssetApi;
+	TSharedPtr<FAssetApi> AssetApi;
 	TArray<FString> AssetTypes;
-	TMap<FString, TArray<FAsset>> AssetMapByCharacterStyleId;
+	TMap<FString, TArray<FRpmAsset>> AssetMapByCharacterStyleId;
 	TArray<TSharedPtr<FAssetListRequest>> AssetListRequests;
 	int32 CurrentCharacterStyleIndex;
 	
 	UFUNCTION()
-	void OnAssetGlbSaved(const FAsset& Asset, const TArray<uint8>& Data);
+	void OnAssetGlbSaved(const FRpmAsset& Asset, const TArray<uint8>& Data);
 	UFUNCTION()
-	void OnAssetIconSaved(const FAsset& Asset, const TArray<uint8>& Data);
+	void OnAssetIconSaved(const FRpmAsset& Asset, const TArray<uint8>& Data);
 
 	void AddFolderToNonAssetDirectory() const;
 	void FetchStyleAssets();
@@ -55,7 +56,8 @@ protected:
 	
 private:
 	static const FString ZipFileName;
-
+	TArray<TSharedPtr<FAssetGlbLoader>> ActiveGlbLoaders;
+	TArray<TSharedPtr<FAssetIconLoader>> ActiveIconLoaders;
 	FHttpModule* Http;
 	
 	int MaxItemsPerCategory;

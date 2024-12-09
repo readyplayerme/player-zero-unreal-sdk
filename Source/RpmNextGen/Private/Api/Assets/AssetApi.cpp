@@ -104,7 +104,7 @@ void FAssetApi::LoadAssetsFromCache(TMap<FString, FString> QueryParams, FOnListA
 		TSharedPtr<FAssetListResponse> AssetListResponse = MakeShared<FAssetListResponse>();
 		for (const FCachedAssetData& CachedAsset : CachedAssets)
 		{
-			FAsset Asset = CachedAsset.ToAsset();
+			FRpmAsset Asset = CachedAsset.ToAsset();
 			AssetListResponse->Data.Add(Asset);
 		}
 		OnComplete.ExecuteIfBound(AssetListResponse, true);

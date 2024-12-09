@@ -20,11 +20,17 @@ const FString FCacheGenerator::ZipFileName = TEXT("CacheAssets.pak");
 FCacheGenerator::FCacheGenerator() : CurrentCharacterStyleIndex(0), MaxItemsPerCategory(10)
 {
 	Http = &FHttpModule::Get();
-	AssetApi = MakeUnique<FAssetApi>(EApiRequestStrategy::ApiOnly);
+	AssetApi = MakeShared<FAssetApi>(EApiRequestStrategy::ApiOnly);
 }
 
 FCacheGenerator::~FCacheGenerator()
 {
+	if(AssetApi.IsValid())
+	{
+		AssetApi->CancelAllRequests();
+	}
+	ActiveGlbLoaders.Empty();
+	ActiveIconLoaders.Empty();
 }
 
 void FCacheGenerator::DownloadRemoteCacheFromUrl(const FString& Url)
@@ -45,7 +51,7 @@ void FCacheGenerator::GenerateLocalCache(int InItemsPerCategory)
 
 void FCacheGenerator::LoadAndStoreAssets()
 {
-	TArray<FAsset> CharacterStyleAssets = TArray<FAsset>();
+	TArray<FRpmAsset> CharacterStyleAssets = TArray<FRpmAsset>();
 	int TotalRefittedAssets = 0;
 	
 	// Ensure AssetMapByCharacterStyleId contains valid data
@@ -119,7 +125,7 @@ void FCacheGenerator::LoadAndStoreAssets()
 	}
 }
 
-void FCacheGenerator::LoadAndStoreAssetGlb(const FString& CharacterStyleId, const FAsset* Asset)
+void FCacheGenerator::LoadAndStoreAssetGlb(const FString& CharacterStyleId, const FRpmAsset* Asset)
 {
 	if (!Asset) // Ensure asset is valid
 	{
@@ -128,11 +134,20 @@ void FCacheGenerator::LoadAndStoreAssetGlb(const FString& CharacterStyleId, cons
 	}
 
 	TSharedPtr<FAssetGlbLoader> AssetLoader = MakeShared<FAssetGlbLoader>();
-	AssetLoader->OnGlbLoaded.BindRaw(this, &FCacheGenerator::OnAssetGlbSaved);
+	ActiveGlbLoaders.Add(AssetLoader);
+	TWeakPtr<FCacheGenerator> WeakPtrThis = AsShared();
+	AssetLoader->OnGlbLoaded.BindLambda([this, AssetLoader, WeakPtrThis](const FRpmAsset& LoadedAsset, const TArray<uint8>& Data)
+	{		
+		if(WeakPtrThis.IsValid())
+		{
+			ActiveGlbLoaders.Remove(AssetLoader);
+			WeakPtrThis.Pin()->OnAssetGlbSaved(LoadedAsset, Data);
+		}
+	});
 	AssetLoader->LoadGlb(*Asset, CharacterStyleId, true);
 }
 
-void FCacheGenerator::LoadAndStoreAssetIcon(const FString& CharacterStyleId, const FAsset* Asset)
+void FCacheGenerator::LoadAndStoreAssetIcon(const FString& CharacterStyleId, const FRpmAsset* Asset)
 {
 	if (!Asset) // Ensure asset is valid
 	{
@@ -140,7 +155,16 @@ void FCacheGenerator::LoadAndStoreAssetIcon(const FString& CharacterStyleId, con
 		return;
 	}
 	TSharedPtr<FAssetIconLoader> AssetLoader = MakeShared<FAssetIconLoader>();
-	AssetLoader->OnIconLoaded.BindRaw( this, &FCacheGenerator::OnAssetIconSaved);
+	ActiveIconLoaders.Add(AssetLoader);
+	TWeakPtr<FCacheGenerator> WeakPtrThis = AsShared();
+	AssetLoader->OnIconLoaded.BindLambda([this, AssetLoader, WeakPtrThis](const FRpmAsset& LoadedAsset, const TArray<uint8>& Data)
+	{		
+		if(WeakPtrThis.IsValid())
+		{
+			ActiveIconLoaders.Remove(AssetLoader);
+			WeakPtrThis.Pin()->OnAssetGlbSaved(LoadedAsset, Data);
+		}
+	});
 	AssetLoader->LoadIcon(*Asset, true);
 }
 
@@ -156,7 +180,7 @@ void FCacheGenerator::Reset()
 	FAssetCacheManager::Get().ClearAllCache();
 }
 
-void FCacheGenerator::OnAssetGlbSaved(const FAsset& Asset, const TArray<uint8>& Data)
+void FCacheGenerator::OnAssetGlbSaved(const FRpmAsset& Asset, const TArray<uint8>& Data)
 {
 	NumberOfAssetsSaved++;
 	if(NumberOfAssetsSaved >= RequiredAssetDownloadRequest)
@@ -168,7 +192,7 @@ void FCacheGenerator::OnAssetGlbSaved(const FAsset& Asset, const TArray<uint8>& 
 	}
 }
 
-void FCacheGenerator::OnAssetIconSaved(const FAsset& Asset, const TArray<uint8>& Data)
+void FCacheGenerator::OnAssetIconSaved(const FRpmAsset& Asset, const TArray<uint8>& Data)
 {
 	NumberOfAssetsSaved++;
 	if(NumberOfAssetsSaved >= RequiredAssetDownloadRequest)
@@ -202,7 +226,7 @@ void FCacheGenerator::AddFolderToNonAssetDirectory() const
 			return;
 		}
 	}
-
+	
 	// Add the folder to the config
 	GConfig->SetString(*SectionName, *KeyName, *FolderToAdd, ConfigFilePath);
 
@@ -218,7 +242,7 @@ void FCacheGenerator::OnListCharacterStylesComplete(TSharedPtr<FAssetListRespons
 	{
 		for ( auto CharacterStyle : AssetListResponse->Data)
 		{
-			TArray<FAsset> AssetList = TArray<FAsset>();
+			TArray<FRpmAsset> AssetList = TArray<FRpmAsset>();
 			AssetList.Add(CharacterStyle);
 			AssetMapByCharacterStyleId.Add(CharacterStyle.Id, AssetList);
 		}
@@ -341,23 +365,9 @@ void FCacheGenerator::FetchNextRefittedAsset()
 	}));
 }
 
-// void FCacheGenerator::OnListAssetTypesResponse(const FAssetTypeListResponse& AssetListResponse, bool bWasSuccessful)
-// {
-// 	if(bWasSuccessful && AssetListResponse.IsSuccess)
-// 	{
-// 		UE_LOG(LogReadyPlayerMe, Log, TEXT("Fetched %d asset types"), AssetListResponse.Data.Num());
-// 		AssetTypes.Append(AssetListResponse.Data);
-// 		FAssetCacheManager::Get().StoreAssetTypes(AssetTypes);
-// 		StartFetchingRefittedAssets();
-// 		return;
-// 	}
-// 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch asset types"));
-// 	OnCacheDataLoaded.ExecuteIfBound(false);
-// }
-
 void FCacheGenerator::OnListAssetTypesComplete(TSharedPtr<FAssetTypeListResponse> AssetTypeListResponse, bool bWasSuccessful)
 {
-	if(bWasSuccessful && AssetTypeListResponse->IsSuccess)
+	if(bWasSuccessful && AssetTypeListResponse.IsValid() &&  AssetTypeListResponse->IsSuccess)
 	{
 		UE_LOG(LogReadyPlayerMe, Log, TEXT("Fetched %d asset types"), AssetTypeListResponse->Data.Num());
 		AssetTypes.Append(AssetTypeListResponse->Data);
@@ -401,9 +411,4 @@ void FCacheGenerator::OnDownloadRemoteCacheComplete(TSharedPtr<IHttpRequest> Req
 	}
 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to download the remote cache"));
 	OnDownloadRemoteCacheDelegate.ExecuteIfBound(false);
-}
-
-void FCacheGenerator::ExtractCache()
-{
-	//FPakFileUtility::ExtractFilesFromPak( FRpmNextGenModule::GetGlobalAssetCachePath() / TEXT("/") / ZipFileName);
 }

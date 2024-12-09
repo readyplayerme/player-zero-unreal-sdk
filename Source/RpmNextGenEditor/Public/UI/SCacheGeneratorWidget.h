@@ -18,7 +18,6 @@ private:
 	FString CacheUrl;
 	TSharedPtr<FCacheGenerator> CacheGenerator;
 	
-	// Callback functions for your buttons
 	FReply OnGenerateOfflineCacheClicked();
 	FReply OnExtractCacheClicked();
 	FReply OnOpenLocalCacheFolderClicked();

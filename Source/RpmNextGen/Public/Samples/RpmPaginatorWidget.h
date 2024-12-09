@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #pragma once
 
@@ -38,9 +38,9 @@ public:
 	void OnNextButtonClicked();
 
 protected:
-	
 	virtual void NativeConstruct() override;
-	
+
+	void UpdatePageText();
 private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* PreviousButton;
@@ -51,5 +51,6 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* PageText;
 
-	FText GetPageCountText(const FPagination& Pagination);
+	int32 TotalPages = 10;
+	int32 CurrentPage = 1;
 };

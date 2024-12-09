@@ -1,8 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Blueprint/UserWidget.h"
 #include "RpmAssetButtonWidget.generated.h"
 
@@ -36,12 +36,12 @@ public:
 	FLinearColor SelectedColor = FLinearColor::Yellow;
 
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me|Asset Button")
-	virtual void InitializeButton(const FAsset& InAssetData, const FVector2D& InImageSize);
+	virtual void InitializeButton(const FRpmAsset& InAssetData, const FVector2D& InImageSize);
 
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me|Asset Button")
 	virtual void SetSelected(const bool bInIsSelected);
 
-	FAsset GetAssetData() const { return AssetData; }
+	FRpmAsset GetAssetData() const { return AssetData; }
 	
 protected:
 	UFUNCTION()
@@ -52,7 +52,7 @@ protected:
 private:
 	TSharedPtr<FRpmTextureLoader> TextureLoader;
 	FLinearColor DefaultColor;
-	FAsset AssetData;
+	FRpmAsset AssetData;
 	bool bIsSelected;
 	
 	UFUNCTION()

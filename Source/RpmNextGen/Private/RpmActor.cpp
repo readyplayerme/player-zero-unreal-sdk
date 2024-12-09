@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright Ready Player Me
 
 #include "RpmActor.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -31,10 +30,10 @@ void ARpmActor::LoadCharacter(const FRpmCharacterData& InCharacterData, UglTFRun
 		SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
 		SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
 	}
-	LoadAsset(FAsset(), GltfAsset);
+	LoadAsset(FRpmAsset(), GltfAsset);
 }
 
-void ARpmActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset)
+void ARpmActor::LoadAsset(const FRpmAsset& Asset, UglTFRuntimeAsset* GltfAsset)
 {
 	if (!GltfAsset)
 	{
@@ -83,7 +82,7 @@ void ARpmActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset)
 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to load mesh components"));
 }
 
-void ARpmActor::LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FAsset& Asset, const FRpmAnimationConfig& InAnimationCharacter)
+void ARpmActor::LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FRpmAsset& Asset, const FRpmAnimationConfig& InAnimationCharacter)
 {
 	AnimationConfig = InAnimationCharacter;
 	SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
@@ -119,7 +118,7 @@ void ARpmActor::RemoveMeshComponentsOfType(const FString& AssetType)
 	}
 }
 
-void ARpmActor::RemoveAssetOfType(const FAsset& Asset)
+void ARpmActor::RemoveAssetOfType(const FRpmAsset& Asset)
 {
 	CharacterData.Assets.Remove(Asset.Type);
 	RemoveMeshComponentsOfType(Asset.Type);

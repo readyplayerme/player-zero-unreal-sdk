@@ -17,7 +17,7 @@ FEditorAssetLoader::~FEditorAssetLoader()
 {
 }
 
-void FEditorAssetLoader::HandleGlbLoaded(const FAsset& Asset, const TArray<unsigned char>& Data)
+void FEditorAssetLoader::HandleGlbLoaded(const FRpmAsset& Asset, const TArray<unsigned char>& Data)
 {
 	UglTFRuntimeAsset* GltfAsset = nullptr;
 	if (!Data.IsEmpty())
@@ -70,7 +70,7 @@ USkeletalMesh* FEditorAssetLoader::SaveAsUAsset(UglTFRuntimeAsset* GltfAsset, co
 	return SkeletalMesh;
 }
 
-void FEditorAssetLoader::LoadBCharacterStyleAsset(const FAsset& Asset)
+void FEditorAssetLoader::LoadBCharacterStyleAsset(const FRpmAsset& Asset)
 {
 	LoadGlb(Asset, Asset.Id, false);
 }
@@ -121,7 +121,7 @@ void FEditorAssetLoader::LoadAssetToWorld(const FString& AssetId, UglTFRuntimeAs
 			GEditor->EditorUpdateComponents();
 			if (GltfAsset)
 			{
-				NewActor->LoadAsset(FAsset(), GltfAsset);
+				NewActor->LoadAsset(FRpmAsset(), GltfAsset);
 			}
 			UE_LOG(LogReadyPlayerMe, Log, TEXT("Successfully loaded GLB asset into the editor world"));
 			return;

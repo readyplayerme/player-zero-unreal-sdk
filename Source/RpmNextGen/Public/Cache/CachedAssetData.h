@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Api/Files/FileUtility.h"
 #include "CachedAssetData.generated.h"
 
@@ -49,7 +49,7 @@ struct RPMNEXTGEN_API FCachedAssetData
 		CreatedAt = FDateTime();
 		UpdatedAt = FDateTime();
 	}
-	FCachedAssetData(const FAsset& InAsset)
+	FCachedAssetData(const FRpmAsset& InAsset)
 	{
 		Id = InAsset.Id;
 		Name = InAsset.Name;
@@ -62,7 +62,7 @@ struct RPMNEXTGEN_API FCachedAssetData
 		UpdatedAt = InAsset.UpdatedAt;
 	}
 
-	FCachedAssetData(const FAsset& InAsset, const FString& InCharacterStyleId)
+	FCachedAssetData(const FRpmAsset& InAsset, const FString& InCharacterStyleId)
 	{
 		Id = InAsset.Id;
 		Name = InAsset.Name;
@@ -93,9 +93,9 @@ struct RPMNEXTGEN_API FCachedAssetData
 		return Valid;
 	}
 
-	FAsset ToAsset() const
+	FRpmAsset ToAsset() const
 	{
-		FAsset Asset;
+		FRpmAsset Asset;
 		Asset.Id = Id;
 		Asset.Name = Name;
 		Asset.GlbUrl = GlbUrl;

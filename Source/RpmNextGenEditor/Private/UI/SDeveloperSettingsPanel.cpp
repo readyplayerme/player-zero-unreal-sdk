@@ -1,11 +1,10 @@
-﻿#include "SDeveloperSettingsPanel.h"
+﻿#include "UI/SDeveloperSettingsPanel.h"
 #include "EditorAssetLoader.h"
 #include "RpmNextGen.h"
 #include "RpmTextureLoader.h"
-#include "SDeveloperLoginPanel.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Api/Assets/AssetApi.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Api/Assets/Models/AssetListRequest.h"
 #include "Api/Assets/Models/AssetListResponse.h"
 #include "Auth/DevAuthTokenCache.h"
@@ -126,7 +125,7 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
 	if (!AssetApi.IsValid())
 	{
-		CharacterStyleAssets = TMap<FString, FAsset>();
+		CharacterStyleAssets = TMap<FString, FRpmAsset>();
 		ActiveLoaders = TArray<TSharedPtr<FRpmTextureLoader>>();
 		AssetApi = MakeShared<FAssetApi>();
 	}
@@ -134,19 +133,10 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 	{
 		AssetApi->CancelAllRequests();
 	}
-	if (!DevAuthData.IsDemo)
-	{
-		AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
-	}
-	else
-	{
-		AssetApi->SetAuthenticationStrategy(nullptr);
-	}
 
 	if(!DeveloperAccountApi.IsValid())
 	{
 		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>();
-
 	}
 	else
 	{
@@ -154,11 +144,17 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 	}
 	if(!DevAuthData.IsDemo)
 	{
+		AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
 		DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
+		UE_LOG(LogReadyPlayerMe, Log, TEXT("Setting up API's with token (FDeveloperTokenAuthStrategy)") );
+
 	}
 	else
 	{
 		DeveloperAccountApi->SetAuthenticationStrategy(nullptr);
+		AssetApi->SetAuthenticationStrategy(nullptr);
+		UE_LOG(LogReadyPlayerMe, Log, TEXT("Setting up API's with NULL strategy") );
+
 	}
 
 	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
@@ -202,7 +198,7 @@ void SDeveloperSettingsPanel::PopulateSettingsContent(TArray<FApplication> InApp
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
 	if (!AssetApi.IsValid())
 	{
-		CharacterStyleAssets = TMap<FString, FAsset>();
+		CharacterStyleAssets = TMap<FString, FRpmAsset>();
 		ActiveLoaders = TArray<TSharedPtr<FRpmTextureLoader>>();
 		AssetApi = MakeShared<FAssetApi>();
 		if (!DevAuthData.IsDemo)
@@ -267,7 +263,7 @@ void SDeveloperSettingsPanel::LoadCharacterStyleList()
 	}));
 }
 
-void SDeveloperSettingsPanel::AddCharacterStyle(const FAsset& Asset)
+void SDeveloperSettingsPanel::AddCharacterStyle(const FRpmAsset& Asset)
 {
 	TSharedPtr<SImage> ImageWidget;
 	const FVector2D ImageSize(100.0f, 100.0f);
@@ -329,7 +325,7 @@ void SDeveloperSettingsPanel::AddCharacterStyle(const FAsset& Asset)
 	ImageLoader->LoadIconFromAsset(Asset);
 }
 
-void SDeveloperSettingsPanel::OnLoadCharacterStyleClicked(const FAsset& Asset)
+void SDeveloperSettingsPanel::OnLoadCharacterStyleClicked(const FRpmAsset& Asset)
 {
 	AssetLoader = MakeShared<FEditorAssetLoader>();
 	AssetLoader->LoadBCharacterStyleAsset(Asset);
@@ -357,7 +353,7 @@ void SDeveloperSettingsPanel::HandleCharacterStyleListResponse(TSharedPtr<FAsset
 			UpdateErrorMessage("No Avatar styles found. Make sure you have uploaded your character models to Ready Player Me Studio");
 			return;
 		}
-		for (FAsset Asset : Response->Data)
+		for (FRpmAsset Asset : Response->Data)
 		{
 			CharacterStyleAssets.Add(Asset.Id, Asset);
 			AddCharacterStyle(Asset);

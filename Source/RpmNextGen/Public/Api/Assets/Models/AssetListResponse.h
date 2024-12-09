@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Api/Common/Models/ApiResponse.h"
 #include "Api/Common/Models/Pagination.h"
 #include "AssetListResponse.generated.h"
@@ -12,7 +12,7 @@ struct RPMNEXTGEN_API FAssetListResponse : public FApiResponse
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me", meta = (JsonName = "data"))
-	TArray<FAsset> Data;
+	TArray<FRpmAsset> Data;
 
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me", meta = (JsonName = "pagination") )
 	FPagination Pagination;

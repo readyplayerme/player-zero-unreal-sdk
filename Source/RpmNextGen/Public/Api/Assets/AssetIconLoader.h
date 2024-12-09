@@ -2,25 +2,25 @@
 
 #include "CoreMinimal.h"
 #include "Api/Common/WebApi.h"
-#include "Models/Asset.h"
+#include "Models/RpmAsset.h"
 
 struct FAssetLoadingContext;
 struct FCachedAssetData;
 class IHttpResponse;
 class FHttpModule;
-struct FAsset;
+struct FRpmAsset;
 
 class RPMNEXTGEN_API FAssetIconLoader : public FWebApi
 {
 public:
-	DECLARE_DELEGATE_TwoParams(FOnIconLoaded, const FAsset&, const TArray<uint8>&);
+	DECLARE_DELEGATE_TwoParams(FOnIconLoaded, const FRpmAsset&, const TArray<uint8>&);
 	
 	FOnIconLoaded OnIconLoaded;
 	
 	FAssetIconLoader();
 	virtual ~FAssetIconLoader();
 	
-	void LoadIcon(const FAsset& Asset, bool bStoreInCache);
+	void LoadIcon(const FRpmAsset& Asset, bool bStoreInCache);
 
 private:
 	FHttpModule* Http;

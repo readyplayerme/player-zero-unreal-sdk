@@ -1,4 +1,4 @@
-﻿#include "SDeveloperLoginPanel.h"
+﻿#include "UI/SDeveloperLoginPanel.h"
 
 #include "EditorCache.h"
 #include "Auth/DevAuthTokenCache.h"
@@ -122,7 +122,6 @@ FReply SDeveloperLoginPanel::OnLoginClicked()
 	FEditorCache::SetString(CacheKeyEmail, Email);
 	Email = Email.TrimStartAndEnd();
 	Password = Password.TrimStartAndEnd();
-	
 	const TSharedPtr<FDeveloperLoginRequest> LoginRequest = MakeShared<FDeveloperLoginRequest>(Email, Password);
 	TWeakPtr<SDeveloperLoginPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperLoginPanel>(AsShared());
 	DeveloperAuthApi->LoginWithEmail(LoginRequest, FOnDeveloperLoginResponse::CreateLambda([WeakPtrThis]( TSharedPtr<FDeveloperLoginResponse> Response, bool bWasSuccessful)

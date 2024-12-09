@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #pragma once
 
@@ -61,7 +61,7 @@ public:
 	 * @param GltfAsset The glTF runtime asset to load the mesh from.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset);
+	virtual void LoadAsset(const FRpmAsset& Asset, UglTFRuntimeAsset* GltfAsset);
 
 	/**
 	 * @brief Loads a glTF asset and applies a skeleton configuration to the actor.
@@ -73,7 +73,7 @@ public:
 	 * @param InAnimationCharacter The animation configuration for the character.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FAsset& Asset, const FRpmAnimationConfig& InAnimationCharacter);
+	virtual void LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FRpmAsset& Asset, const FRpmAnimationConfig& InAnimationCharacter);
 
 	/**
 	 * @brief Removes all mesh components attached to the actor.
@@ -94,7 +94,7 @@ public:
 	void RemoveMeshComponentsOfType(const FString& AssetType);
 
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	void RemoveAssetOfType(const FAsset& Asset );
+	void RemoveAssetOfType(const FRpmAsset& Asset );
 
 protected:
 	/** Weak reference to the master pose component, used for synchronizing skeletal animations. */

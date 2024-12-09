@@ -8,13 +8,23 @@ FDeveloperTokenAuthStrategy::FDeveloperTokenAuthStrategy()
 {
 }
 
-FDeveloperTokenAuthStrategy::FDeveloperTokenAuthStrategy(const FString& InApiKey) : FApiKeyAuthStrategy(InApiKey)
-{
-}
-
 FDeveloperTokenAuthStrategy::~FDeveloperTokenAuthStrategy()
 {
 	CancelAllRequests();
+}
+
+void FDeveloperTokenAuthStrategy::AddAuthToRequest(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, bool)> OnAuthenticationComplete)
+{
+	FDeveloperAuth DeveloperAuth = FDevAuthTokenCache::GetAuthData();
+	if (DeveloperAuth.Token.IsEmpty())
+	{
+		UE_LOG(LogReadyPlayerMe, Error, TEXT("Developer Token not set!"));
+		OnAuthenticationComplete(ApiRequest, false);
+		return;
+	}
+	ApiRequest->Headers.Add(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *DeveloperAuth.Token));
+
+	OnAuthenticationComplete(ApiRequest, true);
 }
 
 void FDeveloperTokenAuthStrategy::TryRefresh(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, const FRefreshTokenResponse&, bool)> OnTokenRefreshed)

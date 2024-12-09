@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 
 #include "Samples/RpmAssetPanelWidget.h"
@@ -39,7 +39,7 @@ void URpmAssetPanelWidget::LoadAssetsFromCache(const FString& AssetType)
 	}
 }
 
-void URpmAssetPanelWidget::CreateButtonsFromAssets(TArray<FAsset> Assets)
+void URpmAssetPanelWidget::CreateButtonsFromAssets(TArray<FRpmAsset> Assets)
 {
 	if(Assets.Num() < 1)
 	{
@@ -81,7 +81,7 @@ void URpmAssetPanelWidget::UpdateSelectedButton(URpmAssetButtonWidget* AssetButt
 	SelectedAssetButton = AssetButton;
 }
 
-void URpmAssetPanelWidget::CreateButton(const FAsset& AssetData)
+void URpmAssetPanelWidget::CreateButton(const FRpmAsset& AssetData)
 {
 	if (AssetButtonBlueprint)
 	{
@@ -148,6 +148,7 @@ void URpmAssetPanelWidget::LoadNextPage()
 		return;
 	}
 	ClearAllButtons();
+	AssetApi->CancelAllRequests();
 	Pagination.Page++;
 	LoadAssetsOfType(CurrentAssetType);
 }

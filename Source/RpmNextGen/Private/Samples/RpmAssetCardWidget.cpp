@@ -1,8 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #include "Samples/RpmAssetCardWidget.h"
 #include "RpmTextureLoader.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Utilities/RpmImageHelper.h"
@@ -18,7 +18,7 @@ void URpmAssetCardWidget::NativeConstruct()
 	}
 }
 
-void URpmAssetCardWidget::InitializeCard(const FAsset& Asset)
+void URpmAssetCardWidget::InitializeCard(const FRpmAsset& Asset)
 {
 	this->SetVisibility(ESlateVisibility::Visible);
 	AssetData = Asset;
@@ -31,7 +31,7 @@ void URpmAssetCardWidget::InitializeCard(const FAsset& Asset)
 	LoadImage(AssetData);
 }
 
-void URpmAssetCardWidget::LoadImage(const FAsset& Asset)
+void URpmAssetCardWidget::LoadImage(const FRpmAsset& Asset)
 {
 	AssetData = Asset;
 	TextureLoader->LoadIconFromAsset(AssetData);

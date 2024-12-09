@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #include "Samples/RpmCreatorWidget.h"
 
@@ -60,7 +60,7 @@ void URpmCreatorWidget::SynchronizeProperties()
 	Super::SynchronizeProperties();
 }
 
-void URpmCreatorWidget::HandleAssetSelectedFromPanel(const FAsset& AssetData)
+void URpmCreatorWidget::HandleAssetSelectedFromPanel(const FRpmAsset& AssetData)
 {
 	OnAssetSelected.Broadcast(AssetData);
 }

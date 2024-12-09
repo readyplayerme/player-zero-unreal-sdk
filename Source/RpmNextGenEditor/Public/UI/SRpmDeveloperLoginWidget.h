@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #pragma once
 
@@ -30,7 +30,6 @@ public:
 	
 private:
 	void HandleLogin(const FString& String);
-	void HandleApplicationList(const FApplicationListResponse& ApplicationListResponse);
 	void HandleLogout();
 	TSharedPtr<SDeveloperLoginPanel> LoginPanel;
 	TSharedPtr<SDeveloperSettingsPanel> SettingsPanel;

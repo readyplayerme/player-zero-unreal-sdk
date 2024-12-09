@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 
 #include "Samples/RpmPaginatorWidget.h"
@@ -22,12 +22,19 @@ void URpmPaginatorWidget::NativeConstruct()
 	UpdateState(FPagination());
 }
 
-void URpmPaginatorWidget::UpdateState(const FPagination& Pagination)
-{	
+void URpmPaginatorWidget::UpdatePageText()
+{
 	if (PageText)
 	{
-		PageText->SetText(GetPageCountText(Pagination));
+		PageText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), CurrentPage, TotalPages)));
 	}
+}
+
+void URpmPaginatorWidget::UpdateState(const FPagination& Pagination)
+{
+	TotalPages = Pagination.TotalPages;
+	CurrentPage = Pagination.Page;
+	UpdatePageText();
 
 	if (PreviousButton)
 	{
@@ -40,17 +47,26 @@ void URpmPaginatorWidget::UpdateState(const FPagination& Pagination)
 	}
 }
 
-FText URpmPaginatorWidget::GetPageCountText(const FPagination& Pagination)
-{
-	return FText::FromString(FString::Printf(TEXT("%d / %d"), Pagination.Page, Pagination.TotalPages));
-}
-
 void URpmPaginatorWidget::OnPrevButtonClicked()
 {
+	PreviousButton->SetIsEnabled(false);
+	NextButton->SetIsEnabled(false);
+	if(CurrentPage > 1)
+	{
+		CurrentPage--;
+		UpdatePageText();
+	}
 	OnPreviousButtonEvent.Broadcast();
 }
 
 void URpmPaginatorWidget::OnNextButtonClicked()
 {
+	PreviousButton->SetIsEnabled(false);
+	NextButton->SetIsEnabled(false);
+	if(CurrentPage < TotalPages)
+	{
+		CurrentPage++;
+		UpdatePageText();
+	}
 	OnNextButtonEvent.Broadcast();
 }

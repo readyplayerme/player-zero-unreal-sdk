@@ -1,10 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Asset.generated.h"
+#include "RpmAsset.generated.h"
 
 USTRUCT(BlueprintType)
-struct RPMNEXTGEN_API FAsset
+struct RPMNEXTGEN_API FRpmAsset
 {
 	GENERATED_BODY()
 
@@ -29,7 +29,7 @@ struct RPMNEXTGEN_API FAsset
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me", meta = (JsonName = "updatedAt"))
 	FDateTime UpdatedAt;
 
-	FAsset()
+	FRpmAsset()
 	{
 		Id = "";
 		Name = "";

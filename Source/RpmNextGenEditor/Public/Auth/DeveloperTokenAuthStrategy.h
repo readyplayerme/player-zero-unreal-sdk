@@ -7,13 +7,12 @@
 
 struct FRefreshTokenResponse;
 
-class RPMNEXTGENEDITOR_API FDeveloperTokenAuthStrategy : public FApiKeyAuthStrategy, public FAuthApi
+class RPMNEXTGENEDITOR_API FDeveloperTokenAuthStrategy : public IAuthenticationStrategy, public FAuthApi
 {
 public:
 	FDeveloperTokenAuthStrategy();
-	FDeveloperTokenAuthStrategy(const FString& InApiKey);
-	~FDeveloperTokenAuthStrategy();
-
+	virtual ~FDeveloperTokenAuthStrategy() override;
+	virtual void AddAuthToRequest(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, bool)> OnAuthenticationComplete) override;
 	virtual void TryRefresh(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, const FRefreshTokenResponse&, bool)> OnTokenRefreshed) override;
 	
 private:

@@ -1,10 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "glTFRuntimeAsset.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Api/Characters/Models/RpmCharacter.h"
 #include "Components/ActorComponent.h"
 #include "RpmCharacterTypes.h"
@@ -17,14 +17,14 @@ struct FCharacterCreateResponse;
 struct FCharacterUpdateResponse;
 struct FCharacterFindByIdResponse;
 class FCharacterApi;
-struct FAsset;
+struct FRpmAsset;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterCreated, FRpmCharacterData, CharacterData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterUpdated, FRpmCharacterData, CharacterData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterFound, FRpmCharacterData, CharacterData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterAssetLoaded, const FRpmCharacterData&, CharacterData, UglTFRuntimeAsset*, GltfRuntimeAsset);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAssetLoaded, const FAsset&, Asset, UglTFRuntimeAsset*, GltfRuntimeAsset );
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssetRemoved, const FAsset&, Asset);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAssetLoaded, const FRpmAsset&, Asset, UglTFRuntimeAsset*, GltfRuntimeAsset );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssetRemoved, const FRpmAsset&, Asset);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RPMNEXTGEN_API URpmLoaderComponent : public UActorComponent
@@ -49,7 +49,7 @@ public:
 	
 	void SetGltfConfig(const FglTFRuntimeConfig* Config);
 
-	void HandleAssetLoaded(const TArray<uint8>& Data, const FAsset& Asset);
+	void HandleAssetLoaded(const TArray<uint8>& Data, const FRpmAsset& Asset);
 	void HandleCharacterAssetLoaded(const TArray<uint8>& Array, const FString& FileName);
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -76,13 +76,13 @@ protected:
 	virtual void LoadCharacterFromUrl(FString Url);
 	
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	void LoadGltfRuntimeAssetFromCache(const FAsset& Asset);
+	void LoadGltfRuntimeAssetFromCache(const FRpmAsset& Asset);
 
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void LoadCharacterAssetsFromCache(TMap<FString, FAsset> AssetMap);
+	virtual void LoadCharacterAssetsFromCache(TMap<FString, FRpmAsset> AssetMap);
 	
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void LoadAssetPreview(FAsset AssetData);
+	virtual void LoadAssetPreview(FRpmAsset AssetData);
 	
 	virtual void HandleCharacterCreateResponse(TSharedPtr<FCharacterCreateResponse> Response, bool bWasSuccessful);
 	virtual void HandleCharacterUpdateResponse(TSharedPtr<FCharacterUpdateResponse> CharacterUpdateResponse, bool bWasSuccessful);

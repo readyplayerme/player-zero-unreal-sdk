@@ -8,7 +8,7 @@ struct FOrganizationListResponse;
 struct FApplicationListResponse;
 class FEditorAssetLoader;
 class FRpmTextureLoader;
-struct FAsset;
+struct FRpmAsset;
 class FAssetApi;
 struct FAssetListResponse;
 struct FApplication;
@@ -36,16 +36,16 @@ private:
 	TArray<TSharedPtr<FString>> ComboBoxItems;
 	TSharedPtr<STextBlock> SelectedApplicationTextBlock;
 	TArray<UTexture2D*> CharacterStyleTextures;
-	TMap<FString, FAsset> CharacterStyleAssets;
+	TMap<FString, FRpmAsset> CharacterStyleAssets;
 	TArray<TSharedPtr<FRpmTextureLoader>> ActiveLoaders;
 	TSharedPtr<FEditorAssetLoader> AssetLoader;
 	FString UserName;
 
 	void UpdateErrorMessage(const FString& Message);
 	void PopulateSettingsContent(TArray<FApplication> InApplicationList);
-	void OnLoadCharacterStyleClicked(const FAsset& Asset);
+	void OnLoadCharacterStyleClicked(const FRpmAsset& Asset);
 	void OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> Image, TSharedPtr<FRpmTextureLoader> RpmTextureLoader);
-	void AddCharacterStyle(const FAsset& Asset);
+	void AddCharacterStyle(const FRpmAsset& Asset);
 	void HandleCharacterStyleListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful);
 	void HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful);
 	void HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful);

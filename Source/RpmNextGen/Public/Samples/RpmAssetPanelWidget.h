@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #pragma once
 
@@ -8,10 +8,10 @@
 #include "RpmAssetPanelWidget.generated.h"
 
 class FAssetApi;
-struct FAsset;
+struct FRpmAsset;
 class URpmAssetButtonWidget;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssetSelected, const FAsset&, AssetData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssetSelected, const FRpmAsset&, AssetData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPaginationUpdated, const FPagination&, Pagination);
 
 /**
@@ -47,7 +47,7 @@ public:
 	FPaginationUpdated OnPaginationUpdated;
 	
 	UFUNCTION(BlueprintCallable, Category = "Asset Panel")
-	void CreateButtonsFromAssets(TArray<FAsset> Assets);
+	void CreateButtonsFromAssets(TArray<FRpmAsset> Assets);
 
 	UFUNCTION(BlueprintCallable, Category = "Asset Panel")
 	void ClearAllButtons();
@@ -71,7 +71,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Asset Panel")
 	virtual void LoadPreviousPage();
 
-	void CreateButton(const FAsset& AssetData);
+	void CreateButton(const FRpmAsset& AssetData);
 
 	virtual void SynchronizeProperties() override;
 	virtual void NativeConstruct() override;
