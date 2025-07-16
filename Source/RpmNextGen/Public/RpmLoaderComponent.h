@@ -76,12 +76,6 @@ protected:
 	virtual void LoadCharacterFromUrl(FString Url);
 	
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	void LoadGltfRuntimeAssetFromCache(const FRpmAsset& Asset);
-
-	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void LoadCharacterAssetsFromCache(TMap<FString, FRpmAsset> AssetMap);
-	
-	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
 	virtual void LoadAssetPreview(FRpmAsset AssetData);
 	
 	virtual void HandleCharacterCreateResponse(TSharedPtr<FCharacterCreateResponse> Response, bool bWasSuccessful);
@@ -92,5 +86,4 @@ private:
 	TSharedPtr<FCharacterApi> CharacterApi;
 	TSharedPtr<FFileApi> FileApi;
 	TSharedPtr<FAssetApi> AssetApi;
-	void LoadAssetsFromCacheWithNewStyle();
 };

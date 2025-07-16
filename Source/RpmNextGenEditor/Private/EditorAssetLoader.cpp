@@ -72,7 +72,7 @@ USkeletalMesh* FEditorAssetLoader::SaveAsUAsset(UglTFRuntimeAsset* GltfAsset, co
 
 void FEditorAssetLoader::LoadBCharacterStyleAsset(const FRpmAsset& Asset)
 {
-	LoadGlb(Asset, Asset.Id, false);
+	LoadGlb(Asset, Asset.Id);
 }
 
 void FEditorAssetLoader::LoadAssetToWorldAsURpmActor(UglTFRuntimeAsset* GltfAsset, FString AssetId)
