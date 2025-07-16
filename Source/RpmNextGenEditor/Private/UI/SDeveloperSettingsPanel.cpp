@@ -3,7 +3,6 @@
 #include "RpmNextGen.h"
 #include "RpmTextureLoader.h"
 #include "Widgets/Input/SEditableTextBox.h"
-#include "Api/Assets/AssetApi.h"
 #include "Api/Assets/Models/RpmAsset.h"
 #include "Api/Assets/Models/AssetListRequest.h"
 #include "Api/Assets/Models/AssetListResponse.h"
@@ -11,10 +10,7 @@
 #include "Auth/DeveloperTokenAuthStrategy.h"
 #include "Auth/Models/DeveloperAuth.h"
 #include "DeveloperAccounts/DeveloperAccountApi.h"
-#include "DeveloperAccounts/Models/ApplicationListRequest.h"
 #include "DeveloperAccounts/Models/ApplicationListResponse.h"
-#include "DeveloperAccounts/Models/OrganizationListRequest.h"
-#include "DeveloperAccounts/Models/OrganizationListResponse.h"
 #include "Settings/RpmDeveloperSettings.h"
 #include "Utilities/RpmImageHelper.h"
 #include "Widgets/Text/STextBlock.h"
@@ -123,38 +119,19 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 	InUserName.IsEmpty() ? UserName = TEXT("User") : UserName = InUserName;
 	UpdateErrorMessage("");
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
-	if (!AssetApi.IsValid())
+	if (!BlueprintApi.IsValid())
 	{
-		CharacterStyleAssets = TMap<FString, FRpmAsset>();
-		ActiveLoaders = TArray<TSharedPtr<FRpmTextureLoader>>();
-		AssetApi = MakeShared<FAssetApi>();
+		BlueprintApi = MakeShared<FBlueprintApi>();
+
 	}
 	else
 	{
-		AssetApi->CancelAllRequests();
+		BlueprintApi->CancelAllRequests();
 	}
 
 	if(!DeveloperAccountApi.IsValid())
 	{
 		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>();
-	}
-	else
-	{
-		AssetApi->CancelAllRequests();
-	}
-	if(!DevAuthData.IsDemo)
-	{
-		AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
-		DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
-		UE_LOG(LogReadyPlayerMe, Log, TEXT("Setting up API's with token (FDeveloperTokenAuthStrategy)") );
-
-	}
-	else
-	{
-		DeveloperAccountApi->SetAuthenticationStrategy(nullptr);
-		AssetApi->SetAuthenticationStrategy(nullptr);
-		UE_LOG(LogReadyPlayerMe, Log, TEXT("Setting up API's with NULL strategy") );
-
 	}
 
 	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
@@ -163,16 +140,6 @@ void SDeveloperSettingsPanel::RunPanelSetup(const FString& InUserName)
 		UpdateErrorMessage("API Key and Proxy URL is not set. Please check your Ready Player Me Settings.");
 		return;
 	}
-	
-	const TSharedPtr<FOrganizationListRequest> OrgRequest = MakeShared<FOrganizationListRequest>();
-	TWeakPtr<SDeveloperSettingsPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperSettingsPanel>(AsShared());
-	DeveloperAccountApi->ListOrganizationsAsync(OrgRequest, FOnOrganizationListResponse::CreateLambda([WeakPtrThis]( TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
-	{
-		if(WeakPtrThis.IsValid())
-		{
-			WeakPtrThis.Pin()->HandleOrganizationListResponse(Response, bWasSuccessful);
-		}
-	}));
 }
 
 void SDeveloperSettingsPanel::UpdateErrorMessage(const FString& Message)
@@ -196,28 +163,7 @@ void SDeveloperSettingsPanel::PopulateSettingsContent(TArray<FApplication> InApp
 		return;
 	}
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
-	if (!AssetApi.IsValid())
-	{
-		CharacterStyleAssets = TMap<FString, FRpmAsset>();
-		ActiveLoaders = TArray<TSharedPtr<FRpmTextureLoader>>();
-		AssetApi = MakeShared<FAssetApi>();
-		if (!DevAuthData.IsDemo)
-		{
-			AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
-		}
-	}
-	else
-	{
-		AssetApi->CancelAllRequests();
-		if (!DevAuthData.IsDemo)
-		{
-			AssetApi->SetAuthenticationStrategy(MakeShared<FDeveloperTokenAuthStrategy>());
-		}
-		else
-		{
-			AssetApi->SetAuthenticationStrategy(nullptr);
-		}
-	}
+
 	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
 	ApplicationList = InApplicationList;
 	FString Active;
@@ -240,6 +186,11 @@ void SDeveloperSettingsPanel::PopulateSettingsContent(TArray<FApplication> InApp
 	LoadCharacterStyleList();
 }
 
+void SDeveloperSettingsPanel::HandleBlueprintListResponse(TSharedPtr<FBlueprintListResponse> Response,
+	bool bWasSuccessful)
+{
+}
+
 void SDeveloperSettingsPanel::LoadCharacterStyleList()
 {
 	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
@@ -251,19 +202,20 @@ void SDeveloperSettingsPanel::LoadCharacterStyleList()
 	TSharedPtr<FAssetListRequest> Request = MakeShared<FAssetListRequest>();
 	FAssetListQueryParams Params = FAssetListQueryParams();
 	Params.ApplicationId = RpmSettings->ApplicationId;
-	Params.Type = FAssetApi::CharacterStyleAssetType;
-	Request->Params = Params;
-	TWeakPtr<SDeveloperSettingsPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperSettingsPanel>(AsShared());
-	AssetApi->ListAssetsAsync(Request, FOnListAssetsResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
-	{
-		if(WeakPtrThis != nullptr && WeakPtrThis.IsValid())
-		{
-			WeakPtrThis.Pin()->HandleCharacterStyleListResponse(Response, bWasSuccessful);
-		}
-	}));
+	// TODO update or remove this function
+	// Params.Type = FAssetApi::CharacterStyleAssetType;
+	// Request->Params = Params;
+	// TWeakPtr<SDeveloperSettingsPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperSettingsPanel>(AsShared());
+	// AssetApi->ListAssetsAsync(Request, FOnListAssetsResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
+	// {
+	// 	if(WeakPtrThis != nullptr && WeakPtrThis.IsValid())
+	// 	{
+	// 		WeakPtrThis.Pin()->HandleCharacterStyleListResponse(Response, bWasSuccessful);
+	// 	}
+	// }));
 }
 
-void SDeveloperSettingsPanel::AddCharacterStyle(const FRpmAsset& Asset)
+void SDeveloperSettingsPanel::AddCharacterStyle(const FCharacterBlueprint& Blueprint)
 {
 	TSharedPtr<SImage> ImageWidget;
 	const FVector2D ImageSize(100.0f, 100.0f);
@@ -296,13 +248,13 @@ void SDeveloperSettingsPanel::AddCharacterStyle(const FRpmAsset& Asset)
 					.HAlign(HAlign_Center)
 					.VAlign(VAlign_Center)
 					.Text(FText::FromString("Import"))
-					.OnClicked_Lambda([this, Asset]() -> FReply
+					.OnClicked_Lambda([this, Blueprint]() -> FReply
 					{
-						OnLoadCharacterStyleClicked(Asset);
+						//TODO fix or cleanup
+						//OnLoadCharacterStyleClicked(Blueprint);
 						return FReply::Handled();
 					})
 				]
-
 			]
 		]
 		+ SHorizontalBox::Slot()
@@ -311,7 +263,7 @@ void SDeveloperSettingsPanel::AddCharacterStyle(const FRpmAsset& Asset)
 		  .Padding(10, 10, 0, 0)
 		[
 			SNew(SEditableText)
-			   .Text(FText::FromString(FString::Printf(TEXT("ID: %s"), *Asset.Id)))
+			   .Text(FText::FromString(FString::Printf(TEXT("ID: %s"), *Blueprint.Id)))
 			   .IsReadOnly(true)
 			   .IsCaretMovedWhenGainFocus(false)
 			   .SelectAllTextWhenFocused(false)
@@ -322,14 +274,14 @@ void SDeveloperSettingsPanel::AddCharacterStyle(const FRpmAsset& Asset)
 	TSharedPtr<FRpmTextureLoader> ImageLoader = MakeShared<FRpmTextureLoader>();
 	ActiveLoaders.Add(ImageLoader);
 	ImageLoader->OnTextureLoaded.BindRaw(this, &SDeveloperSettingsPanel::OnTextureLoaded, ImageWidget, ImageLoader);
-	ImageLoader->LoadIconFromAsset(Asset);
+	// TODO // Load the icon from the asset URL
+	//ImageLoader->LoadIconFromAsset(Blueprint);
 }
 
-void SDeveloperSettingsPanel::OnLoadCharacterStyleClicked(const FRpmAsset& Asset)
-{
-	AssetLoader = MakeShared<FEditorAssetLoader>();
-	AssetLoader->LoadBCharacterStyleAsset(Asset);
-}
+// void SDeveloperSettingsPanel::OnLoadCharacterStyleClicked(const FRpmAsset& Asset)
+// {
+//
+// }
 
 void SDeveloperSettingsPanel::OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> Image, TSharedPtr<FRpmTextureLoader> RpmTextureLoader)
 {
@@ -342,65 +294,44 @@ void SDeveloperSettingsPanel::OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<
 	ActiveLoaders.Remove(RpmTextureLoader);
 }
 
-void SDeveloperSettingsPanel::HandleCharacterStyleListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful)
-{
-	CharacterStyleAssets.Empty();
-	if(bWasSuccessful && Response.IsValid())
-	{
-		if(Response->Data.Num() == 0)
-		{
-			UE_LOG(LogReadyPlayerMe, Error, TEXT("No Avatar styles found. Make sure you have uploaded your character models to Ready Player Me Studio"));
-			UpdateErrorMessage("No Avatar styles found. Make sure you have uploaded your character models to Ready Player Me Studio");
-			return;
-		}
-		for (FRpmAsset Asset : Response->Data)
-		{
-			CharacterStyleAssets.Add(Asset.Id, Asset);
-			AddCharacterStyle(Asset);
-		}
-		UpdateErrorMessage("");
-		return;
-	}
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to list base models"));
-	UpdateErrorMessage("Failed to load base models. Please try again.");
-}
 
-void SDeveloperSettingsPanel::HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		if (Response->Data.Num() == 0)
-		{
-			UE_LOG(LogReadyPlayerMe, Error, TEXT("No organizations found"));
-			return;
-		}
-		TSharedPtr<FApplicationListRequest> Request = MakeShared<FApplicationListRequest>();
-		Request->Params.Add("organizationId", Response->Data[0].Id);
-		TWeakPtr<SDeveloperSettingsPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperSettingsPanel>(AsShared());
-		DeveloperAccountApi->ListApplicationsAsync(Request, FOnApplicationListResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
-		{
-			if(WeakPtrThis.IsValid())
-			{
-				WeakPtrThis.Pin()->HandleApplicationListResponse(Response, bWasSuccessful);
-			}
-		}));
-		UpdateErrorMessage("");
-		return;
-	}
-	UpdateErrorMessage("Failed to fetch organizations. Please check your network connection.");
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch organizations"))
-}
 
-void SDeveloperSettingsPanel::HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
-{
-	if(bWasSuccessful && Response.IsValid())
-	{
-		PopulateSettingsContent(Response->Data);
-		UpdateErrorMessage("");
-		return;
-	}
-	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch applications"));
-}
+// void SDeveloperSettingsPanel::HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful)
+// {
+// 	if (bWasSuccessful)
+// 	{
+// 		if (Response->Data.Num() == 0)
+// 		{
+// 			UE_LOG(LogReadyPlayerMe, Error, TEXT("No organizations found"));
+// 			return;
+// 		}
+// 		TSharedPtr<FApplicationListRequest> Request = MakeShared<FApplicationListRequest>();
+// 		Request->Params.Add("organizationId", Response->Data[0].Id);
+// 		TWeakPtr<SDeveloperSettingsPanel> WeakPtrThis = StaticCastSharedRef<SDeveloperSettingsPanel>(AsShared());
+// 		DeveloperAccountApi->ListApplicationsAsync(Request, FOnApplicationListResponse::CreateLambda( [WeakPtrThis](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
+// 		{
+// 			if(WeakPtrThis.IsValid())
+// 			{
+// 				WeakPtrThis.Pin()->HandleApplicationListResponse(Response, bWasSuccessful);
+// 			}
+// 		}));
+// 		UpdateErrorMessage("");
+// 		return;
+// 	}
+// 	UpdateErrorMessage("Failed to fetch organizations. Please check your network connection.");
+// 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch organizations"))
+// }
+
+// void SDeveloperSettingsPanel::HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful)
+// {
+// 	if(bWasSuccessful && Response.IsValid())
+// 	{
+// 		PopulateSettingsContent(Response->Data);
+// 		UpdateErrorMessage("");
+// 		return;
+// 	}
+// 	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to fetch applications"));
+// }
 
 void SDeveloperSettingsPanel::PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem)
 {
@@ -452,9 +383,10 @@ FReply SDeveloperSettingsPanel::OnLogoutClicked()
 
 	ClearLoadedCharacterModelImages();
 	FDevAuthTokenCache::ClearAuthData();
-	if(AssetApi.IsValid())
+	if (BlueprintApi.IsValid())
 	{
-		AssetApi->CancelAllRequests();
+		BlueprintApi->CancelAllRequests();
+		BlueprintApi.Reset();
 	}
 
 	OnLogout.ExecuteIfBound();
