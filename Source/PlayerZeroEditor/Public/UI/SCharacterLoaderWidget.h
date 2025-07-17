@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "EditorAssetLoader.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 
@@ -20,7 +19,6 @@ public:
 	void OnSkeletonSelected(const FAssetData& AssetData);
 
 private:
-	FEditorAssetLoader AssetLoader;
 	TSharedPtr<SEditableTextBox> PathTextBox;
 	USkeleton* SelectedSkeleton = nullptr;
 	

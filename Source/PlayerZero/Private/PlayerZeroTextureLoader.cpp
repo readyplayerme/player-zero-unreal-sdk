@@ -1,7 +1,6 @@
 ﻿#include "PlayerZeroTextureLoader.h"
 
 #include "PlayerZero.h"
-#include "Api/Assets/AssetIconLoader.h"
 #include "Async/Async.h"
 #include "Modules/ModuleManager.h"
 #include "Engine/Texture2D.h"
@@ -9,13 +8,13 @@
 
 FPlayerZeroTextureLoader::FPlayerZeroTextureLoader()
 {
-	AssetIconLoader = MakeShared<FAssetIconLoader>();
-	AssetIconLoader->OnIconLoaded.BindRaw( this, &FPlayerZeroTextureLoader::OnIconLoaded);
+	// AssetIconLoader = MakeShared<FAssetIconLoader>();
+	// AssetIconLoader->OnIconLoaded.BindRaw( this, &FPlayerZeroTextureLoader::OnIconLoaded);
 }
 
 void FPlayerZeroTextureLoader::LoadIconFromAsset(const FAsset& Asset, bool bStoreInCache)
 {
-	AssetIconLoader->LoadIcon(Asset, bStoreInCache);
+	//AssetIconLoader->LoadIcon(Asset, bStoreInCache);
 }
 
 void FPlayerZeroTextureLoader::OnIconLoaded(const FAsset& Asset, const TArray<unsigned char>& Array)

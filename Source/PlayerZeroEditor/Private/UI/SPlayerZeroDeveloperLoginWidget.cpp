@@ -5,8 +5,6 @@
 #include "EditorCache.h"
 #include "PlayerZero.h"
 #include "SlateOptMacros.h"
-#include "Api/Assets/Models/AssetListRequest.h"
-#include "Api/Assets/Models/AssetListResponse.h"
 #include "DeveloperAccounts/DeveloperAccountApi.h"
 #include "Auth/DeveloperTokenAuthStrategy.h"
 #include "Widgets/Input/SEditableTextBox.h"
@@ -208,15 +206,16 @@ void SPlayerZeroDeveloperLoginWidget::Initialize()
 		DeveloperAuthApi->OnLoginResponse.BindRaw(this, &SPlayerZeroDeveloperLoginWidget::HandleLoginResponse);
 	}
 
-	if (!AssetApi.IsValid())
-	{
-		AssetApi = MakeShared<FAssetApi>();
-		if (!DevAuthData.IsDemo)
-		{
-			AssetApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
-		}
-		AssetApi->OnListAssetsResponse.BindRaw(this, &SPlayerZeroDeveloperLoginWidget::HandleBaseModelListResponse);
-	}
+	// TODO update
+	// if (!AssetApi.IsValid())
+	// {
+	// 	AssetApi = MakeShared<FAssetApi>();
+	// 	if (!DevAuthData.IsDemo)
+	// 	{
+	// 		AssetApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
+	// 	}
+	// 	AssetApi->OnListAssetsResponse.BindRaw(this, &SPlayerZeroDeveloperLoginWidget::HandleBaseModelListResponse);
+	// }
 	if (!DeveloperAccountApi.IsValid())
 	{
 		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>(nullptr);
@@ -224,10 +223,10 @@ void SPlayerZeroDeveloperLoginWidget::Initialize()
 		{
 			DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
 		}
-		DeveloperAccountApi->OnOrganizationResponse.BindRaw(
-			this, &SPlayerZeroDeveloperLoginWidget::HandleOrganizationListResponse);
-		DeveloperAccountApi->OnApplicationListResponse.BindRaw(
-			this, &SPlayerZeroDeveloperLoginWidget::HandleApplicationListResponse);
+		// DeveloperAccountApi->OnOrganizationResponse.BindRaw(
+		// 	this, &SPlayerZeroDeveloperLoginWidget::HandleOrganizationListResponse);
+		// DeveloperAccountApi->OnApplicationListResponse.BindRaw(
+		// 	this, &SPlayerZeroDeveloperLoginWidget::HandleApplicationListResponse);
 	}
 	bIsInitialized = true;
 	if (bIsLoggedIn)
@@ -327,8 +326,8 @@ void SPlayerZeroDeveloperLoginWidget::OnTextureLoaded(UTexture2D* Texture2D, TSh
 
 void SPlayerZeroDeveloperLoginWidget::OnLoadBaseModelClicked(const FAsset& StyleAsset)
 {
-	AssetLoader = MakeShared<FEditorAssetLoader>();
-	AssetLoader->LoadBaseModelAsset(StyleAsset);
+	// AssetLoader = MakeShared<FEditorAssetLoader>();
+	// AssetLoader->LoadBaseModelAsset(StyleAsset);
 }
 
 EVisibility SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility() const
@@ -356,7 +355,8 @@ FReply SPlayerZeroDeveloperLoginWidget::OnLoginClicked()
 	Email = Email.TrimStartAndEnd();
 	Password = Password.TrimStartAndEnd();
 	DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
-	AssetApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
+	// TODO update
+	//AssetApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
 	FDeveloperLoginRequest LoginRequest = FDeveloperLoginRequest(Email, Password);
 	DeveloperAuthApi->LoginWithEmail(LoginRequest);
 	return FReply::Handled();
@@ -383,55 +383,55 @@ void SPlayerZeroDeveloperLoginWidget::HandleLoginResponse(const FDeveloperLoginR
 	FDevAuthTokenCache::ClearAuthData();
 }
 
-void SPlayerZeroDeveloperLoginWidget::HandleOrganizationListResponse(const FOrganizationListResponse& Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		if (Response.Data.Num() == 0)
-		{
-			UE_LOG(LogPlayerZero, Error, TEXT("No organizations found"));
-			return;
-		}
-		FApplicationListRequest Request;
-		Request.Params.Add("organizationId", Response.Data[0].Id);
-		DeveloperAccountApi->ListApplicationsAsync(Request);
-		return;
-	}
-
-	UE_LOG(LogPlayerZero, Error, TEXT("Failed to list organizations"));
-}
-
-
-void SPlayerZeroDeveloperLoginWidget::HandleApplicationListResponse(const FApplicationListResponse& Response,                                                             bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
-		UserApplications = Response.Data;
-		FString Active;
-		TArray<FString> Items;
-		for (const FApplication& App : UserApplications)
-		{
-			Items.Add(App.Name);
-			if (App.Id == PlayerZeroSettings->ApplicationId)
-			{
-				Active = App.Name;
-			}
-		}
-		if (Active.IsEmpty() && Items.Num() > 0)
-		{
-			const auto NewActiveItem = MakeShared<FString>(Items[0]);
-			OnComboBoxSelectionChanged(NewActiveItem, ESelectInfo::Direct);
-			SelectedApplicationTextBlock->SetText(FText::FromString(*NewActiveItem));
-		}
-		PopulateComboBoxItems(Items, Active);
-	}
-	else
-	{
-		UE_LOG(LogPlayerZero, Error, TEXT("Failed to list applications"));
-	}
-	LoadBaseModelList();
-}
+// void SPlayerZeroDeveloperLoginWidget::HandleOrganizationListResponse(const FOrganizationListResponse& Response, bool bWasSuccessful)
+// {
+// 	if (bWasSuccessful)
+// 	{
+// 		if (Response.Data.Num() == 0)
+// 		{
+// 			UE_LOG(LogPlayerZero, Error, TEXT("No organizations found"));
+// 			return;
+// 		}
+// 		FApplicationListRequest Request;
+// 		Request.Params.Add("organizationId", Response.Data[0].Id);
+// 		DeveloperAccountApi->ListApplicationsAsync(Request);
+// 		return;
+// 	}
+//
+// 	UE_LOG(LogPlayerZero, Error, TEXT("Failed to list organizations"));
+// }
+//
+//
+// void SPlayerZeroDeveloperLoginWidget::HandleApplicationListResponse(const FApplicationListResponse& Response,                                                             bool bWasSuccessful)
+// {
+// 	if (bWasSuccessful)
+// 	{
+// 		const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
+// 		UserApplications = Response.Data;
+// 		FString Active;
+// 		TArray<FString> Items;
+// 		for (const FApplication& App : UserApplications)
+// 		{
+// 			Items.Add(App.Name);
+// 			if (App.Id == PlayerZeroSettings->ApplicationId)
+// 			{
+// 				Active = App.Name;
+// 			}
+// 		}
+// 		if (Active.IsEmpty() && Items.Num() > 0)
+// 		{
+// 			const auto NewActiveItem = MakeShared<FString>(Items[0]);
+// 			OnComboBoxSelectionChanged(NewActiveItem, ESelectInfo::Direct);
+// 			SelectedApplicationTextBlock->SetText(FText::FromString(*NewActiveItem));
+// 		}
+// 		PopulateComboBoxItems(Items, Active);
+// 	}
+// 	else
+// 	{
+// 		UE_LOG(LogPlayerZero, Error, TEXT("Failed to list applications"));
+// 	}
+// 	LoadBaseModelList();
+// }
 
 
 void SPlayerZeroDeveloperLoginWidget::PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem)
@@ -482,7 +482,8 @@ FReply SPlayerZeroDeveloperLoginWidget::OnUseDemoAccountClicked()
 
 	// Unset the authentication strategy for the APIs
 	DeveloperAccountApi->SetAuthenticationStrategy(nullptr);
-	AssetApi->SetAuthenticationStrategy(nullptr);
+	// TODO update
+	//AssetApi->SetAuthenticationStrategy(nullptr);
 	GetOrgList();
 	return FReply::Handled();
 }
@@ -505,31 +506,32 @@ FReply SPlayerZeroDeveloperLoginWidget::OnLogoutClicked()
 	return FReply::Handled();
 }
 
-void SPlayerZeroDeveloperLoginWidget::LoadBaseModelList()
-{
-	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
-	if (PlayerZeroSettings->ApplicationId.IsEmpty())
-	{
-		UE_LOG(LogPlayerZero, Error, TEXT("Application ID is empty, unable to load base models."));
-		return;
-	}
-	FAssetListRequest Request = FAssetListRequest();
-	FAssetListQueryParams Params = FAssetListQueryParams();
-	Params.ApplicationId = PlayerZeroSettings->ApplicationId;
-	Params.Type = FAssetApi::BaseModelType;
-	Request.Params = Params;
-	AssetApi->ListAssetsAsync(Request);
-}
+// void SPlayerZeroDeveloperLoginWidget::LoadBaseModelList()
+// {
+// 	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
+// 	if (PlayerZeroSettings->ApplicationId.IsEmpty())
+// 	{
+// 		UE_LOG(LogPlayerZero, Error, TEXT("Application ID is empty, unable to load base models."));
+// 		return;
+// 	}
+// 	FAssetListRequest Request = FAssetListRequest();
+// 	FAssetListQueryParams Params = FAssetListQueryParams();
+// 	Params.ApplicationId = PlayerZeroSettings->ApplicationId;
+// 	// TODO update
+// 	// Params.Type = FAssetApi::BaseModelType;
+// 	// Request.Params = Params;
+// 	// AssetApi->ListAssetsAsync(Request);
+// }
 
-void SPlayerZeroDeveloperLoginWidget::HandleBaseModelListResponse(const FAssetListResponse& Response, bool bWasSuccessful)
-{
-	CharacterStyleAssets.Empty();
-	for (FAsset Asset : Response.Data)
-	{
-		CharacterStyleAssets.Add(Asset.Id, Asset);
-		AddCharacterStyle(Asset);
-	}
-}
+// void SPlayerZeroDeveloperLoginWidget::HandleBaseModelListResponse(const FAssetListResponse& Response, bool bWasSuccessful)
+// {
+// 	CharacterStyleAssets.Empty();
+// 	for (FAsset Asset : Response.Data)
+// 	{
+// 		CharacterStyleAssets.Add(Asset.Id, Asset);
+// 		AddCharacterStyle(Asset);
+// 	}
+// }
 
 
 void SPlayerZeroDeveloperLoginWidget::SetLoggedInState(const bool IsLoggedIn)

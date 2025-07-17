@@ -10,8 +10,6 @@
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
 #include "UI/LoginWindowStyle.h"
-#include "UI/SCacheGeneratorWidget.h"
-#include "UI/Commands/CacheWindowCommands.h"
 
 static const FName DeveloperWindowName("LoginWindow");
 static const FName LoaderWindowName("LoaderWindow");
@@ -26,19 +24,12 @@ void FPlayerZeroEditorModule::StartupModule()
 
 	FLoginWindowCommands::Register();
 	FLoaderWindowCommands::Register();
-	FCacheWindowCommands::Register();
 
 	PluginCommands = MakeShareable(new FUICommandList);
 
 	PluginCommands->MapAction(
 		FLoginWindowCommands::Get().OpenPluginWindow,
 		FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::PluginButtonClicked),
-		FCanExecuteAction());
-
-
-	PluginCommands->MapAction(
-		FCacheWindowCommands::Get().OpenPluginWindow,
-		FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::OpenCacheEditorWindow),
 		FCanExecuteAction());
 
 	// Don't show Loader window in the menu
@@ -51,10 +42,6 @@ void FPlayerZeroEditorModule::StartupModule()
 
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(DeveloperWindowName, FOnSpawnTab::CreateRaw(this, &FPlayerZeroEditorModule::OnSpawnPluginTab))
 		.SetDisplayName(LOCTEXT("DeveloperLoginWidget", "Ready Player Me"))
-		.SetMenuType(ETabSpawnerMenuType::Hidden);
-	
-	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(CacheWindowName, FOnSpawnTab::CreateRaw(this, &FPlayerZeroEditorModule::OnSpawnCacheWindow))
-		.SetDisplayName(LOCTEXT("CacheGeneratorrWidget", "Cache Generator"))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
 	
 	// Don't show Loader window in the menu
@@ -94,15 +81,6 @@ void FPlayerZeroEditorModule::FillReadyPlayerMeMenu(UToolMenu* Menu)
 		LOCTEXT("OpenLoginWindowToolTip", "Open the RPM Developer Window."),
 		FSlateIcon(),
 		FUIAction(FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::PluginButtonClicked))
-	);
-
-
-	Section.AddMenuEntry(
-		"OpenCacheGeneratorWindow",
-		LOCTEXT("OpenCacheGeneratorWindow", "Cache Generator"),
-		LOCTEXT("OpenGeneratorWindowToolTip", "Cache Generator Window."),
-		FSlateIcon(),
-		FUIAction(FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::OpenCacheEditorWindow))
 	);
 	
 	// Don't show Loader window in the menu
@@ -157,15 +135,6 @@ TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnLoaderWindow(const FSpawnTa
 		];
 }
 
-TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnCacheWindow(const FSpawnTabArgs& SpawnTabArgs)
-{
-	return SNew(SDockTab)
-		.TabRole(NomadTab)
-		[
-			SNew(SCacheGeneratorWidget)
-		];
-}
-
 void FPlayerZeroEditorModule::PluginButtonClicked()
 {
 	FGlobalTabmanager::Get()->TryInvokeTab(DeveloperWindowName);
@@ -175,11 +144,6 @@ void FPlayerZeroEditorModule::PluginButtonClicked()
 void FPlayerZeroEditorModule::OpenLoaderWindow()
 {
 	FGlobalTabmanager::Get()->TryInvokeTab(LoaderWindowName);
-}
-
-void FPlayerZeroEditorModule::OpenCacheEditorWindow()
-{
-	FGlobalTabmanager::Get()->TryInvokeTab(CacheWindowName);
 }
 
 #undef LOCTEXT_NAMESPACE

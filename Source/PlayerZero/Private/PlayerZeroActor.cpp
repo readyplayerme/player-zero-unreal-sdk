@@ -7,7 +7,6 @@
 #include "glTFRuntimeSkeletalMeshComponent.h"
 #include "PlayerZero.h"
 #include "PlayerZeroCharacterTypes.h"
-#include "Api/Assets/AssetApi.h"
 
 APlayerZeroActor::APlayerZeroActor()
 {
@@ -41,16 +40,17 @@ void APlayerZeroActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAss
 		UE_LOG(LogGLTFRuntime, Warning, TEXT("No asset to setup"));
 		return;
 	}
-	if(Asset.Type == FAssetApi::BaseModelType)
-	{
-		CharacterData.BaseModelId = Asset.Id;
-		if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
-		{
-			AnimationConfig = AnimationConfigsByBaseModelId[CharacterData.BaseModelId];
-			SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
-			SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
-		}
-	}
+	//TODO cleanup
+	// if(Asset.Type == FAssetApi::BaseModelType)
+	// {
+	// 	CharacterData.BaseModelId = Asset.Id;
+	// 	if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
+	// 	{
+	// 		AnimationConfig = AnimationConfigsByBaseModelId[CharacterData.BaseModelId];
+	// 		SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
+	// 		SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
+	// 	}
+	// }
 	RemoveMeshComponentsOfType(Asset.Type);
 	double LoadingStartTime = FPlatformTime::Seconds();
 
@@ -102,11 +102,12 @@ void APlayerZeroActor::RemoveMeshComponentsOfType(const FString& AssetType)
 		return;
 	}
 
+	//TODO cleanup
 	// Remove components by type, or remove all if AssetType is empty or it's a new base model
-	if (AssetType.IsEmpty() || AssetType == FAssetApi::BaseModelType)
-	{
-		RemoveAllMeshes();
-	}
+	// if (AssetType.IsEmpty() || AssetType == FAssetApi::BaseModelType)
+	// {
+	// 	RemoveAllMeshes();
+	// }
 	else if (LoadedMeshComponentsByAssetType.Contains(AssetType))
 	{
 		TArray<USceneComponent*>& ComponentsToRemove = LoadedMeshComponentsByAssetType[AssetType];
@@ -144,9 +145,11 @@ TArray<USceneComponent*> APlayerZeroActor::LoadMeshComponents(UglTFRuntimeAsset*
 {
 	TArray<FglTFRuntimeNode> AllNodes = GltfAsset->GetNodes();
 	TArray<USceneComponent*> NewMeshComponents;
+
+	//TODO cleanup
 	//if baseModel or full character asset changes we need to update master pose component
-	bool bIsMasterPoseUpdateRequired = AssetType == FAssetApi::BaseModelType || AssetType.IsEmpty();
-	
+	//bool bIsMasterPoseUpdateRequired = AssetType == FAssetApi::BaseModelType || AssetType.IsEmpty();
+	bool bIsMasterPoseUpdateRequired = true;
 	// Loop through all nodes to create mesh components
 	for (const FglTFRuntimeNode& Node : AllNodes)
 	{

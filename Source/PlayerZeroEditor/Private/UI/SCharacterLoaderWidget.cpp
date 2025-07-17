@@ -19,7 +19,6 @@ void SCharacterLoaderWidget::Construct(const FArguments& InArgs)
 	FString LastSavedPath;
 	GConfig->GetString(*ConfigSection, *PathKeyName, LastSavedPath, GGameIni);
 	PathText = FText::FromString(LastSavedPath);
-	AssetLoader = FEditorAssetLoader();
 	ChildSlot
 	[
 		SNew(SVerticalBox)
@@ -114,9 +113,10 @@ void SCharacterLoaderWidget::LoadAsset(const FString& Path)
 	Config.SceneScale = 100.0f;
 	Config.TransformBaseType = EglTFRuntimeTransformBaseType::YForward;
 	UglTFRuntimeAsset* gltfAsset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromFilename(Path, true, Config);
-	if (SelectedSkeleton)
-	{
-		AssetLoader.SkeletonToCopy = SelectedSkeleton;
-	}
-	AssetLoader.LoadAssetToWorldAsUPlayerZeroActor(gltfAsset);
+	// TODO update
+	// if (SelectedSkeleton)
+	// {
+	// 	AssetLoader.SkeletonToCopy = SelectedSkeleton;
+	// }
+	// AssetLoader.LoadAssetToWorldAsUPlayerZeroActor(gltfAsset);
 }

@@ -3,14 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EditorAssetLoader.h"
-#include "Api/Assets/AssetApi.h"
-#include "Api/Assets/Models/AssetListResponse.h"
 #include "Auth/DeveloperAuthApi.h"
 #include "DeveloperAccounts/DeveloperAccountApi.h"
 #include "DeveloperAccounts/Models/ApplicationListResponse.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Containers/Map.h"
+#include "PlayerZero/Public/Api/Assets/Models/Asset.h"
 
 class FPlayerZeroTextureLoader;
 struct FDeveloperLoginResponse;
@@ -41,13 +39,10 @@ private:
 	TSharedPtr<FString> SelectedComboBoxItem;
 	TArray<TSharedPtr<FString>> ComboBoxItems;
 	TArray<UTexture2D*> CharacterStyleTextures;
-	TMap<FString, FAsset> CharacterStyleAssets;
 
 	EVisibility GetLoginViewVisibility() const;
 	EVisibility GetLoggedInViewVisibility() const;
 	TArray<TSharedPtr<FPlayerZeroTextureLoader>> ActiveLoaders;
-	TSharedPtr<FEditorAssetLoader> AssetLoader;
-	TSharedPtr<FAssetApi> AssetApi;
 	TSharedPtr<FDeveloperAccountApi> DeveloperAccountApi;
 	TSharedPtr<FDeveloperAuthApi> DeveloperAuthApi;
 	static constexpr const TCHAR* CacheKeyEmail = TEXT("Email");
@@ -66,11 +61,11 @@ private:
 	void Initialize();
 	void GetOrgList();
 	void ClearLoadedCharacterModelImages();
-	void LoadBaseModelList();
+	//void LoadBaseModelList();
 	void HandleLoginResponse(const FDeveloperLoginResponse& Response, bool bWasSuccessful);
-	void HandleOrganizationListResponse(const FOrganizationListResponse& Response, bool bWasSuccessful);
-	void HandleApplicationListResponse(const FApplicationListResponse& Response, bool bWasSuccessful);
-	void HandleBaseModelListResponse(const FAssetListResponse& Response, bool bWasSuccessful);
+	//void HandleOrganizationListResponse(const FOrganizationListResponse& Response, bool bWasSuccessful);
+	//void HandleApplicationListResponse(const FApplicationListResponse& Response, bool bWasSuccessful);
+	//void HandleBaseModelListResponse(const FAssetListResponse& Response, bool bWasSuccessful);
 	void OnLoadBaseModelClicked(const FAsset& Asset);
 	void SetLoggedInState(const bool IsLoggedIn);
 	void PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem);

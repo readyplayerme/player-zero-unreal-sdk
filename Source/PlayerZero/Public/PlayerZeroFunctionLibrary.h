@@ -17,9 +17,5 @@ class PLAYERZERO_API UPlayerZeroFunctionLibrary : public UBlueprintFunctionLibra
 	GENERATED_BODY()
 
 public:	
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero", meta = (WorldContext = "WorldContextObject"))
-	static void FetchFirstAssetId(UObject* WorldContextObject, const FString& AssetType, FOnAssetIdFetched OnAssetIdFetched);
-	
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero/Cache")
-	static void ExtractCachePakFile();
+
 };
