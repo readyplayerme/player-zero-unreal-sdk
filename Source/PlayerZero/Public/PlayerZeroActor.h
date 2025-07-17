@@ -79,16 +79,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
 	virtual void LoadCharacter(const FRpmCharacterData& InCharacterData, UglTFRuntimeAsset* GltfAsset);
-
-	/**
-	 * @brief Loads an asset (skeletal or static mesh) from a glTF asset.
-	 * 
-	 * @param Asset The asset to be loaded, including its type and ID.
-	 * @param GltfAsset The glTF runtime asset to load the mesh from.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void LoadAsset(const FRpmAsset& Asset, UglTFRuntimeAsset* GltfAsset);
-
+	
 	/**
 	 * @brief Loads a glTF asset and applies a skeleton configuration to the actor.
 	 * 

@@ -13,7 +13,7 @@ public:
 	FPlayerZeroTextureLoader();
 	DECLARE_DELEGATE_OneParam(FOnTextureLoaded, UTexture2D*);
 	
-	void LoadIconFromAsset(const FRpmAsset& Asset, bool bStoreInCache = false);
+	void LoadIconFromAsset(const FRpmAsset& Asset);
 	UFUNCTION()
 	void OnIconLoaded(const FRpmAsset& Asset, const TArray<unsigned char>& Array);
 

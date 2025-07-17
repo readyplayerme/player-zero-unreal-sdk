@@ -24,7 +24,7 @@ public:
 	FAssetIconLoader();
 	virtual ~FAssetIconLoader();
 	
-	void LoadIcon(const FRpmAsset& Asset, bool bStoreInCache);
+	void LoadIcon(const FRpmAsset& Asset);
 
 private:
 	FHttpModule* Http;

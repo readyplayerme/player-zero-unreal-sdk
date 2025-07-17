@@ -8,9 +8,8 @@ struct FAssetLoadingContext
 	FRpmAsset Asset;
 	FString CharacterStyleId;
 	TArray<uint8> Data;
-	bool bStoreInCache;
-	FAssetLoadingContext(const FRpmAsset& InAsset, const FString& InCharacterStyleId, bool bInStoreInCache)
-		: Asset(InAsset), CharacterStyleId(InCharacterStyleId), bStoreInCache(bInStoreInCache)
+	FAssetLoadingContext(const FRpmAsset& InAsset, const FString& InCharacterStyleId)
+		: Asset(InAsset), CharacterStyleId(InCharacterStyleId)
 	{
 	}
 };

@@ -118,5 +118,5 @@ void SCharacterLoaderWidget::LoadAsset(const FString& Path)
 	{
 		AssetLoader.SkeletonToCopy = SelectedSkeleton;
 	}
-	AssetLoader.LoadAssetToWorldAsUPlayerZeroActor(gltfAsset);
+	AssetLoader.LoadAssetToWorldAsURpmActor(gltfAsset);
 }

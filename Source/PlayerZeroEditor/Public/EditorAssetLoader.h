@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Api/Assets/AssetGlbLoader.h"
@@ -21,9 +21,6 @@ public:
 =======
 	void LoadAssetToWorldAsURpmActor(UglTFRuntimeAsset* GltfAsset, FString AssetId = "");
 	void LoadBCharacterStyleAsset(const FRpmAsset& Asset);
-	
-	USkeletalMesh* SaveAsUAsset(UglTFRuntimeAsset* GltfAsset, const FString& LoadedAssetId) const;
->>>>>>> origin/develop:Source/RpmNextGenEditor/Public/EditorAssetLoader.h
 
 private:
 	FglTFRuntimeConfig* GltfConfig;
