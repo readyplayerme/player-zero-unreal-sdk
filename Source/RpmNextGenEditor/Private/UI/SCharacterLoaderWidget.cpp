@@ -119,5 +119,4 @@ void SCharacterLoaderWidget::LoadAsset(const FString& Path)
 		AssetLoader.SkeletonToCopy = SelectedSkeleton;
 	}
 	AssetLoader.LoadAssetToWorldAsURpmActor(gltfAsset);
-	AssetLoader.SaveAsUAsset(gltfAsset, TEXT("/Game/ReadyPlayerMe/TestSkeleton"));
 }

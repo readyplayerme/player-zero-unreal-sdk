@@ -1,16 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Api/Blueprints/BlueprintApi.h"
 #include "Widgets/SCompoundWidget.h"
 
+struct FBlueprintListResponse;
+struct FCharacterBlueprint;
 class FDeveloperAccountApi;
-struct FOrganizationListResponse;
-struct FApplicationListResponse;
-class FEditorAssetLoader;
 class FRpmTextureLoader;
-struct FRpmAsset;
-class FAssetApi;
-struct FAssetListResponse;
 struct FApplication;
 
 DECLARE_DELEGATE(FOnLogout);
@@ -28,7 +25,7 @@ public:
 	FOnLogout OnLogout;
 private:
 	TSharedPtr<FDeveloperAccountApi> DeveloperAccountApi;
-	TSharedPtr<FAssetApi> AssetApi;
+	TSharedPtr<FBlueprintApi> BlueprintApi;
 	
 	TSharedPtr<STextBlock> ErrorMessageText;
 	TSharedPtr<SVerticalBox> ContentBox;
@@ -36,19 +33,15 @@ private:
 	TArray<TSharedPtr<FString>> ComboBoxItems;
 	TSharedPtr<STextBlock> SelectedApplicationTextBlock;
 	TArray<UTexture2D*> CharacterStyleTextures;
-	TMap<FString, FRpmAsset> CharacterStyleAssets;
 	TArray<TSharedPtr<FRpmTextureLoader>> ActiveLoaders;
-	TSharedPtr<FEditorAssetLoader> AssetLoader;
 	FString UserName;
 
 	void UpdateErrorMessage(const FString& Message);
 	void PopulateSettingsContent(TArray<FApplication> InApplicationList);
-	void OnLoadCharacterStyleClicked(const FRpmAsset& Asset);
+	//void OnLoadCharacterStyleClicked(const FCharacterBlueprint& Blueprint);
 	void OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> Image, TSharedPtr<FRpmTextureLoader> RpmTextureLoader);
-	void AddCharacterStyle(const FRpmAsset& Asset);
-	void HandleCharacterStyleListResponse(TSharedPtr<FAssetListResponse> Response, bool bWasSuccessful);
-	void HandleApplicationListResponse(TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful);
-	void HandleOrganizationListResponse(TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful);
+	void AddCharacterStyle(const FCharacterBlueprint& Blueprint);
+	void HandleBlueprintListResponse(TSharedPtr<FBlueprintListResponse> Response, bool bWasSuccessful);
 	void LoadCharacterStyleList();
 	void OnComboBoxSelectionChanged(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo);
 	void ClearLoadedCharacterModelImages();

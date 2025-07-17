@@ -11,9 +11,9 @@ FRpmTextureLoader::FRpmTextureLoader()
 	AssetIconLoader->OnIconLoaded.BindRaw( this, &FRpmTextureLoader::OnIconLoaded);
 }
 
-void FRpmTextureLoader::LoadIconFromAsset(const FRpmAsset& Asset, bool bStoreInCache)
+void FRpmTextureLoader::LoadIconFromAsset(const FRpmAsset& Asset)
 {
-	AssetIconLoader->LoadIcon(Asset, bStoreInCache);
+	AssetIconLoader->LoadIcon(Asset);
 }
 
 void FRpmTextureLoader::OnIconLoaded(const FRpmAsset& Asset, const TArray<unsigned char>& Array)
