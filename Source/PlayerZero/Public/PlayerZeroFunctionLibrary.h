@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #pragma once
 
@@ -17,9 +17,13 @@ class PLAYERZERO_API UPlayerZeroFunctionLibrary : public UBlueprintFunctionLibra
 	GENERATED_BODY()
 
 public:	
+<<<<<<< HEAD:Source/PlayerZero/Public/PlayerZeroFunctionLibrary.h
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero", meta = (WorldContext = "WorldContextObject"))
 	static void FetchFirstAssetId(UObject* WorldContextObject, const FString& AssetType, FOnAssetIdFetched OnAssetIdFetched);
 	
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero/Cache")
+=======
+	UFUNCTION(BlueprintCallable, Category = "ReadyPlayerMe/Cache")
+>>>>>>> origin/develop:Source/RpmNextGen/Public/RpmFunctionLibrary.h
 	static void ExtractCachePakFile();
 };

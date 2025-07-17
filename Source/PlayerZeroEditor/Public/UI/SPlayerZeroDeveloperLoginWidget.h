@@ -1,21 +1,22 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EditorAssetLoader.h"
-#include "Api/Assets/AssetApi.h"
-#include "Api/Assets/Models/AssetListResponse.h"
-#include "Auth/DeveloperAuthApi.h"
 #include "DeveloperAccounts/DeveloperAccountApi.h"
-#include "DeveloperAccounts/Models/ApplicationListResponse.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Containers/Map.h"
 
+<<<<<<< HEAD:Source/PlayerZeroEditor/Public/UI/SPlayerZeroDeveloperLoginWidget.h
 class FPlayerZeroTextureLoader;
 struct FDeveloperLoginResponse;
 class UPlayerZeroDeveloperSettings;
 class UDeveloperAuthApi;
+=======
+class SDeveloperSettingsPanel;
+class SDeveloperLoginPanel;
+class URpmDeveloperSettings;
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Public/UI/SRpmDeveloperLoginWidget.h
 class SEditableTextBox;
 
 /**
@@ -30,19 +31,22 @@ public:
 
 	SLATE_END_ARGS()
 
+
 	void Construct(const FArguments& InArgs);
+<<<<<<< HEAD:Source/PlayerZeroEditor/Public/UI/SPlayerZeroDeveloperLoginWidget.h
 	virtual ~SPlayerZeroDeveloperLoginWidget() override;
 
+=======
+	virtual ~SRpmDeveloperLoginWidget() override;
+	
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Public/UI/SRpmDeveloperLoginWidget.h
 private:
-	TSharedPtr<SVerticalBox> ContentBox;
-	TSharedPtr<SEditableTextBox> EmailTextBox;
-	TSharedPtr<SEditableTextBox> PasswordTextBox;
-	TSharedPtr<STextBlock> SelectedApplicationTextBlock;
-	TSharedPtr<FString> SelectedComboBoxItem;
-	TArray<TSharedPtr<FString>> ComboBoxItems;
-	TArray<UTexture2D*> CharacterStyleTextures;
-	TMap<FString, FAsset> CharacterStyleAssets;
+	void HandleLogin(const FString& String);
+	void HandleLogout();
+	TSharedPtr<SDeveloperLoginPanel> LoginPanel;
+	TSharedPtr<SDeveloperSettingsPanel> SettingsPanel;
 
+<<<<<<< HEAD:Source/PlayerZeroEditor/Public/UI/SPlayerZeroDeveloperLoginWidget.h
 	EVisibility GetLoginViewVisibility() const;
 	EVisibility GetLoggedInViewVisibility() const;
 	TArray<TSharedPtr<FPlayerZeroTextureLoader>> ActiveLoaders;
@@ -51,31 +55,22 @@ private:
 	TSharedPtr<FDeveloperAccountApi> DeveloperAccountApi;
 	TSharedPtr<FDeveloperAuthApi> DeveloperAuthApi;
 	static constexpr const TCHAR* CacheKeyEmail = TEXT("Email");
+=======
+	EVisibility GetLoginPanelVisibility() const;
+	EVisibility GetSettingsPanelVisibility() const;
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Public/UI/SRpmDeveloperLoginWidget.h
 	bool bIsLoggedIn = false;
 	bool bIsInitialized = false;
 	FString UserName;
-	TArray<FApplication> UserApplications;
-	FText GetWelcomeText() const;
 	const FString DemoUserName = TEXT("Guest user");
-	FText GetSelectedComboBoxItemText() const;
 
-	FReply OnLoginClicked();
-	FReply OnUseDemoAccountClicked();
-	FReply OnLogoutClicked();
-
-	void Initialize();
-	void GetOrgList();
-	void ClearLoadedCharacterModelImages();
-	void LoadBaseModelList();
-	void HandleLoginResponse(const FDeveloperLoginResponse& Response, bool bWasSuccessful);
-	void HandleOrganizationListResponse(const FOrganizationListResponse& Response, bool bWasSuccessful);
-	void HandleApplicationListResponse(const FApplicationListResponse& Response, bool bWasSuccessful);
-	void HandleBaseModelListResponse(const FAssetListResponse& Response, bool bWasSuccessful);
-	void OnLoadBaseModelClicked(const FAsset& Asset);
 	void SetLoggedInState(const bool IsLoggedIn);
+<<<<<<< HEAD:Source/PlayerZeroEditor/Public/UI/SPlayerZeroDeveloperLoginWidget.h
 	void PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem);
 	void OnComboBoxSelectionChanged(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo);
 	UFUNCTION()
 	void OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> SImage, TSharedPtr<FPlayerZeroTextureLoader> LoaderToRemove);
 	void AddCharacterStyle(const FAsset& StyleAsset);
+=======
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Public/UI/SRpmDeveloperLoginWidget.h
 };

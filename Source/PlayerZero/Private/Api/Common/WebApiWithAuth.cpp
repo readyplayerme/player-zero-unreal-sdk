@@ -1,21 +1,38 @@
 ﻿#include "Api/Common/WebApiWithAuth.h"
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Common/WebApiWithAuth.cpp
 #include "PlayerZero.h"
 #include "Interfaces/IHttpResponse.h"
+=======
+#include "Api/Auth/ApiKeyAuthStrategy.h"
+#include "Settings/RpmDeveloperSettings.h"
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Common/WebApiWithAuth.cpp
 
 FWebApiWithAuth::FWebApiWithAuth() : AuthenticationStrategy(nullptr)
 {
     FWebApi();
-    SetAuthenticationStrategy(nullptr);
+    const URpmDeveloperSettings* Settings = GetDefault<URpmDeveloperSettings>();
+    if (!Settings->ApiKey.IsEmpty() || Settings->ApiProxyUrl.IsEmpty())
+    {
+        SetAuthenticationStrategy(MakeShared<FApiKeyAuthStrategy>());
+    }
 }
 
-FWebApiWithAuth::FWebApiWithAuth(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy) : AuthenticationStrategy(nullptr)
+FWebApiWithAuth::FWebApiWithAuth(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy) : AuthenticationStrategy(InAuthenticationStrategy)
 {
-    SetAuthenticationStrategy(InAuthenticationStrategy);
+    FWebApi();
+}
+
+//TODO check if this is needed
+FWebApiWithAuth::~FWebApiWithAuth()
+{
+    CancelAllRequests();
+    AuthenticationStrategy = nullptr;
 }
 
 void FWebApiWithAuth::SetAuthenticationStrategy(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy)
 {
     AuthenticationStrategy = InAuthenticationStrategy;
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Common/WebApiWithAuth.cpp
     if (AuthenticationStrategy.IsValid())
     {
         AuthenticationStrategy->OnAuthComplete.Unbind();
@@ -79,4 +96,6 @@ void FWebApiWithAuth::OnProcessResponse(FHttpRequestPtr Request, FHttpResponsePt
         UE_LOG(LogPlayerZero, Warning, TEXT("WebApi from URL %s request failed"), *Request->GetURL());
         OnRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
     }
+=======
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Common/WebApiWithAuth.cpp
 }

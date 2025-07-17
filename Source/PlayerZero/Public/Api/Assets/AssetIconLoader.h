@@ -1,31 +1,31 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Models/Asset.h"
+#include "Api/Common/WebApi.h"
+#include "Models/RpmAsset.h"
 
 struct FAssetLoadingContext;
 struct FCachedAssetData;
 class IHttpResponse;
 class FHttpModule;
-struct FAsset;
+struct FRpmAsset;
 
+<<<<<<< HEAD:Source/PlayerZero/Public/Api/Assets/AssetIconLoader.h
 class PLAYERZERO_API FAssetIconLoader : public TSharedFromThis<FAssetIconLoader>
+=======
+class RPMNEXTGEN_API FAssetIconLoader : public FWebApi
+>>>>>>> origin/develop:Source/RpmNextGen/Public/Api/Assets/AssetIconLoader.h
 {
 public:
-	DECLARE_DELEGATE_TwoParams(FOnIconLoaded, const FAsset&, const TArray<uint8>&);
+	DECLARE_DELEGATE_TwoParams(FOnIconLoaded, const FRpmAsset&, const TArray<uint8>&);
 	
 	FOnIconLoaded OnIconLoaded;
 	
 	FAssetIconLoader();
 	virtual ~FAssetIconLoader();
 	
-	void LoadIcon(const FAsset& Asset, bool bStoreInCache);
+	void LoadIcon(const FRpmAsset& Asset, bool bStoreInCache);
 
 private:
 	FHttpModule* Http;
-	
-	UFUNCTION()
-	void IconLoaded(TSharedPtr<IHttpResponse> Response, bool bWasSuccessful, const TSharedRef<FAssetLoadingContext>& Context);
-
-	void LoadIcon(TSharedRef<FAssetLoadingContext> Context);
 };

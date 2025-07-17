@@ -15,13 +15,20 @@ public:
 	FEditorAssetLoader();
 	virtual ~FEditorAssetLoader() override;
 
+<<<<<<< HEAD:Source/PlayerZeroEditor/Public/EditorAssetLoader.h
 	void LoadAssetToWorldAsUPlayerZeroActor(UglTFRuntimeAsset* GltfAsset, FString AssetId = "");
 	void LoadBaseModelAsset(const FAsset& Asset);
+=======
+	void LoadAssetToWorldAsURpmActor(UglTFRuntimeAsset* GltfAsset, FString AssetId = "");
+	void LoadBCharacterStyleAsset(const FRpmAsset& Asset);
+	
+	USkeletalMesh* SaveAsUAsset(UglTFRuntimeAsset* GltfAsset, const FString& LoadedAssetId) const;
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Public/EditorAssetLoader.h
 
 private:
 	FglTFRuntimeConfig* GltfConfig;
 	
 	void LoadAssetToWorld(const FString& AssetId, UglTFRuntimeAsset* GltfAsset);
 	UFUNCTION()
-	void HandleGlbLoaded(const FAsset& Asset, const TArray<unsigned char>& Data);
+	void HandleGlbLoaded(const FRpmAsset& Asset, const TArray<unsigned char>& Data);
 };

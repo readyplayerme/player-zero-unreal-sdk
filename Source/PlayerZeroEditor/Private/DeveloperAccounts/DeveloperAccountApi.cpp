@@ -1,11 +1,18 @@
 #include "DeveloperAccounts/DeveloperAccountApi.h"
-#include "JsonObjectConverter.h"
 #include "DeveloperAccounts/Models/ApplicationListRequest.h"
 #include "DeveloperAccounts/Models/ApplicationListResponse.h"
 #include "DeveloperAccounts/Models/OrganizationListRequest.h"
 #include "DeveloperAccounts/Models/OrganizationListResponse.h"
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
 #include "Interfaces/IHttpResponse.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
+=======
+#include "Settings/RpmDeveloperSettings.h"
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
+
+FDeveloperAccountApi::FDeveloperAccountApi()
+{    
+}
 
 FDeveloperAccountApi::FDeveloperAccountApi(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy) : FWebApiWithAuth(InAuthenticationStrategy)
 {
@@ -15,59 +22,48 @@ FDeveloperAccountApi::FDeveloperAccountApi(const TSharedPtr<IAuthenticationStrat
     }
 }
 
-void FDeveloperAccountApi::ListApplicationsAsync(const FApplicationListRequest& Request)
+void FDeveloperAccountApi::ListApplicationsAsync(TSharedPtr<FApplicationListRequest> Request, FOnApplicationListResponse OnComplete)
 {
     // TODO find better way to get settings (or move to editor only code)
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
     const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
     ApiBaseUrl = PlayerZeroSettings->GetApiBaseUrl();
     const FString QueryString = BuildQueryString(Request.Params);
+=======
+    const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
+    ApiBaseUrl = RpmSettings->GetApiBaseUrl();
+    const FString QueryString = BuildQueryString(Request->Params);
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
     const FString Url = FString::Printf(TEXT("%s/v1/applications%s"), *ApiBaseUrl, *QueryString);
     TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
     ApiRequest->Url = Url;
-    OnRequestComplete.BindRaw(this, &FDeveloperAccountApi::HandleAppListResponse);
-    DispatchRawWithAuth(ApiRequest);
+    SendRequestWithAuth<FApplicationListResponse>(ApiRequest, [OnComplete](TSharedPtr<FApplicationListResponse> Response, bool bWasSuccessful, int32 StatusCode)
+    {
+        //UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed "));
+        OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
+    });
 }
 
-void FDeveloperAccountApi::ListOrganizationsAsync(const FOrganizationListRequest& Request)
+void FDeveloperAccountApi::ListOrganizationsAsync(TSharedPtr<FOrganizationListRequest> Request, FOnOrganizationListResponse OnComplete)
 {
     // TODO find better way to get settings (or move to editor only code)
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
     const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
     ApiBaseUrl = PlayerZeroSettings->GetApiBaseUrl();
     const FString QueryString = BuildQueryString(Request.Params);
+=======
+    const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
+    ApiBaseUrl = RpmSettings->GetApiBaseUrl();
+    const FString QueryString = BuildQueryString(Request->Params);
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
     const FString Url = FString::Printf(TEXT("%s/v1/organizations%s"), *ApiBaseUrl, *QueryString);
     TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
     ApiRequest->Url = Url;
-    OnRequestComplete.BindRaw(this, &FDeveloperAccountApi::HandleOrgListResponse);
-    DispatchRawWithAuth(ApiRequest);
-}
-
-
-void FDeveloperAccountApi::HandleAppListResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-    FApplicationListResponse ApplicationListResponse;
-    FString Data = Response->GetContentAsString();
-    if (bWasSuccessful && !Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &ApplicationListResponse, 0, 0))
+    SendRequestWithAuth<FOrganizationListResponse>(ApiRequest, [OnComplete](TSharedPtr<FOrganizationListResponse> Response, bool bWasSuccessful, int32 StatusCode)
     {
-        OnApplicationListResponse.ExecuteIfBound(ApplicationListResponse, true);
-        return;
-    }
-    OnApplicationListResponse.ExecuteIfBound(ApplicationListResponse, false);
-}
-
-void FDeveloperAccountApi::HandleOrgListResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-    FOrganizationListResponse OrganizationListResponse;
-    if(Response.IsValid())
-    {
-        FString Data = Response->GetContentAsString();
-        if (bWasSuccessful && !Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &OrganizationListResponse, 0, 0))
-        {
-            OnOrganizationResponse.ExecuteIfBound(OrganizationListResponse, true);
-            return;
-        }
-    }
-
-    OnOrganizationResponse.ExecuteIfBound(OrganizationListResponse, false);
+        //UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed "));
+        OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
+    });
 }
 
 

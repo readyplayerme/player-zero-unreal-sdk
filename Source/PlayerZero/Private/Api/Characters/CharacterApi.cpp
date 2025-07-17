@@ -1,10 +1,14 @@
 #include "Api/Characters/CharacterApi.h"
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Characters/CharacterApi.cpp
 #include "HttpModule.h"
 #include "PlayerZero.h"
+=======
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Characters/CharacterApi.cpp
 #include "Api/Auth/ApiKeyAuthStrategy.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"
 #include "Api/Characters/Models/CharacterPreviewRequest.h"
 #include "Api/Characters/Models/CharacterUpdateRequest.h"
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Characters/CharacterApi.cpp
 #include "Interfaces/IHttpResponse.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
 
@@ -17,41 +21,70 @@ FCharacterApi::FCharacterApi()
 		SetAuthenticationStrategy(MakeShared<FApiKeyAuthStrategy>());
 	}
 	OnRequestComplete.BindRaw(this, &FCharacterApi::HandleCharacterResponse);
+=======
+#include "Settings/RpmDeveloperSettings.h"
+
+FCharacterApi::FCharacterApi()
+{
+	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
+	BaseUrl = FString::Printf(TEXT("%s/v1/characters"), *RpmSettings->GetApiBaseUrl());
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Characters/CharacterApi.cpp
 }
 
 FCharacterApi::~FCharacterApi()
 {
 }
 
-void FCharacterApi::CreateAsync(const FCharacterCreateRequest& Request)
+void FCharacterApi::CreateAsync(TSharedPtr<FCharacterCreateRequest> Request, FOnCharacterCreateResponse OnComplete)
 {
-	AssetByType.Append(Request.Data.Assets);
+	AssetByType.Append(Request->Data.Assets);
 	TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
 	ApiRequest->Url = FString::Printf(TEXT("%s"), *BaseUrl);
 	ApiRequest->Method = POST;
 	ApiRequest->Payload = ConvertToJsonString(Request);
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	DispatchRawWithAuth(ApiRequest);
+	SendRequestWithAuth<FCharacterCreateResponse>(ApiRequest, [OnComplete](TSharedPtr<FCharacterCreateResponse> Response, bool bWasSuccessful, int32 StatusCode)
+	 {
+		if (StatusCode == 401)
+		{
+			UE_LOG(LogReadyPlayerMe, Error,TEXT("The request to the character API failed with a 401 response code. Please ensure that your API Key or proxy is correctly configured."));
+		}
+		 OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
+	 });
 }
 
-void FCharacterApi::UpdateAsync(const FCharacterUpdateRequest& Request)
+void FCharacterApi::UpdateAsync(TSharedPtr<FCharacterUpdateRequest> Request, FOnCharacterUpdatResponse OnComplete)
 {
-	AssetByType.Append(Request.Payload.Assets);
+	AssetByType.Append(Request->Payload.Assets);
 	TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
-	ApiRequest->Url = FString::Printf(TEXT("%s/%s"), *BaseUrl, *Request.Id);
+	ApiRequest->Url = FString::Printf(TEXT("%s/%s"), *BaseUrl, *Request->Id);
 	ApiRequest->Method = PATCH;
 	ApiRequest->Payload = ConvertToJsonString(Request);
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	DispatchRawWithAuth(ApiRequest);
+	SendRequestWithAuth<FCharacterUpdateResponse>(ApiRequest, [OnComplete](TSharedPtr<FCharacterUpdateResponse> Response, bool bWasSuccessful, int32 StatusCode)
+	{
+		if (StatusCode == 401)
+		{
+			UE_LOG(LogReadyPlayerMe, Error,TEXT("The request to the character API failed with a 401 response code. Please ensure that your API Key or proxy is correctly configured."));
+		}
+		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
+	});
 }
 
-void FCharacterApi::FindByIdAsync(const FCharacterFindByIdRequest& Request)
+void FCharacterApi::FindByIdAsync(TSharedPtr<FCharacterFindByIdRequest> Request, FOnCharacterFindResponse OnComplete)
 {
 	TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
-	ApiRequest->Url = FString::Printf(TEXT("%s/%s"), *BaseUrl, *Request.Id);
+	ApiRequest->Url = FString::Printf(TEXT("%s/%s"), *BaseUrl, *Request->Id);
 	ApiRequest->Method = GET;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	DispatchRawWithAuth(ApiRequest);
+	SendRequestWithAuth<FCharacterFindByIdResponse>(ApiRequest, [OnComplete](TSharedPtr<FCharacterFindByIdResponse> Response, bool bWasSuccessful, int32 StatusCode)
+	{
+		if (StatusCode == 401)
+		{
+			UE_LOG(LogReadyPlayerMe, Error,TEXT("The request to the character API failed with a 401 response code. Please ensure that your API Key or proxy is correctly configured."));
+		}
+		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
+	});
 }
 
 FString FCharacterApi::GeneratePreviewUrl(const FCharacterPreviewRequest& Request)
@@ -60,6 +93,7 @@ FString FCharacterApi::GeneratePreviewUrl(const FCharacterPreviewRequest& Reques
 	FString url = FString::Printf(TEXT("%s/%s/preview%s"), *BaseUrl, *Request.Id, *QueryString);
 	return url;
 }
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Characters/CharacterApi.cpp
 
 void FCharacterApi::HandleCharacterResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful)
 {
@@ -133,3 +167,5 @@ void FCharacterApi::HandleFindResponse(FHttpResponsePtr Response, bool bWasSucce
 
 
 
+=======
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Characters/CharacterApi.cpp

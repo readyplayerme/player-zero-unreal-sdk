@@ -1,58 +1,65 @@
 ﻿#include "Auth/DeveloperTokenAuthStrategy.h"
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/Auth/DeveloperTokenAuthStrategy.cpp
 #include "PlayerZero.h"
+=======
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/Auth/DeveloperTokenAuthStrategy.cpp
 #include "Auth/DevAuthTokenCache.h"
 #include "Api/Auth/Models/RefreshTokenRequest.h"
 #include "Api/Auth/Models/RefreshTokenResponse.h"
 #include "Auth/Models/DeveloperAuth.h"
 
-DeveloperTokenAuthStrategy::DeveloperTokenAuthStrategy() 
+FDeveloperTokenAuthStrategy::FDeveloperTokenAuthStrategy()
 {
-	AuthApi = MakeShared<FAuthApi>();
-	AuthApi->OnRefreshTokenResponse.BindRaw(this, &DeveloperTokenAuthStrategy::OnRefreshTokenResponse);
 }
 
-void DeveloperTokenAuthStrategy::AddAuthToRequest(TSharedPtr<FApiRequest> ApiRequest) 
+FDeveloperTokenAuthStrategy::~FDeveloperTokenAuthStrategy()
 {
-	const FString Key = TEXT("Authorization");
-	const FString Token = FDevAuthTokenCache::GetAuthData().Token;
-	if(Token.IsEmpty())
+	CancelAllRequests();
+}
+
+void FDeveloperTokenAuthStrategy::AddAuthToRequest(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, bool)> OnAuthenticationComplete)
+{
+	FDeveloperAuth DeveloperAuth = FDevAuthTokenCache::GetAuthData();
+	if (DeveloperAuth.Token.IsEmpty())
 	{
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/Auth/DeveloperTokenAuthStrategy.cpp
 		UE_LOG(LogPlayerZero, Error, TEXT("Token is empty"));
 		OnAuthComplete.ExecuteIfBound(ApiRequest, false);
+=======
+		UE_LOG(LogReadyPlayerMe, Error, TEXT("Developer Token not set!"));
+		OnAuthenticationComplete(ApiRequest, false);
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/Auth/DeveloperTokenAuthStrategy.cpp
 		return;
 	}
-	if (ApiRequest->Headers.Contains(Key))
-	{
-		ApiRequest->Headers.Remove(Key);
-	}
-	ApiRequest->Headers.Add(Key, FString::Printf(TEXT("Bearer %s"), *Token));
-	OnAuthComplete.ExecuteIfBound(ApiRequest, true);
+	ApiRequest->Headers.Add(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *DeveloperAuth.Token));
+
+	OnAuthenticationComplete(ApiRequest, true);
 }
 
-void DeveloperTokenAuthStrategy::TryRefresh(TSharedPtr<FApiRequest> ApiRequest)
+void FDeveloperTokenAuthStrategy::TryRefresh(TSharedPtr<FApiRequest> ApiRequest, TFunction<void(TSharedPtr<FApiRequest>, const FRefreshTokenResponse&, bool)> OnTokenRefreshed)
 {
-	ApiRequestToRetry = ApiRequest;
 	FRefreshTokenRequest RefreshRequest;
 	RefreshRequest.Data.Token = FDevAuthTokenCache::GetAuthData().Token;
 	RefreshRequest.Data.RefreshToken = FDevAuthTokenCache::GetAuthData().RefreshToken;
-	RefreshTokenAsync(RefreshRequest);
-}
+    
+	TWeakPtr<FAuthApi> WeakPtrThis = SharedThis(this);
 
-void DeveloperTokenAuthStrategy::OnRefreshTokenResponse(TSharedPtr<FApiRequest> Request, const FRefreshTokenResponse& Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful && !Response.Data.Token.IsEmpty())
+	RefreshToken(RefreshRequest, FOnRefreshTokenResponse::CreateLambda([WeakPtrThis, ApiRequest, OnTokenRefreshed](TSharedPtr<FRefreshTokenResponse> Response, bool bWasSuccessful)
 	{
-		FDeveloperAuth DeveloperAuth = FDevAuthTokenCache::GetAuthData();
-		DeveloperAuth.Token = Response.Data.Token;
-		DeveloperAuth.RefreshToken = Response.Data.RefreshToken;
-		FDevAuthTokenCache::SetAuthData(DeveloperAuth);
-		OnTokenRefreshed.ExecuteIfBound(ApiRequestToRetry, Response.Data, true);
-		return;
-	}
-	OnTokenRefreshed.ExecuteIfBound(ApiRequestToRetry, Response.Data, false);
+		if (WeakPtrThis.IsValid())
+		{
+			if (bWasSuccessful && !Response->Data.Token.IsEmpty())
+			{
+				FDeveloperAuth DeveloperAuth = FDevAuthTokenCache::GetAuthData();
+				DeveloperAuth.Token = Response->Data.Token;
+				DeveloperAuth.RefreshToken = Response->Data.RefreshToken;
+				FDevAuthTokenCache::SetAuthData(DeveloperAuth);
+                
+				OnTokenRefreshed(ApiRequest, *Response, true);
+				return;
+			}
+			OnTokenRefreshed(ApiRequest, *Response, false);
+		}
+	}));
 }
 
-void DeveloperTokenAuthStrategy::RefreshTokenAsync(const FRefreshTokenRequest& Request)
-{	
-	AuthApi->RefreshToken(Request);
-}

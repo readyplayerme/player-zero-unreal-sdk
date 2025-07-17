@@ -29,8 +29,7 @@ public:
 
 	static FString GetFullPersistentPath(const FString& RelativePath)
 	{
-		const FString PersistentPath = FPaths::ProjectPersistentDownloadDir() / RelativePath;
-	
+		const FString PersistentPath = FPaths::Combine(FPaths::ProjectPersistentDownloadDir(), RelativePath);
 		return FPaths::ConvertRelativePathToFull(PersistentPath);
 	}
 

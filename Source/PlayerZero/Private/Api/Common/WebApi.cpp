@@ -1,31 +1,29 @@
 ﻿#include "Api/Common/WebApi.h"
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Common/WebApi.cpp
 #include "HttpModule.h"
 #include "PlayerZero.h"
 #include "Interfaces/IHttpResponse.h"
+=======
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Common/WebApi.cpp
 
 FWebApi::FWebApi()
 {
-    Http = &FHttpModule::Get();
+    HttpModule = &FHttpModule::Get();
 }
 
 FWebApi::~FWebApi()
 {
-    
+    CancelAllRequests();
 }
 
-void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest)
+void FWebApi::CancelAllRequests()
 {
-    TSharedPtr<IHttpRequest> Request = Http->CreateRequest();
-    FString Url = ApiRequest->Url + BuildQueryString(ApiRequest->QueryParams);
-    Request->SetURL(Url);
-    Request->SetVerb(ApiRequest->GetVerb());
-    Request->SetTimeout(10);
-    FString Headers;
-    for (const auto& Header : ApiRequest->Headers)
+    for (const auto& Request : ActiveRequests)
     {
-        Request->SetHeader(Header.Key, Header.Value);
-        Headers.Append(FString::Printf(TEXT("%s: %s\n"), *Header.Key, *Header.Value));
+        Request->OnProcessRequestComplete().Unbind();
+        Request->CancelRequest();
     }
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Common/WebApi.cpp
 
     if (!ApiRequest->Payload.IsEmpty() && ApiRequest->Method != ERequestMethod::GET)
     {
@@ -45,6 +43,9 @@ void FWebApi::OnProcessResponse(FHttpRequestPtr Request, FHttpResponsePtr Respon
     FString ErrorMessage = Response.IsValid() ? Response->GetContentAsString() : TEXT("Request failed");
     UE_LOG(LogPlayerZero, Warning, TEXT("WebApi from URL %s request failed: %s"), *Request->GetURL(), *ErrorMessage);
     OnRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
+=======
+    ActiveRequests.Empty();
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Common/WebApi.cpp
 }
 
 FString FWebApi::BuildQueryString(const TMap<FString, FString>& QueryParams)

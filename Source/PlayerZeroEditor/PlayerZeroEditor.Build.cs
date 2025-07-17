@@ -51,6 +51,8 @@ public class PlayerZeroEditor : ModuleRules
 				"Json", 
 				"UMG",
 				"ImageWrapper",
+				"MeshBuilder",
+				"SkeletalMeshUtilitiesCommon"
 			}
 			);
 		

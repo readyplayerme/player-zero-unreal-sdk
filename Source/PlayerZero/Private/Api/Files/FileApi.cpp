@@ -1,8 +1,13 @@
 #include "Api/Files/FileApi.h"
 
 #include "HttpModule.h"
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Files/FileApi.cpp
 #include "PlayerZero.h"
 #include "Api/Assets/Models/Asset.h"
+=======
+#include "RpmNextGen.h"
+#include "Api/Assets/Models/RpmAsset.h"
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Files/FileApi.cpp
 #include "Interfaces/IHttpResponse.h"
 
 FFileApi::FFileApi()
@@ -22,7 +27,7 @@ void FFileApi::LoadFileFromUrl(const FString& URL)
 	HttpRequest->ProcessRequest();
 }
 
-void FFileApi::LoadAssetFileFromUrl(const FString& URL, FAsset Asset)
+void FFileApi::LoadAssetFileFromUrl(const FString& URL, const FRpmAsset& Asset)
 {
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->OnProcessRequestComplete().BindRaw(this, &FFileApi::AssetFileRequestComplete, Asset);
@@ -33,34 +38,41 @@ void FFileApi::LoadAssetFileFromUrl(const FString& URL, FAsset Asset)
 
 void FFileApi::FileRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	FString URL = Request->GetURL();
-	FString FileName;
-	if(URL.Contains(".glb") || URL.Contains(".png"))
-	{
-		FileName = FPaths::GetCleanFilename(Request->GetURL());
-	}
-	
+	const FString URL = Request->GetURL();
+	const FString FileName = FPaths::GetCleanFilename(URL);
+
 	if (bWasSuccessful && Response.IsValid() && Response->GetContentLength() > 0)
 	{
-		TArray<uint8> Content = Response->GetContent();
-		OnFileRequestComplete.ExecuteIfBound(&Content, FileName);
+		const TArray<uint8>& Content = Response->GetContent(); 
+		OnFileRequestComplete.ExecuteIfBound(Content, FileName);
 		return;
 	}
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Files/FileApi.cpp
 	UE_LOG(LogPlayerZero, Error, TEXT("Failed to load file from URL"));
 	OnFileRequestComplete.ExecuteIfBound(nullptr, FileName);
+=======
+
+	const int32 ResponseCode = Response.IsValid() ? Response->GetResponseCode() : -1;
+	UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to load file from URL. Response code: %d, URL: %s"), ResponseCode, *URL);
+	OnFileRequestComplete.ExecuteIfBound(TArray<uint8>(), FileName);
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Files/FileApi.cpp
 }
 
-void FFileApi::AssetFileRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, FAsset Asset)
+void FFileApi::AssetFileRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, FRpmAsset Asset)
 {
-	
 	if (bWasSuccessful && Response.IsValid() && Response->GetContentLength() > 0)
 	{
-		TArray<uint8> Content = Response->GetContent();
-		OnAssetFileRequestComplete.ExecuteIfBound(&Content, Asset);
+		const TArray<uint8>& Content = Response->GetContent(); 
+		OnAssetFileRequestComplete.ExecuteIfBound(Content, Asset);
 		return;
 	}
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Files/FileApi.cpp
 	UE_LOG(LogPlayerZero, Warning, TEXT("Failed to load file from URL. Try loading from cache"));
 	OnAssetFileRequestComplete.ExecuteIfBound(nullptr, Asset);
+=======
+	UE_LOG(LogReadyPlayerMe, Warning, TEXT("Failed to load file from URL. Try loading from cache"));
+	OnAssetFileRequestComplete.ExecuteIfBound(TArray<uint8>(), Asset);
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Files/FileApi.cpp
 }
 
 bool FFileApi::LoadFileFromPath(const FString& Path, TArray<uint8>& OutContent)

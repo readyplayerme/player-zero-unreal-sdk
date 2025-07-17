@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright Ready Player Me
 
 #include "PlayerZeroActor.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -25,28 +24,32 @@ void APlayerZeroActor::BeginPlay()
 void APlayerZeroActor::LoadCharacter(const FPlayerZeroCharacterData& InCharacterData, UglTFRuntimeAsset* GltfAsset)
 {
 	CharacterData = InCharacterData;
-	if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
+	if(AnimationConfigsByCharacterStyleId.Contains(CharacterData.CharacterStyleId))
 	{
-		AnimationConfig = AnimationConfigsByBaseModelId[CharacterData.BaseModelId];
+		AnimationConfig = AnimationConfigsByCharacterStyleId[CharacterData.CharacterStyleId];
 		SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
 		SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
 	}
-	LoadAsset(FAsset(), GltfAsset);
+	LoadAsset(FRpmAsset(), GltfAsset);
 }
 
+<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 void APlayerZeroActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset)
+=======
+void ARpmActor::LoadAsset(const FRpmAsset& Asset, UglTFRuntimeAsset* GltfAsset)
+>>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
 {
 	if (!GltfAsset)
 	{
 		UE_LOG(LogGLTFRuntime, Warning, TEXT("No asset to setup"));
 		return;
 	}
-	if(Asset.Type == FAssetApi::BaseModelType)
+	if(Asset.Type == FAssetApi::CharacterStyleAssetType)
 	{
-		CharacterData.BaseModelId = Asset.Id;
-		if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
+		CharacterData.CharacterStyleId = Asset.Id;
+		if(AnimationConfigsByCharacterStyleId.Contains(CharacterData.CharacterStyleId))
 		{
-			AnimationConfig = AnimationConfigsByBaseModelId[CharacterData.BaseModelId];
+			AnimationConfig = AnimationConfigsByCharacterStyleId[CharacterData.CharacterStyleId];
 			SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
 			SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
 		}
@@ -58,25 +61,34 @@ void APlayerZeroActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAss
 	if (NewMeshComponents.Num() > 0)
 	{
 		LoadedMeshComponentsByAssetType.Add(Asset.Type, NewMeshComponents);
-		if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
+		if(AnimationConfigsByCharacterStyleId.Contains(CharacterData.CharacterStyleId))
 		{
-			// Check if MasterPoseComponent is valid before using it
 			if (MasterPoseComponent == nullptr)
 			{
+<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 				UE_LOG(LogPlayerZero, Error, TEXT("MasterPoseComponent is null for base model %s"), *CharacterData.BaseModelId);
+=======
+				UE_LOG(LogReadyPlayerMe, Error, TEXT("MasterPoseComponent is null for base model %s"), *CharacterData.CharacterStyleId);
+>>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
 				return;
 			}
 
-			// Check if Animation Blueprint is valid
 			if (!AnimationConfig.AnimationBlueprint)
 			{
+<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 				UE_LOG(LogPlayerZero, Error, TEXT("AnimationBlueprint is null for base model %s"), *CharacterData.BaseModelId);
+=======
+				UE_LOG(LogReadyPlayerMe, Error, TEXT("AnimationBlueprint is null for base model %s"), *CharacterData.CharacterStyleId);
+>>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
 				return;
 			}
 			
 			MasterPoseComponent->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 			MasterPoseComponent->SetAnimClass(AnimationConfig.AnimationBlueprint);
+<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 			UE_LOG(LogPlayerZero, Log, TEXT("Set Animation Blueprint for %s"), *CharacterData.BaseModelId);
+=======
+>>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
 		}
 
 		UE_LOG(LogPlayerZero, Log, TEXT("Asset loaded in %f seconds"), FPlatformTime::Seconds() - LoadingStartTime);
@@ -86,7 +98,11 @@ void APlayerZeroActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAss
 	UE_LOG(LogPlayerZero, Error, TEXT("Failed to load mesh components"));
 }
 
+<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 void APlayerZeroActor::LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FAsset& Asset, const FPlayerZeroAnimationConfig& InAnimationCharacter)
+=======
+void ARpmActor::LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FRpmAsset& Asset, const FRpmAnimationConfig& InAnimationCharacter)
+>>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
 {
 	AnimationConfig = InAnimationCharacter;
 	SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
@@ -103,7 +119,7 @@ void APlayerZeroActor::RemoveMeshComponentsOfType(const FString& AssetType)
 	}
 
 	// Remove components by type, or remove all if AssetType is empty or it's a new base model
-	if (AssetType.IsEmpty() || AssetType == FAssetApi::BaseModelType)
+	if (AssetType.IsEmpty() || AssetType == FAssetApi::CharacterStyleAssetType)
 	{
 		RemoveAllMeshes();
 	}
@@ -122,30 +138,42 @@ void APlayerZeroActor::RemoveMeshComponentsOfType(const FString& AssetType)
 	}
 }
 
+void ARpmActor::RemoveAssetOfType(const FRpmAsset& Asset)
+{
+	CharacterData.Assets.Remove(Asset.Type);
+	RemoveMeshComponentsOfType(Asset.Type);
+}
 
 void APlayerZeroActor::RemoveAllMeshes()
 {
-	for (const auto Pairs : LoadedMeshComponentsByAssetType){
-		
-		TArray<USceneComponent*> ComponentsToRemove = Pairs.Value;
-		for (USceneComponent* ComponentToRemove : ComponentsToRemove)
-		{
-			if (ComponentToRemove)
-			{
-				ComponentToRemove->DestroyComponent();
-				ComponentToRemove = nullptr;
-			}
-		}
+	for (const auto& Pair : LoadedMeshComponentsByAssetType)
+	{
+		RemoveMeshComponents(Pair.Value);
 	}
 	LoadedMeshComponentsByAssetType.Empty();
 }
 
+<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 TArray<USceneComponent*> APlayerZeroActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAsset, const FString& AssetType)
+=======
+void ARpmActor::RemoveMeshComponents(const TArray<USceneComponent*>& Components)
+{
+	for (USceneComponent* Component : Components)
+	{
+		if (Component)
+		{
+			Component->DestroyComponent();
+			Component = nullptr;
+		}
+	}
+}
+
+TArray<USceneComponent*> ARpmActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAsset, const FString& AssetType)
+>>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
 {
 	TArray<FglTFRuntimeNode> AllNodes = GltfAsset->GetNodes();
 	TArray<USceneComponent*> NewMeshComponents;
-	//if baseModel or full character asset changes we need to update master pose component
-	bool bIsMasterPoseUpdateRequired = AssetType == FAssetApi::BaseModelType || AssetType.IsEmpty();
+	bool bIsMasterPoseUpdateRequired = AssetType == FAssetApi::CharacterStyleAssetType || AssetType.IsEmpty();
 	
 	// Loop through all nodes to create mesh components
 	for (const FglTFRuntimeNode& Node : AllNodes)
@@ -161,13 +189,20 @@ TArray<USceneComponent*> APlayerZeroActor::LoadMeshComponents(UglTFRuntimeAsset*
 			USkeletalMeshComponent* SkeletalMeshComponent = CreateSkeletalMeshComponent(GltfAsset, Node);
 			if(bIsMasterPoseUpdateRequired)
 			{
+<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 				UE_LOG( LogPlayerZero, Log, TEXT("Setting master pose component"));
+=======
+>>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
 				MasterPoseComponent = SkeletalMeshComponent;
 				NewMeshComponents.Add(SkeletalMeshComponent);
 				bIsMasterPoseUpdateRequired = false;
 				continue;
 			}
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
+			SkeletalMeshComponent->SetLeaderPoseComponent(MasterPoseComponent.Get());
+#else
 			SkeletalMeshComponent->SetMasterPoseComponent(MasterPoseComponent.Get());
+#endif
 			NewMeshComponents.Add(SkeletalMeshComponent);
 		}
 		else
@@ -184,7 +219,7 @@ USkeletalMeshComponent* APlayerZeroActor::CreateSkeletalMeshComponent(UglTFRunti
 	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
 
 	if (SkeletalMeshConfig.bPerPolyCollision)
-	{
+	{              
 		SkeletalMeshComponent = NewObject<UglTFRuntimeSkeletalMeshComponent>(this, GetSafeNodeName<UglTFRuntimeSkeletalMeshComponent>(Node));
 		SkeletalMeshComponent->bEnablePerPolyCollision = true;
 		SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -195,6 +230,11 @@ USkeletalMeshComponent* APlayerZeroActor::CreateSkeletalMeshComponent(UglTFRunti
 	}
 
 	USkeletalMesh* SkeletalMesh = GltfAsset->LoadSkeletalMesh(Node.MeshIndex, Node.SkinIndex, SkeletalMeshConfig);
+	if (!SkeletalMesh)
+	{
+		UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to load skeletal mesh for node %s"), *Node.Name);
+		return nullptr;
+	}
 	SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
 	SkeletalMeshComponent->SetupAttachment(AssetRoot);
 	SkeletalMeshComponent->SetRelativeTransform(Node.Transform);
@@ -232,8 +272,11 @@ UStaticMeshComponent* APlayerZeroActor::CreateStaticMeshComponent(UglTFRuntimeAs
 	
 	return StaticMeshComponent;
 }
+<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 
 void APlayerZeroActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+=======
+>>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp

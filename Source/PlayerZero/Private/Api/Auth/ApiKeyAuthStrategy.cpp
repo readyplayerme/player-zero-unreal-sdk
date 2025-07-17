@@ -7,6 +7,7 @@ class UPlayerZeroSettings;
 
 FApiKeyAuthStrategy::FApiKeyAuthStrategy()
 {
+<<<<<<< HEAD:Source/PlayerZero/Private/Api/Auth/ApiKeyAuthStrategy.cpp
 }
 
 void FApiKeyAuthStrategy::AddAuthToRequest(TSharedPtr<FApiRequest> ApiRequest)
@@ -20,14 +21,14 @@ void FApiKeyAuthStrategy::AddAuthToRequest(TSharedPtr<FApiRequest> ApiRequest)
 	}
 	ApiRequest->Headers.Add(TEXT("X-API-KEY"), PlayerZeroSettings->ApiKey);
 	OnAuthComplete.ExecuteIfBound(ApiRequest, true);
+=======
+	if(const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>())
+	{
+		ApiKey = RpmSettings->ApiKey;
+	}
+>>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Auth/ApiKeyAuthStrategy.cpp
 }
 
-void FApiKeyAuthStrategy::OnRefreshTokenResponse(TSharedPtr<FApiRequest> ApiRequest, const FRefreshTokenResponse& Response, bool bWasSuccessful)
-{
-	OnTokenRefreshed.ExecuteIfBound(ApiRequest, Response.Data, bWasSuccessful);
-}
-
-void FApiKeyAuthStrategy::TryRefresh(TSharedPtr<FApiRequest> ApiRequest)
-{
-	OnAuthComplete.ExecuteIfBound(ApiRequest, false);
+FApiKeyAuthStrategy::FApiKeyAuthStrategy(const FString& InApiKey) : ApiKey(InApiKey)
+{	
 }

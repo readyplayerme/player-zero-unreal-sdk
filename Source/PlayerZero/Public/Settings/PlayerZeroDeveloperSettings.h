@@ -1,10 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
 #include "PlayerZeroDeveloperSettings.generated.h"
+
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1)
+class FObjectPreSaveContext;
+#endif
 
 /**
  * 
@@ -44,7 +48,11 @@ public:
 	}
 
 	virtual void PostInitProperties() override;
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1)
+	virtual void PreSave(FObjectPreSaveContext ObjectSaveContext) override;
+#else
 	virtual void PreSave(const ITargetPlatform* TargetPlatform) override;
+#endif
 private:
 	const FString DemoAppId = TEXT("665e05a50c62c921e5a6ab84");
 	const FString DemoProxyUrl = TEXT("https://api.readyplayer.me/demo");

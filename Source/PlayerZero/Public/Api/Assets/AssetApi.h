@@ -3,39 +3,37 @@
 #include "Api/Common/WebApiWithAuth.h"
 #include "Models/AssetTypeListResponse.h"
 
+class URpmDeveloperSettings;
 struct FApiRequest;
 struct FAssetTypeListRequest;
 struct FAssetListRequest;
 struct FAssetListResponse;
 
-DECLARE_DELEGATE_TwoParams(FOnListAssetsResponse, const FAssetListResponse&, bool);
-DECLARE_DELEGATE_TwoParams(FOnListAssetTypeResponse, const FAssetTypeListResponse&, bool);
+DECLARE_DELEGATE_TwoParams(FOnListAssetsResponse, TSharedPtr<FAssetListResponse>, bool);
+DECLARE_DELEGATE_TwoParams(FOnListAssetTypesResponse, TSharedPtr<FAssetTypeListResponse>, bool);
 
 class PLAYERZERO_API FAssetApi :  public FWebApiWithAuth
 {
 public:
-	static const FString BaseModelType;
-	
-	FOnListAssetsResponse OnListAssetsResponse;
-	FOnListAssetTypeResponse OnListAssetTypeResponse;
+	static const FString CharacterStyleAssetType;
 	
 	FAssetApi();
 	FAssetApi(EApiRequestStrategy InApiRequestStrategy);
 	virtual ~FAssetApi() override;
-	
 	void Initialize();
-	void ListAssetsAsync(const FAssetListRequest& Request);
-	void ListAssetTypesAsync(const FAssetTypeListRequest& Request);
+	virtual void SetAuthenticationStrategy(const TSharedPtr<IAuthenticationStrategy>& InAuthenticationStrategy) override;
+	void ListAssetsAsync(TSharedPtr<FAssetListRequest> Request, FOnListAssetsResponse OnComplete);
+	void ListAssetTypesAsync(TSharedPtr<FAssetTypeListRequest> Request, FOnListAssetTypesResponse OnComplete);
+
+	
 protected:
 	EApiRequestStrategy ApiRequestStrategy;
-	
+
 private:
 	FString ApiBaseUrl;
-	bool bIsInitialized = false;
-	void HandleAssetResponse(TSharedPtr<FApiRequest>, FHttpResponsePtr Response, bool bWasSuccessful);
-	
-	void LoadAssetsFromCache(TMap<FString, FString> QueryParams);
-	void LoadAssetTypesFromCache();
+
+	void LoadAssetsFromCache(TMap<FString, FString> QueryParams, FOnListAssetsResponse OnComplete);
+	void LoadAssetTypesFromCache(FOnListAssetTypesResponse OnComplete);
 
 	TArray<FString> ExtractQueryValues(const FString& QueryString, const FString& Key);
 };

@@ -1,9 +1,15 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
+<<<<<<< HEAD:PlayerZero.uplugin
 	"VersionName": "0.2",
 	"FriendlyName": "Player Zero SDK",
 	"Description": "Player Zero SDK",
+=======
+	"VersionName": "1.0",
+	"FriendlyName": "RpmNextGen",
+	"Description": "Ready Player Me Next Gen SDK",
+>>>>>>> origin/develop:RpmNextGen.uplugin
 	"Category": "Other",
 	"CreatedBy": "Ready Player Me",
 	"CreatedByURL": "https://readyplayer.me",

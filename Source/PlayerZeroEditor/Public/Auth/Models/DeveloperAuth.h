@@ -18,10 +18,21 @@ struct PLAYERZEROEDITOR_API FDeveloperAuth
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "name"))
 	FString Name;
 
+<<<<<<< HEAD:Source/PlayerZeroEditor/Public/Auth/Models/DeveloperAuth.h
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "isDemo"))
 	bool IsDemo;
+=======
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me", meta = (JsonName = "isDemo"))
+	bool IsDemo = false;
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Public/Auth/Models/DeveloperAuth.h
 
-	FDeveloperAuth() = default;
+	FDeveloperAuth()
+	{
+		Token = TEXT("");
+		RefreshToken = TEXT("");
+		Name = TEXT("");
+		IsDemo = false;
+	}
 	
 	FDeveloperAuth(FDeveloperLoginResponseBody Data, bool bIsDemo)
 	{

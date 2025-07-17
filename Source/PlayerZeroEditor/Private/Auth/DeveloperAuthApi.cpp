@@ -1,6 +1,7 @@
 ﻿#include "Auth/DeveloperAuthApi.h"
 #include "Auth/Models/DeveloperLoginRequest.h"
 #include "Auth/Models/DeveloperLoginResponse.h"
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/Auth/DeveloperAuthApi.cpp
 #include "Interfaces/IHttpResponse.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
 
@@ -29,11 +30,26 @@ void FDeveloperAuthApi::HandleLoginResponse(TSharedPtr<FApiRequest> ApiRequest, 
 }
 
 void FDeveloperAuthApi::LoginWithEmail(FDeveloperLoginRequest Request)
+=======
+#include "Settings/RpmDeveloperSettings.h"
+
+FDeveloperAuthApi::FDeveloperAuthApi()
+{
+	const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
+	ApiUrl = FString::Printf(TEXT("%s/login"), *RpmSettings->ApiBaseAuthUrl);
+}
+
+void FDeveloperAuthApi::LoginWithEmail(TSharedPtr<FDeveloperLoginRequest> Request, FOnDeveloperLoginResponse OnComplete)
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/Auth/DeveloperAuthApi.cpp
 {
 	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
 	ApiRequest->Url = ApiUrl;
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	ApiRequest->Payload = Request.ToJsonString();
-	DispatchRaw(ApiRequest);
+	ApiRequest->Payload = ConvertToJsonString(*Request.Get());
+	SendRequest<FDeveloperLoginResponse>(ApiRequest, [OnComplete](TSharedPtr<FDeveloperLoginResponse> Response, bool bWasSuccessful, int32 StatusCode)
+	{
+		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
+	});
+
 }

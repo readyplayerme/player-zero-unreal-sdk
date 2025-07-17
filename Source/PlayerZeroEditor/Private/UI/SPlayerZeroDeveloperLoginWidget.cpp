@@ -1,15 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #include "UI/SPlayerZeroDeveloperLoginWidget.h"
 #include "Auth/DevAuthTokenCache.h"
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 #include "EditorCache.h"
 #include "PlayerZero.h"
+=======
+#include "RpmNextGen.h"
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 #include "SlateOptMacros.h"
-#include "Api/Assets/Models/AssetListRequest.h"
-#include "Api/Assets/Models/AssetListResponse.h"
-#include "DeveloperAccounts/DeveloperAccountApi.h"
-#include "Auth/DeveloperTokenAuthStrategy.h"
 #include "Widgets/Input/SEditableTextBox.h"
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 #include "PlayerZeroTextureLoader.h"
 #include "Auth/DeveloperAuthApi.h"
 #include "Auth/Models/DeveloperAuth.h"
@@ -21,6 +22,11 @@
 #include "Settings/PlayerZeroDeveloperSettings.h"
 #include "Utilities/PlayerZeroImageHelper.h"
 #include "Widgets/Layout/SScrollBox.h"
+=======
+#include "Auth/Models/DeveloperAuth.h"
+#include "UI/SDeveloperLoginPanel.h"
+#include "UI/SDeveloperSettingsPanel.h"
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -40,22 +46,23 @@ void SPlayerZeroDeveloperLoginWidget::Construct(const FArguments& InArgs)
 		UserName = "User";
 		FDevAuthTokenCache::ClearAuthData();
 	}
-
 	ChildSlot
 	[
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
 		[
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 			SNew(STextBlock)
 			.Text(FText::FromString("Sign in with your Ready Player Me Studio account"))
 			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility)
+=======
+			SAssignNew(LoginPanel, SDeveloperLoginPanel)
+			.Visibility(this, &SRpmDeveloperLoginWidget::GetLoginPanelVisibility)
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 		]
 		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
 		[
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 			SNew(STextBlock)
 			.Text(FText::FromString("Email:"))
 			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility)
@@ -195,10 +202,19 @@ void SPlayerZeroDeveloperLoginWidget::Construct(const FArguments& InArgs)
 void SPlayerZeroDeveloperLoginWidget::Initialize()
 {
 	if (bIsInitialized)
+=======
+			SAssignNew(SettingsPanel, SDeveloperSettingsPanel)
+			.Visibility(this, &SRpmDeveloperLoginWidget::GetSettingsPanelVisibility)
+		]
+	];
+
+	if(LoginPanel)
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 	{
-		return;
+		LoginPanel->OnLoginSuccess.BindRaw( this, &SRpmDeveloperLoginWidget::HandleLogin );
 	}
 
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 	ActiveLoaders = TArray<TSharedPtr<FPlayerZeroTextureLoader>>();
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
 	if (!DeveloperAuthApi.IsValid())
@@ -212,9 +228,16 @@ void SPlayerZeroDeveloperLoginWidget::Initialize()
 	{
 		AssetApi = MakeShared<FAssetApi>();
 		if (!DevAuthData.IsDemo)
+=======
+	if(SettingsPanel)
+	{
+		SettingsPanel->OnLogout.BindRaw( this, &SRpmDeveloperLoginWidget::HandleLogout );
+		if(bIsLoggedIn)
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 		{
-			AssetApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
+			SettingsPanel->RunPanelSetup(UserName);
 		}
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 		AssetApi->OnListAssetsResponse.BindRaw(this, &SPlayerZeroDeveloperLoginWidget::HandleBaseModelListResponse);
 	}
 	if (!DeveloperAccountApi.IsValid())
@@ -236,22 +259,32 @@ void SPlayerZeroDeveloperLoginWidget::Initialize()
 		return;
 	}
 	OnLogoutClicked();
+=======
+	}
+
+	SetLoggedInState(bIsLoggedIn);
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 }
 
 SPlayerZeroDeveloperLoginWidget::~SPlayerZeroDeveloperLoginWidget()
 {
-	ClearLoadedCharacterModelImages();
 }
 
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 void SPlayerZeroDeveloperLoginWidget::ClearLoadedCharacterModelImages()
+=======
+void SRpmDeveloperLoginWidget::HandleLogin(const FString& String)
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 {
-	for (const auto Texture : CharacterStyleTextures)
+	UE_LOG(LogReadyPlayerMe, Log, TEXT("Login success: %s"), *String);
+	if(SettingsPanel)
 	{
-		Texture->RemoveFromRoot();
+		SettingsPanel->RunPanelSetup(String);
 	}
-	CharacterStyleTextures.Empty();
+	SetLoggedInState(true);
 }
 
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 void SPlayerZeroDeveloperLoginWidget::AddCharacterStyle(const FAsset& StyleAsset)
 {
 	TSharedPtr<SImage> ImageWidget;
@@ -332,15 +365,34 @@ void SPlayerZeroDeveloperLoginWidget::OnLoadBaseModelClicked(const FAsset& Style
 }
 
 EVisibility SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility() const
+=======
+void SRpmDeveloperLoginWidget::HandleLogout()
+{
+	SetLoggedInState(false);
+}
+
+void SRpmDeveloperLoginWidget::SetLoggedInState(bool IsLoggedIn)
+{
+	bIsLoggedIn = IsLoggedIn;
+	Invalidate(EInvalidateWidget::Layout); 
+}
+
+EVisibility SRpmDeveloperLoginWidget::GetLoginPanelVisibility() const
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 {
 	return bIsLoggedIn ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 EVisibility SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility() const
+=======
+EVisibility SRpmDeveloperLoginWidget::GetSettingsPanelVisibility() const
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 {
 	return bIsLoggedIn ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
+<<<<<<< HEAD:Source/PlayerZeroEditor/Private/UI/SPlayerZeroDeveloperLoginWidget.cpp
 FText SPlayerZeroDeveloperLoginWidget::GetWelcomeText() const
 {
 	return FText::Format(FText::FromString("Welcome {0}"), FText::FromString(UserName));
@@ -540,4 +592,6 @@ void SPlayerZeroDeveloperLoginWidget::SetLoggedInState(const bool IsLoggedIn)
 	Invalidate(EInvalidateWidget::Layout);
 }
 
+=======
+>>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
