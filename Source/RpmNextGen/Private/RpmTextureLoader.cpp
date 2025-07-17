@@ -2,8 +2,6 @@
 
 #include "RpmNextGen.h"
 #include "Api/Assets/AssetIconLoader.h"
-#include "Async/Async.h"
-#include "Modules/ModuleManager.h"
 #include "Engine/Texture2D.h"
 #include "Utilities/RpmImageHelper.h"
 
@@ -13,12 +11,12 @@ FRpmTextureLoader::FRpmTextureLoader()
 	AssetIconLoader->OnIconLoaded.BindRaw( this, &FRpmTextureLoader::OnIconLoaded);
 }
 
-void FRpmTextureLoader::LoadIconFromAsset(const FAsset& Asset, bool bStoreInCache)
+void FRpmTextureLoader::LoadIconFromAsset(const FRpmAsset& Asset)
 {
-	AssetIconLoader->LoadIcon(Asset, bStoreInCache);
+	AssetIconLoader->LoadIcon(Asset);
 }
 
-void FRpmTextureLoader::OnIconLoaded(const FAsset& Asset, const TArray<unsigned char>& Array)
+void FRpmTextureLoader::OnIconLoaded(const FRpmAsset& Asset, const TArray<unsigned char>& Array)
 {
 	if (UTexture2D* Texture = FRpmImageHelper::CreateTextureFromData(Array))
 	{

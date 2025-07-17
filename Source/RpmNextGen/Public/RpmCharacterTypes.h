@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Api/Assets/Models/Asset.h"
+#include "Api/Assets/Models/RpmAsset.h"
 #include "Components/ActorComponent.h"
 #include "RpmCharacterTypes.generated.h"
 
@@ -32,15 +32,15 @@ struct RPMNEXTGEN_API FRpmCharacterData
 	FString Id;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me")
-	FString BaseModelId;
+	FString CharacterStyleId;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me", meta = (JsonName = "assets"))
-	TMap<FString, FAsset> Assets;
+	TMap<FString, FRpmAsset> Assets;
 
 	FRpmCharacterData()
 	{
 		Id = "";
-		BaseModelId = "";
-		Assets = TMap<FString, FAsset>();
+		CharacterStyleId = "";
+		Assets = TMap<FString, FRpmAsset>();
 	}
 };

@@ -8,7 +8,6 @@ public:
 	static const FString CachePakFilePath;
 	
 	static void CreatePakFile();
-	static void ExtractPakFile(const FString& PakFilePath);
 	static void ExtractFilesFromPak(const FString& PakFilePath);
 
 private:
