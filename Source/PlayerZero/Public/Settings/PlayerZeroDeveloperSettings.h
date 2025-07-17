@@ -9,27 +9,33 @@
 /**
  * 
  */
-UCLASS(config = Game, defaultconfig, meta = (DisplayName = "Ready Player Me"))
+UCLASS(config = Game, defaultconfig, meta = (DisplayName = "Player Zero Settings"))
 class PLAYERZERO_API UPlayerZeroDeveloperSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(VisibleAnywhere, Config, Category = "Auth Settings", meta = (ReadOnly  = "true", ToolTip = "Base URL for requests."))
+	UPROPERTY(VisibleAnywhere, Config, Category = "Player Zero Settings", meta = (ReadOnly  = "true", ToolTip = "Base URL for requests."))
 	FString ApiBaseUrl;
 
 public:
 	
-	UPROPERTY(VisibleAnywhere, Config, Category = "Auth Settings", meta = (ReadOnly  = "true", ToolTip = "Base URL for authentication requests."))
+	UPROPERTY(VisibleAnywhere, Config, Category = "Player Zero Settings", meta = (ReadOnly  = "true", ToolTip = "Base URL for authentication requests."))
 	FString ApiBaseAuthUrl;
 
-	UPROPERTY(EditAnywhere, Config, Category = "Auth Settings", meta = (ToolTip = "Application ID used for authentication."))
+	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "Application ID used for authentication."))
 	FString ApplicationId;
 
-	UPROPERTY(EditAnywhere, Config, Category = "Auth Settings", meta = (ToolTip = "API key used for authentication."))
+	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "API key used for authentication."))
 	FString ApiKey;
 	
-	UPROPERTY(EditAnywhere, Config, Category = "Auth Settings", meta = (ToolTip = "Proxy URL for API requests. If empty, the base URL will be used."))
+	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "Proxy URL for API requests. If empty, the base URL will be used."))
 	FString ApiProxyUrl;
+
+	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "Game ID for the Player Zero application. This is used to identify the game in the Player Zero ecosystem."))
+	FString GameId;
+
+	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "Default avatar ID for the Player Zero application. This when you try to load an avatar but no avatarId is set."))
+	FString DefaultAvatarId;
 	
 	UPlayerZeroDeveloperSettings();
 	

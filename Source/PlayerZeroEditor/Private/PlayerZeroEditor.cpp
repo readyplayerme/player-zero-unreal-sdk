@@ -41,7 +41,7 @@ void FPlayerZeroEditorModule::StartupModule()
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FPlayerZeroEditorModule::RegisterMenus));
 
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(DeveloperWindowName, FOnSpawnTab::CreateRaw(this, &FPlayerZeroEditorModule::OnSpawnPluginTab))
-		.SetDisplayName(LOCTEXT("DeveloperLoginWidget", "Ready Player Me"))
+		.SetDisplayName(LOCTEXT("DeveloperLoginWidget", "Player Zero"))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
 	
 	// Don't show Loader window in the menu
@@ -54,31 +54,31 @@ void FPlayerZeroEditorModule::RegisterMenus()
 {
 	FToolMenuOwnerScoped OwnerScoped(this);
 
-	// Create a new main menu entry called "ReadyPlayerMe"
+	// Create a new main menu entry called "PlayerZero"
 	UToolMenu* MainMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu");
 
-	// Add a new top-level menu "Ready Player Me"
-	FToolMenuSection& Section = MainMenu->AddSection("ReadyPlayerMeTopMenu", LOCTEXT("ReadyPlayerMeMenuSection", "Ready Player Me"));
+	// Add a new top-level menu "Player Zero"
+	FToolMenuSection& Section = MainMenu->AddSection("PlayerZeroTopMenu", LOCTEXT("PlayerZeroMenuSection", "Player Zero"));
 
-	// Add a sub-menu for "Ready Player Me"
+	// Add a sub-menu for "Player Zero"
 	FToolMenuEntry& SubMenuEntry = Section.AddSubMenu(
-		"ReadyPlayerMe",
-		LOCTEXT("ReadyPlayerMeMenu", "Ready Player Me"),
-		LOCTEXT("ReadyPlayerMeMenu_ToolTip", "Open Ready Player Me tools"),
-		FNewToolMenuDelegate::CreateRaw(this, &FPlayerZeroEditorModule::FillReadyPlayerMeMenu),
+		"PlayerZero",
+		LOCTEXT("PlayerZeroMenu", "Player Zero"),
+		LOCTEXT("PlayerZeroMenu_ToolTip", "Open Player Zero tools"),
+		FNewToolMenuDelegate::CreateRaw(this, &FPlayerZeroEditorModule::FillPlayerZeroMenu),
 		false, // Don't open on hover
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.User") // Optional icon for the top-level menu
 	);
 }
 
-void FPlayerZeroEditorModule::FillReadyPlayerMeMenu(UToolMenu* Menu)
+void FPlayerZeroEditorModule::FillPlayerZeroMenu(UToolMenu* Menu)
 {
-	FToolMenuSection& Section = Menu->AddSection("ReadyPlayerMeSubSection");
+	FToolMenuSection& Section = Menu->AddSection("PlayerZeroSubSection");
 
 	Section.AddMenuEntry(
 		"OpenLoginWindow",
 		LOCTEXT("OpenLoginWindow", "Developer Window"),
-		LOCTEXT("OpenLoginWindowToolTip", "Open the RPM Developer Window."),
+		LOCTEXT("OpenLoginWindowToolTip", "Open the Player Zero Developer Window."),
 		FSlateIcon(),
 		FUIAction(FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::PluginButtonClicked))
 	);

@@ -2,7 +2,7 @@
 
 #include "Settings/PlayerZeroDeveloperSettings.h"
 
-UPlayerZeroDeveloperSettings::UPlayerZeroDeveloperSettings() : ApiBaseUrl(TEXT("https://api.readyplayer.me")), ApiBaseAuthUrl(TEXT("https://readyplayer.me/api/auth"))
+UPlayerZeroDeveloperSettings::UPlayerZeroDeveloperSettings() : ApiBaseUrl(TEXT("https://api.readyplayer.me")), ApiBaseAuthUrl(TEXT("https://readyplayer.me/api/auth")), DefaultAvatarId((TEXT("68304bfa19a6664919431f4e")))
 {
 	LoadConfig();
 }
@@ -32,14 +32,6 @@ void UPlayerZeroDeveloperSettings::PostEditChangeProperty(struct FPropertyChange
 	SaveConfig(CPF_Config, *GetDefaultConfigFilename());
 }
 #endif // WITH_EDITOR
-
-
-void UPlayerZeroDeveloperSettings::SetupDemoAccount()
-{
-	ApplicationId = DemoAppId;
-	ApiProxyUrl = DemoProxyUrl;
-	SaveConfig(CPF_Config, *GetDefaultConfigFilename());
-}
 
 void UPlayerZeroDeveloperSettings::Reset()
 {

@@ -30,7 +30,8 @@ void APlayerZeroActor::LoadCharacter(const FPlayerZeroCharacterData& InCharacter
 		SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
 		SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
 	}
-	LoadAsset(FAsset(), GltfAsset);
+	//TODO
+	//LoadAsset(FAsset(), GltfAsset);
 }
 
 void APlayerZeroActor::LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset)

@@ -1,5 +1,6 @@
 #include "DeveloperAccounts/DeveloperAccountApi.h"
 #include "JsonObjectConverter.h"
+#include "PlayerZero.h"
 #include "DeveloperAccounts/Models/ApplicationListRequest.h"
 #include "DeveloperAccounts/Models/ApplicationListResponse.h"
 #include "DeveloperAccounts/Models/OrganizationListRequest.h"
@@ -59,6 +60,7 @@ void FDeveloperAccountApi::HandleOrgListResponse(TSharedPtr<FApiRequest> ApiRequ
     FOrganizationListResponse OrganizationListResponse;
     if(Response.IsValid())
     {
+        UE_LOG(LogPlayerZero, Log, TEXT("Organization LIST request completed. Response code: %d"), Response->GetResponseCode());
         FString Data = Response->GetContentAsString();
         if (bWasSuccessful && !Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &OrganizationListResponse, 0, 0))
         {

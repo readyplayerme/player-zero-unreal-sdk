@@ -9,7 +9,10 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Containers/Map.h"
 #include "PlayerZero/Public/Api/Assets/Models/Asset.h"
+#include "Api/Blueprints/Models/CharacterBlueprint.h"
 
+class FBlueprintApi;
+struct FBlueprintListResponse;
 class FPlayerZeroTextureLoader;
 struct FDeveloperLoginResponse;
 class UPlayerZeroDeveloperSettings;
@@ -45,6 +48,7 @@ private:
 	TArray<TSharedPtr<FPlayerZeroTextureLoader>> ActiveLoaders;
 	TSharedPtr<FDeveloperAccountApi> DeveloperAccountApi;
 	TSharedPtr<FDeveloperAuthApi> DeveloperAuthApi;
+	TSharedPtr<FBlueprintApi> BlueprintApi;
 	static constexpr const TCHAR* CacheKeyEmail = TEXT("Email");
 	bool bIsLoggedIn = false;
 	bool bIsInitialized = false;
@@ -55,22 +59,21 @@ private:
 	FText GetSelectedComboBoxItemText() const;
 
 	FReply OnLoginClicked();
-	FReply OnUseDemoAccountClicked();
 	FReply OnLogoutClicked();
-
+	TMap<FString, FCharacterBlueprint> LoadedBlueprints;
 	void Initialize();
 	void GetOrgList();
 	void ClearLoadedCharacterModelImages();
-	//void LoadBaseModelList();
+	void LoadBlueprintList();
 	void HandleLoginResponse(const FDeveloperLoginResponse& Response, bool bWasSuccessful);
-	//void HandleOrganizationListResponse(const FOrganizationListResponse& Response, bool bWasSuccessful);
-	//void HandleApplicationListResponse(const FApplicationListResponse& Response, bool bWasSuccessful);
-	//void HandleBaseModelListResponse(const FAssetListResponse& Response, bool bWasSuccessful);
-	void OnLoadBaseModelClicked(const FAsset& Asset);
+	void HandleOrganizationListResponse(const FOrganizationListResponse& Response, bool bWasSuccessful);
+	void HandleApplicationListResponse(const FApplicationListResponse& Response, bool bWasSuccessful);
+	void HandleBlueprintListResponse(const FBlueprintListResponse& Response, bool bWasSuccessful);
+	void OnLoadBlueprintClicked(const FCharacterBlueprint& CharacterBlueprint);
 	void SetLoggedInState(const bool IsLoggedIn);
 	void PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem);
 	void OnComboBoxSelectionChanged(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo);
 	UFUNCTION()
 	void OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> SImage, TSharedPtr<FPlayerZeroTextureLoader> LoaderToRemove);
-	void AddCharacterStyle(const FAsset& StyleAsset);
+	void AddCharacterBlueprint(const FCharacterBlueprint& CharacterBlueprint);
 };

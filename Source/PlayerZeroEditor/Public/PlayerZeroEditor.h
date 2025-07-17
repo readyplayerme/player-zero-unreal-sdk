@@ -18,7 +18,7 @@ public:
 	
 private:
 	void RegisterMenus();
-	void FillReadyPlayerMeMenu(UToolMenu* Menu);
+	void FillPlayerZeroMenu(UToolMenu* Menu);
 	void OpenLoaderWindow();
 	void OpenCacheEditorWindow();
 	
