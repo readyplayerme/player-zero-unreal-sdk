@@ -39,7 +39,6 @@ public:
 	
 	UPlayerZeroDeveloperSettings();
 	
-	void SetupDemoAccount();
 	void Reset();
 	
 	FString GetApiBaseUrl() const;

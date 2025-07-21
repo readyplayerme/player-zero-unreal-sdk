@@ -19,7 +19,7 @@ void SPlayerZeroLoginPanel::Construct(const FArguments& InArgs)
 		.Padding(10)
 		[
 			SNew(STextBlock)
-			.Text(FText::FromString("Sign in with your account"))
+			.Text(FText::FromString("Sign in with your Player Zero developer account"))
 			.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 16))
 		]
 		+ SVerticalBox::Slot()
@@ -123,7 +123,7 @@ void SPlayerZeroLoginPanel::HandleLoginResponse(const FDeveloperLoginResponse& R
 {
 	if (bWasSuccessful)
 	{
-		const FDeveloperAuth AuthData = FDeveloperAuth(Response.Data, false);
+		const FDeveloperAuth AuthData = FDeveloperAuth(Response.Data);
 		FDevAuthTokenCache::SetAuthData(AuthData);
 		OnLoginSuccess.ExecuteIfBound(Response.Data.Name);
 		return;

@@ -40,6 +40,7 @@ private:
 	TArray<TSharedPtr<FString>> ComboBoxItems;
 	TSharedPtr<STextBlock> SelectedApplicationTextBlock;
 	TArray<UTexture2D*> CharacterStyleTextures;
+	TArray<FApplication> UserApplications;
 	TMap<FString, FCharacterBlueprint> LoadedBlueprints;
 	TArray<TSharedPtr<FPlayerZeroTextureLoader>> ActiveLoaders;
 	FString UserName;

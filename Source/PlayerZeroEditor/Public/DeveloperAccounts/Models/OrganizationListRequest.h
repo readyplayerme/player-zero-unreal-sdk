@@ -10,4 +10,6 @@ struct PLAYERZEROEDITOR_API FOrganizationListRequest : public FApiRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "API")
 	TMap<FString, FString> Params;
+
+	
 };

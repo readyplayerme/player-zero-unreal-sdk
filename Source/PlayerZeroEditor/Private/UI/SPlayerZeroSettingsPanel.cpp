@@ -119,6 +119,7 @@ void SPlayerZeroSettingsPanel::RunPanelSetup(const FString& InUserName)
 {
 	LoadedBlueprints = TMap<FString, FCharacterBlueprint>();
 	ActiveLoaders = TArray<TSharedPtr<FPlayerZeroTextureLoader>>();
+	
 	InUserName.IsEmpty() ? UserName = TEXT("User") : UserName = InUserName;
 	UpdateErrorMessage("");
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
@@ -127,6 +128,8 @@ void SPlayerZeroSettingsPanel::RunPanelSetup(const FString& InUserName)
 	if(!DeveloperAccountApi.IsValid())
 	{
 		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>(MakeShared<DeveloperTokenAuthStrategy>());
+		DeveloperAccountApi->OnApplicationListResponse.BindRaw(this, &SPlayerZeroSettingsPanel::HandleApplicationListResponse);
+		DeveloperAccountApi->OnOrganizationResponse.BindRaw(this, &SPlayerZeroSettingsPanel::HandleOrganizationListResponse);
 	}
 
 	if (!BlueprintApi.IsValid())
@@ -134,13 +137,7 @@ void SPlayerZeroSettingsPanel::RunPanelSetup(const FString& InUserName)
 		BlueprintApi = MakeShared<FBlueprintApi>();
 		BlueprintApi->OnListResponse.BindRaw(this, &SPlayerZeroSettingsPanel::HandleBlueprintListResponse);
 	}
-
-	const UPlayerZeroDeveloperSettings* RpmSettings = GetDefault<UPlayerZeroDeveloperSettings>();
-	if(RpmSettings->ApiKey.IsEmpty() && RpmSettings->ApiProxyUrl.IsEmpty())
-	{
-		UpdateErrorMessage("API Key and Proxy URL is not set. Please check your Ready Player Me Settings.");
-		return;
-	}
+	DeveloperAccountApi->ListOrganizationsAsync(FOrganizationListRequest());
 }
 
 void SPlayerZeroSettingsPanel::UpdateErrorMessage(const FString& Message)
@@ -254,10 +251,13 @@ void SPlayerZeroSettingsPanel::AddCharacterBlueprint(const FCharacterBlueprint& 
 		]
 	];
 
-	// TSharedPtr<FRpmTextureLoader> ImageLoader = MakeShared<FRpmTextureLoader>();
-	// ActiveLoaders.Add(ImageLoader);
-	// ImageLoader->OnTextureLoaded.BindRaw(this, &SPlayerZeroSettingsPanel::OnTextureLoaded, ImageWidget, ImageLoader);
-	// ImageLoader->LoadIconFromAsset(CharacterBlueprint);
+	TSharedPtr<FPlayerZeroTextureLoader> ImageLoader = MakeShared<FPlayerZeroTextureLoader>();
+	ActiveLoaders.Add(ImageLoader);
+	ImageLoader->OnTextureLoaded.BindRaw(this, &SPlayerZeroSettingsPanel::OnTextureLoaded, ImageWidget, ImageLoader);
+	UE_LOG(LogPlayerZero, Log, TEXT("Loading icon from URL: %s"), *CharacterBlueprint.CharacterModel.IconUrl);
+	UE_LOG(LogPlayerZero, Log, TEXT("Model URL : %s"), *CharacterBlueprint.CharacterModel.ModelUrl);
+	UE_LOG(LogPlayerZero, Log, TEXT("ID: %s"), *CharacterBlueprint.CharacterModel.Id);
+	ImageLoader->LoadIconFromUrl(CharacterBlueprint.CharacterModel.IconUrl);
 }
 
 void SPlayerZeroSettingsPanel::OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> Image, TSharedPtr<FPlayerZeroTextureLoader> RpmTextureLoader)
@@ -276,16 +276,18 @@ void SPlayerZeroSettingsPanel::HandleBlueprintListResponse(const FBlueprintListR
 	LoadedBlueprints.Empty();
 	if(bWasSuccessful)
 	{
+		UE_LOG(LogPlayerZero, Log, TEXT("Blueprint LIST request completed."));
 		if(Response.Data.Num() == 0)
 		{
 			UE_LOG(LogPlayerZero, Error, TEXT("No Avatar styles found. Make sure you have uploaded your character models to Ready Player Me Studio"));
 			UpdateErrorMessage("No Avatar styles found. Make sure you have uploaded your character models to Ready Player Me Studio");
 			return;
 		}
-		for (FCharacterBlueprint Asset : Response.Data)
+		UE_LOG(LogPlayerZero, Log, TEXT("Blueprints listed successfully. Count: %d"), Response.Data.Num());
+		for (FCharacterBlueprint CharacterBlueprint : Response.Data)
 		{
-			LoadedBlueprints.Add(Asset.Id, Asset);
-			AddCharacterBlueprint(Asset);
+			LoadedBlueprints.Add(CharacterBlueprint.Id, CharacterBlueprint);
+			AddCharacterBlueprint(CharacterBlueprint);
 		}
 		UpdateErrorMessage("");
 		return;
@@ -318,19 +320,33 @@ void SPlayerZeroSettingsPanel::HandleApplicationListResponse(const FApplicationL
 {
 	if (bWasSuccessful)
 	{
-		if (Response.Data.Num() == 0)
+		// log success
+		UE_LOG(LogPlayerZero, Log, TEXT("Applications listed successfully. Count: %d"), Response.Data.Num());
+		const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
+		UserApplications = Response.Data;
+		FString Active;
+		TArray<FString> Items;
+		for (const FApplication& App : UserApplications)
 		{
-			UE_LOG(LogPlayerZero, Error, TEXT("No organizations found"));
-			return;
+			Items.Add(App.Name);
+			if (App.Id == PlayerZeroSettings->ApplicationId)
+			{
+				Active = App.Name;
+			}
 		}
-		UE_LOG(LogPlayerZero, Log, TEXT("Organizations listed successfully. Count: %d"), Response.Data.Num());
-		FApplicationListRequest Request;
-		Request.Params.Add("organizationId", Response.Data[0].Id);
-		DeveloperAccountApi->ListApplicationsAsync(Request);
-		return;
+		if (Active.IsEmpty() && Items.Num() > 0)
+		{
+			const auto NewActiveItem = MakeShared<FString>(Items[0]);
+			OnComboBoxSelectionChanged(NewActiveItem, ESelectInfo::Direct);
+			SelectedApplicationTextBlock->SetText(FText::FromString(*NewActiveItem));
+		}
+		PopulateComboBoxItems(Items, Active);
 	}
-
-	UE_LOG(LogPlayerZero, Error, TEXT("Failed to list organizations"));
+	else
+	{
+		UE_LOG(LogPlayerZero, Error, TEXT("Failed to list applications"));
+	}
+	LoadBlueprintList();
 }
 
 void SPlayerZeroSettingsPanel::PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem)

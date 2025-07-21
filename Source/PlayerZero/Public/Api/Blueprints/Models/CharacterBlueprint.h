@@ -13,6 +13,12 @@ struct PLAYERZERO_API FCharacterBlueprintModel
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "name"))
 	FString Id;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "modelUrl"))
+	FString ModelUrl;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "iconUrl"))
+	FString IconUrl;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "characterModel"))
 	FDateTime CreatedAt;
 	
@@ -30,13 +36,7 @@ struct PLAYERZERO_API FCharacterBlueprint
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "name"))
 	FString Id;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "modelUrl"))
-	FString ModelUrl;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "iconUrl"))
-	FString IconUrl;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "characterModel"))
 	FCharacterBlueprintModel CharacterModel;
 
