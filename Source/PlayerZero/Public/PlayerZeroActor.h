@@ -32,13 +32,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Player Zero")
 	virtual void LoadCharacter(const FPlayerZeroCharacterData& InCharacterData, UglTFRuntimeAsset* GltfAsset);
-
-	UFUNCTION(BlueprintCallable, Category = "Player Zero")
-	virtual void LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset );
 	
-	UFUNCTION(BlueprintCallable, Category = "Player Zero")
-	virtual void LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FAsset& Asset, const FPlayerZeroAnimationConfig& InAnimationCharacter);
-
 	UFUNCTION(BlueprintCallable, Category = "Player Zero")
 	void RemoveAllMeshes();
 	

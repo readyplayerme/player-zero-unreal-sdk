@@ -1,25 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Ready Player Me
 
 #include "UI/SPlayerZeroDeveloperLoginWidget.h"
 #include "Auth/DevAuthTokenCache.h"
-#include "EditorCache.h"
 #include "PlayerZero.h"
 #include "SlateOptMacros.h"
-#include "DeveloperAccounts/DeveloperAccountApi.h"
-#include "Auth/DeveloperTokenAuthStrategy.h"
 #include "Widgets/Input/SEditableTextBox.h"
-#include "PlayerZeroTextureLoader.h"
-#include "Api/Blueprints/BlueprintApi.h"
-#include "Auth/DeveloperAuthApi.h"
 #include "Auth/Models/DeveloperAuth.h"
-#include "Auth/Models/DeveloperLoginRequest.h"
-#include "DeveloperAccounts/Models/ApplicationListRequest.h"
-#include "DeveloperAccounts/Models/ApplicationListResponse.h"
-#include "DeveloperAccounts/Models/OrganizationListRequest.h"
-#include "DeveloperAccounts/Models/OrganizationListResponse.h"
-#include "Settings/PlayerZeroDeveloperSettings.h"
-#include "Utilities/PlayerZeroImageHelper.h"
-#include "Widgets/Layout/SScrollBox.h"
+#include "UI/SPlayerZeroLoginPanel.h"
+#include "UI/SPlayerZeroSettingsPanel.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -39,522 +27,71 @@ void SPlayerZeroDeveloperLoginWidget::Construct(const FArguments& InArgs)
 		UserName = "User";
 		FDevAuthTokenCache::ClearAuthData();
 	}
-
 	ChildSlot
 	[
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
 		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Sign in with your Player Zero developer account"))
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility)
+			SAssignNew(LoginPanel, SPlayerZeroLoginPanel)
+			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoginPanelVisibility)
 		]
 		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
 		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Email:"))
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility)
+			SAssignNew(SettingsPanel, SPlayerZeroSettingsPanel)
+			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetSettingsPanelVisibility)
 		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SAssignNew(EmailTextBox, SEditableTextBox)
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Password:"))
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SAssignNew(PasswordTextBox, SEditableTextBox)
-			.IsPassword(true)
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(SButton)
-			.Text(FText::FromString("Login"))
-			.OnClicked(this, &SPlayerZeroDeveloperLoginWidget::OnLoginClicked)
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.FillWidth(1.0)
-			[
-				SNew(STextBlock)
-				.Text(this, &SPlayerZeroDeveloperLoginWidget::GetWelcomeText)
-				.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility)
-			]
-			+ SHorizontalBox::Slot()
-			  .AutoWidth()
-			  .HAlign(HAlign_Right)
-			[
-				SNew(SButton)
-				.Text(FText::FromString("Logout"))
-				.OnClicked(this, &SPlayerZeroDeveloperLoginWidget::OnLogoutClicked)
-				.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility)
-			]
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Project Settings"))
-			.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf"), 16))
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Select the Ready Player Me application to link to project"))
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(SComboBox<TSharedPtr<FString>>)
-			.OptionsSource(&ComboBoxItems)
-			.OnSelectionChanged(this, &SPlayerZeroDeveloperLoginWidget::OnComboBoxSelectionChanged)
-			.OnGenerateWidget_Lambda([](TSharedPtr<FString> Item)
-			                                    {
-				                                    return SNew(STextBlock).Text(FText::FromString(*Item));
-			                                    })
-			[
-				SAssignNew(SelectedApplicationTextBlock, STextBlock).Text(
-					this, &SPlayerZeroDeveloperLoginWidget::GetSelectedComboBoxItemText)
-			]
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Character Blueprints"))
-			.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf"), 16))
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Here you can import your character blueprints from Studio"))
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility)
-		]
-		+ SVerticalBox::Slot()
-		  .Padding(10)
-		  .FillHeight(1.0f) // Allows the scroll box to take up remaining space
-		[
-			SNew(SScrollBox)
-			.Visibility(this, &SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility)
-			+ SScrollBox::Slot()
-			[
-				SAssignNew(ContentBox, SVerticalBox)
-			]
-		]	
 	];
 
-	EmailTextBox->SetText(FText::FromString(FEditorCache::GetString(CacheKeyEmail)));
-	Initialize();
-}
-
-void SPlayerZeroDeveloperLoginWidget::Initialize()
-{
-	if (bIsInitialized)
+	if(LoginPanel)
 	{
-		return;
-	}
-	LoadedBlueprints = TMap<FString, FCharacterBlueprint>();
-	ActiveLoaders = TArray<TSharedPtr<FPlayerZeroTextureLoader>>();
-	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
-	if (!DeveloperAuthApi.IsValid())
-	{
-		DeveloperAuthApi = MakeShared<FDeveloperAuthApi>();
-
-		DeveloperAuthApi->OnLoginResponse.BindRaw(this, &SPlayerZeroDeveloperLoginWidget::HandleLoginResponse);
-	}
-	if (!BlueprintApi.IsValid())
-	{
-		BlueprintApi = MakeShared<FBlueprintApi>();
-		BlueprintApi->OnListResponse.BindRaw(this, &SPlayerZeroDeveloperLoginWidget::HandleBlueprintListResponse);
+		LoginPanel->OnLoginSuccess.BindRaw( this, &SPlayerZeroDeveloperLoginWidget::HandleLogin );
 	}
 
-	// TODO update
-	// if (!AssetApi.IsValid())
-	// {
-	// 	AssetApi = MakeShared<FAssetApi>();
-	// 	if (!DevAuthData.IsDemo)
-	// 	{
-	// 		AssetApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
-	// 	}
-	// 	AssetApi->OnListAssetsResponse.BindRaw(this, &SPlayerZeroDeveloperLoginWidget::HandleBaseModelListResponse);
-	// }
-	if (!DeveloperAccountApi.IsValid())
+	if(SettingsPanel)
 	{
-		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>(nullptr);
-		if (!DevAuthData.IsDemo)
+		SettingsPanel->OnLogout.BindRaw( this, &SPlayerZeroDeveloperLoginWidget::HandleLogout );
+		if(bIsLoggedIn)
 		{
-			DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
+			SettingsPanel->RunPanelSetup(UserName);
 		}
-		DeveloperAccountApi->OnOrganizationResponse.BindRaw(
-			this, &SPlayerZeroDeveloperLoginWidget::HandleOrganizationListResponse);
-		DeveloperAccountApi->OnApplicationListResponse.BindRaw(
-			this, &SPlayerZeroDeveloperLoginWidget::HandleApplicationListResponse);
 	}
-	bIsInitialized = true;
-	if (bIsLoggedIn)
-	{
-		GetOrgList();
-		return;
-	}
-	OnLogoutClicked();
+
+	SetLoggedInState(bIsLoggedIn);
 }
 
 SPlayerZeroDeveloperLoginWidget::~SPlayerZeroDeveloperLoginWidget()
 {
-	ClearLoadedCharacterModelImages();
 }
 
-void SPlayerZeroDeveloperLoginWidget::ClearLoadedCharacterModelImages()
+void SPlayerZeroDeveloperLoginWidget::HandleLogin(const FString& String)
 {
-	for (const auto Texture : CharacterStyleTextures)
+	UE_LOG(LogPlayerZero, Log, TEXT("Login success: %s"), *String);
+	if(SettingsPanel)
 	{
-		Texture->RemoveFromRoot();
+		SettingsPanel->RunPanelSetup(String);
 	}
-	CharacterStyleTextures.Empty();
+	SetLoggedInState(true);
 }
 
-void SPlayerZeroDeveloperLoginWidget::LoadBlueprintList()
+void SPlayerZeroDeveloperLoginWidget::HandleLogout()
 {
-	if (!BlueprintApi.IsValid())
-	{
-		return;
-	}
-	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetMutableDefault<UPlayerZeroDeveloperSettings>();
-	const FBlueprintListRequest Request = FBlueprintListRequest(PlayerZeroSettings->ApplicationId, false);
-	BlueprintApi->ListAsync(Request);
+	SetLoggedInState(false);
 }
 
-void SPlayerZeroDeveloperLoginWidget::AddCharacterBlueprint(const FCharacterBlueprint& CharacterBlueprint)
+void SPlayerZeroDeveloperLoginWidget::SetLoggedInState(bool IsLoggedIn)
 {
-	TSharedPtr<SImage> ImageWidget;
-	const FVector2D ImageSize(100.0f, 100.0f);
-
-	ContentBox->AddSlot()
-	          .AutoHeight()
-	          .Padding(5)
-	[
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
-		  .AutoWidth()
-		  .Padding(5)
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			  .AutoHeight()
-			  .HAlign(HAlign_Left)
-			[
-				SAssignNew(ImageWidget, SImage).
-				DesiredSizeOverride(ImageSize)
-			]
-			+ SVerticalBox::Slot()
-			  .AutoHeight().Padding( 0, 5)
-			[
-				SNew(SBox)
-				.WidthOverride(100.0f)
-				[
-					SNew(SButton)
-					.HAlign(HAlign_Center)
-					.VAlign(VAlign_Center)
-					.Text(FText::FromString("Load"))
-					.OnClicked_Lambda([this, CharacterBlueprint]() -> FReply
-					{
-						OnLoadBlueprintClicked(CharacterBlueprint);
-						return FReply::Handled();
-					})
-				]
-
-			]
-		]
-		+ SHorizontalBox::Slot()
-		  .AutoWidth()
-		  .VAlign(VAlign_Top)
-		  .Padding(10, 10, 0, 0)
-		[
-			SNew(SEditableText)
-			   .Text(FText::FromString(FString::Printf(TEXT("ID: %s"), *CharacterBlueprint.Id)))
-			   .IsReadOnly(true)
-			   .IsCaretMovedWhenGainFocus(false)
-			   .SelectAllTextWhenFocused(false)
-			   .MinDesiredWidth(100.0f)
-		]
-	];
-
-	TSharedPtr<FPlayerZeroTextureLoader> ImageLoader = MakeShared<FPlayerZeroTextureLoader>();
-	ActiveLoaders.Add(ImageLoader);
-	ImageLoader->OnTextureLoaded.BindRaw(this, &SPlayerZeroDeveloperLoginWidget::OnTextureLoaded, ImageWidget, ImageLoader);
-	//TODO fix 
-	//ImageLoader->LoadIconFromAsset(CharacterBlueprint);
+	bIsLoggedIn = IsLoggedIn;
+	Invalidate(EInvalidateWidget::Layout); 
 }
 
-void SPlayerZeroDeveloperLoginWidget::OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> SImage, TSharedPtr<FPlayerZeroTextureLoader> LoaderToRemove)
-{
-	if (Texture2D)
-	{
-		Texture2D->AddToRoot();
-		CharacterStyleTextures.Add(Texture2D);
-		FPlayerZeroImageHelper::LoadTextureToSImage(Texture2D, FVector2D(100.0f, 100.0f), SImage);
-	}
-	ActiveLoaders.Remove(LoaderToRemove);
-}
-
-void SPlayerZeroDeveloperLoginWidget::OnLoadBlueprintClicked(const FCharacterBlueprint& CharacterBlueprint)
-{
-	// AssetLoader = MakeShared<FEditorAssetLoader>();
-	// AssetLoader->LoadBaseModelAsset(StyleAsset);
-}
-
-EVisibility SPlayerZeroDeveloperLoginWidget::GetLoginViewVisibility() const
+EVisibility SPlayerZeroDeveloperLoginWidget::GetLoginPanelVisibility() const
 {
 	return bIsLoggedIn ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
-EVisibility SPlayerZeroDeveloperLoginWidget::GetLoggedInViewVisibility() const
+EVisibility SPlayerZeroDeveloperLoginWidget::GetSettingsPanelVisibility() const
 {
 	return bIsLoggedIn ? EVisibility::Visible : EVisibility::Collapsed;
-}
-
-FText SPlayerZeroDeveloperLoginWidget::GetWelcomeText() const
-{
-	return FText::Format(FText::FromString("Welcome {0}"), FText::FromString(UserName));
-}
-
-FReply SPlayerZeroDeveloperLoginWidget::OnLoginClicked()
-{
-	UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetMutableDefault<UPlayerZeroDeveloperSettings>();
-	PlayerZeroSettings->Reset();
-	FString Email = EmailTextBox->GetText().ToString();
-	FString Password = PasswordTextBox->GetText().ToString();
-	FEditorCache::SetString(CacheKeyEmail, Email);
-	Email = Email.TrimStartAndEnd();
-	Password = Password.TrimStartAndEnd();
-	DeveloperAccountApi->SetAuthenticationStrategy(MakeShared<DeveloperTokenAuthStrategy>());
-	FDeveloperLoginRequest LoginRequest = FDeveloperLoginRequest(Email, Password);
-	DeveloperAuthApi->LoginWithEmail(LoginRequest);
-	return FReply::Handled();
-}
-
-void SPlayerZeroDeveloperLoginWidget::GetOrgList()
-{
-	FOrganizationListRequest OrgRequest;
-	DeveloperAccountApi->ListOrganizationsAsync(OrgRequest);
-}
-
-void SPlayerZeroDeveloperLoginWidget::HandleLoginResponse(const FDeveloperLoginResponse& Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		// log success
-		UE_LOG(LogPlayerZero, Log, TEXT("Login successful for user: %s"), *Response.Data.Name);
-		UserName = Response.Data.Name;
-		const FDeveloperAuth AuthData = FDeveloperAuth(Response.Data, false);
-		FDevAuthTokenCache::SetAuthData(AuthData);
-		SetLoggedInState(true);
-		GetOrgList();
-		return;
-	}
-	UE_LOG(LogPlayerZero, Error, TEXT("Login request failed"));
-	FDevAuthTokenCache::ClearAuthData();
-}
-
-void SPlayerZeroDeveloperLoginWidget::HandleOrganizationListResponse(const FOrganizationListResponse& Response, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		// log success
-		if (Response.Data.Num() == 0)
-		{
-			UE_LOG(LogPlayerZero, Error, TEXT("No organizations found"));
-			return;
-		}
-		UE_LOG(LogPlayerZero, Log, TEXT("Organizations listed successfully. Count: %d"), Response.Data.Num());
-		FApplicationListRequest Request;
-		Request.Params.Add("organizationId", Response.Data[0].Id);
-		DeveloperAccountApi->ListApplicationsAsync(Request);
-		return;
-	}
-
-	UE_LOG(LogPlayerZero, Error, TEXT("Failed to list organizations"));
-}
-
-
-void SPlayerZeroDeveloperLoginWidget::HandleApplicationListResponse(const FApplicationListResponse& Response,                                                             bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		// log success
-		UE_LOG(LogPlayerZero, Log, TEXT("Applications listed successfully. Count: %d"), Response.Data.Num());
-		const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
-		UserApplications = Response.Data;
-		FString Active;
-		TArray<FString> Items;
-		for (const FApplication& App : UserApplications)
-		{
-			Items.Add(App.Name);
-			if (App.Id == PlayerZeroSettings->ApplicationId)
-			{
-				Active = App.Name;
-			}
-		}
-		if (Active.IsEmpty() && Items.Num() > 0)
-		{
-			const auto NewActiveItem = MakeShared<FString>(Items[0]);
-			OnComboBoxSelectionChanged(NewActiveItem, ESelectInfo::Direct);
-			SelectedApplicationTextBlock->SetText(FText::FromString(*NewActiveItem));
-		}
-		PopulateComboBoxItems(Items, Active);
-	}
-	else
-	{
-		UE_LOG(LogPlayerZero, Error, TEXT("Failed to list applications"));
-	}
-	LoadBlueprintList();
-}
-
-void SPlayerZeroDeveloperLoginWidget::HandleBlueprintListResponse(const FBlueprintListResponse& Response,
-	bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		if (LoadedBlueprints.Num() > 0)
-		{
-			// Clear previous blueprints
-			LoadedBlueprints.Empty();
-			ContentBox->ClearChildren();
-		}
-
-		for (FCharacterBlueprint Blueprint : Response.Data)
-		{
-			LoadedBlueprints.Add(Blueprint.Id, Blueprint);
-			AddCharacterBlueprint(Blueprint);
-		}
-		// log success
-		UE_LOG(LogPlayerZero, Log, TEXT("Blueprints listed successfully. Count: %d"), Response.Data.Num());
-		return;
-	}
-
-	UE_LOG(LogPlayerZero, Error, TEXT("Failed to list blueprints"));
-}
-
-// void SPlayerZeroDeveloperLoginWidget::LoadBaseModelList()
-// {
-// 	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
-// 	if (PlayerZeroSettings->ApplicationId.IsEmpty())
-// 	{
-// 		UE_LOG(LogPlayerZero, Error, TEXT("Application ID is empty, unable to load base models."));
-// 		return;
-// 	}
-// 	FAssetListRequest Request = FAssetListRequest();
-// 	FAssetListQueryParams Params = FAssetListQueryParams();
-// 	Params.ApplicationId = PlayerZeroSettings->ApplicationId;
-// 	// TODO update
-// 	// Params.Type = FAssetApi::BaseModelType;
-// 	// Request.Params = Params;
-// 	// AssetApi->ListAssetsAsync(Request);
-// }
-
-// void SPlayerZeroDeveloperLoginWidget::HandleBaseModelListResponse(const FAssetListResponse& Response, bool bWasSuccessful)
-// {
-// 	CharacterStyleAssets.Empty();
-// 	for (FAsset Asset : Response.Data)
-// 	{
-// 		CharacterStyleAssets.Add(Asset.Id, Asset);
-// 		AddCharacterStyle(Asset);
-// 	}
-// }
-
-void SPlayerZeroDeveloperLoginWidget::PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem)
-{
-	ComboBoxItems.Empty();
-	for (const FString& Item : Items)
-	{
-		ComboBoxItems.Add(MakeShared<FString>(Item));
-	}
-	SelectedComboBoxItem = MakeShared<FString>(ActiveItem);
-}
-
-
-FText SPlayerZeroDeveloperLoginWidget::GetSelectedComboBoxItemText() const
-{
-	return SelectedComboBoxItem.IsValid() && !SelectedComboBoxItem->IsEmpty()
-		       ? FText::FromString(*SelectedComboBoxItem)
-		       : FText::FromString("Select an option");
-}
-
-
-void SPlayerZeroDeveloperLoginWidget::OnComboBoxSelectionChanged(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo)
-{
-	SelectedComboBoxItem = NewValue;
-	FApplication* application = UserApplications.FindByPredicate([&](FApplication item)
-	{
-		return item.Name == *NewValue;
-	});
-	if (application)
-	{
-		UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetMutableDefault<UPlayerZeroDeveloperSettings>();
-		PlayerZeroSettings->ApplicationId = application->Id;
-		PlayerZeroSettings->SaveConfig();
-	}
-}
-
-FReply SPlayerZeroDeveloperLoginWidget::OnLogoutClicked()
-{
-	UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetMutableDefault<UPlayerZeroDeveloperSettings>();
-	PlayerZeroSettings->Reset();
-
-	// Clear the content box to remove all child widgets
-	if (ContentBox.IsValid())
-	{
-		ContentBox->ClearChildren();
-	}
-	ComboBoxItems.Empty();
-
-	ClearLoadedCharacterModelImages();
-	FDevAuthTokenCache::ClearAuthData();
-	SetLoggedInState(false);
-	return FReply::Handled();
-}
-
-void SPlayerZeroDeveloperLoginWidget::SetLoggedInState(const bool IsLoggedIn)
-{
-	this->bIsLoggedIn = IsLoggedIn;
-
-	// Force the UI to refresh
-	Invalidate(EInvalidateWidget::Layout);
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

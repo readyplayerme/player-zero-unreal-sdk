@@ -4,12 +4,12 @@
 #include "FileData.generated.h"
 
 UENUM(BlueprintType)
-enum class PLAYERZERO_API EFileType
+enum class EFileType : uint8
 {
-	None = 0,
-	GLB = 1,
-	PNG = 2,
-	JPEG = 3,
+	None,
+	GLB,
+	PNG,
+	JPEG,
 };
 
 USTRUCT(BlueprintType)

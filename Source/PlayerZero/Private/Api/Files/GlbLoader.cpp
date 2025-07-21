@@ -6,7 +6,7 @@
 FGlbLoader::FGlbLoader() : GltfConfig(new FglTFRuntimeConfig()), FileWriter(new FFileUtility()) 
 {
     GltfConfig->TransformBaseType = EglTFRuntimeTransformBaseType::YForward;
-    OnFileRequestComplete.BindRaw( this, &FGlbLoader::HandleFileRequestComplete);
+    OnAssetFileRequestComplete.BindRaw( this, &FGlbLoader::HandleFileRequestComplete);
 }
 
 FGlbLoader::FGlbLoader(FglTFRuntimeConfig* Config) : FGlbLoader()
@@ -24,14 +24,14 @@ FGlbLoader::~FGlbLoader()
     delete FileWriter;
 }
 
-void FGlbLoader::HandleFileRequestComplete(const TArray<uint8>* Data, const FString& FileName)
+void FGlbLoader::HandleFileRequestComplete(const FFileData& File, const TArray<unsigned char>& Data)
 {
     UglTFRuntimeAsset* GltfAsset = nullptr;
-    if (Data)
+    if (Data.Num() < 1)
     {
         if(OnGLtfAssetLoaded.IsBound())
         {
-            GltfAsset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(*Data, *GltfConfig);
+            GltfAsset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(Data, *GltfConfig);
             OnGLtfAssetLoaded.ExecuteIfBound(GltfAsset, TEXT("AssetType"));
         }
         return;

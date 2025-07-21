@@ -2,7 +2,7 @@
 
 
 #include "PlayerZeroLoaderComponent.h"
-
+#include "Api/Files/Models/FileData.h"
 #include "glTFRuntimeFunctionLibrary.h"
 #include "PlayerZero.h"
 #include "PlayerZeroFunctionLibrary.h"
@@ -19,7 +19,7 @@ UPlayerZeroLoaderComponent::UPlayerZeroLoaderComponent()
 	AppId = PlayerZeroSettings->ApplicationId;
 	FileApi = MakeShared<FFileApi>();
 	//FileApi->OnAssetFileRequestComplete.BindUObject(this, &UPlayerZeroLoaderComponent::HandleAssetLoaded);
-	FileApi->OnFileRequestComplete.BindUObject(this, &UPlayerZeroLoaderComponent::HandleCharacterAssetLoaded);
+	FileApi->OnAssetFileRequestComplete.BindUObject(this, &UPlayerZeroLoaderComponent::HandleCharacterAssetLoaded);
 	CharacterApi = MakeShared<FCharacterApi>();
 	CharacterApi->OnCharacterFindResponse.BindUObject(this, &UPlayerZeroLoaderComponent::HandleCharacterFindResponse);
 	CharacterData = FPlayerZeroCharacterData();
@@ -42,30 +42,14 @@ void UPlayerZeroLoaderComponent::LoadCharacterFromUrl(FString Url)
 	FileApi->LoadFileFromUrl(Url);
 }
 
-//TODO
-// void UPlayerZeroLoaderComponent::HandleAssetLoaded(const TArray<unsigned char>* Data, const FAsset& Asset)
-// {
-// 	if(!Data)
-// 	{
-// 		LoadGltfRuntimeAssetFromCache(Asset);
-// 		return;
-// 	}
-// 	UglTFRuntimeAsset* GltfRuntimeAsset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(*Data, GltfConfig);
-// 	if(!GltfRuntimeAsset)
-// 	{
-// 		UE_LOG(LogPlayerZero, Error, TEXT("Failed to load gltf asset"));
-// 	}
-// 	OnAssetLoaded.Broadcast(Asset, GltfRuntimeAsset);
-// }
-
-void UPlayerZeroLoaderComponent::HandleCharacterAssetLoaded(const TArray<unsigned char>* Data, const FString& FileName)
+void UPlayerZeroLoaderComponent::HandleCharacterAssetLoaded(const FFileData& File, const TArray<unsigned char>& Data)
 {
-	if(!Data)
+	if(Data.Num() <1)
 	{
 		UE_LOG(LogPlayerZero, Error, TEXT("Failed to load character asset data"));
 		return;
 	}
-	UglTFRuntimeAsset* GltfRuntimeAsset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(*Data, GltfConfig);
+	UglTFRuntimeAsset* GltfRuntimeAsset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(Data, GltfConfig);
 	if(!GltfRuntimeAsset)
 	{
 		UE_LOG(LogPlayerZero, Error, TEXT("Failed to load gltf asset"));

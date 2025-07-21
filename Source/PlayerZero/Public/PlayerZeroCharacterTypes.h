@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Api/Assets/Models/Asset.h"
 #include "Components/ActorComponent.h"
 #include "PlayerZeroCharacterTypes.generated.h"
 
@@ -33,14 +32,10 @@ struct PLAYERZERO_API FPlayerZeroCharacterData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero")
 	FString BaseModelId;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "assets"))
-	TMap<FString, FAsset> Assets;
 
 	FPlayerZeroCharacterData()
 	{
 		Id = "";
 		BaseModelId = "";
-		Assets = TMap<FString, FAsset>();
 	}
 };

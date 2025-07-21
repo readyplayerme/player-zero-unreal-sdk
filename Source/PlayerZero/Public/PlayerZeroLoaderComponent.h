@@ -4,19 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "glTFRuntimeAsset.h"
-#include "Api/Assets/Models/Asset.h"
 #include "Api/Characters/Models/PlayerZeroCharacter.h"
 #include "Components/ActorComponent.h"
 #include "PlayerZeroCharacterTypes.h"
 #include "PlayerZeroLoaderComponent.generated.h"
 
+struct FFileData;
 class FFileApi;
 class FGlbLoader;
 struct FCharacterCreateResponse;
 struct FCharacterUpdateResponse;
 struct FCharacterFindByIdResponse;
 class FCharacterApi;
-struct FAsset;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterFound, FPlayerZeroCharacterData, CharacterData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterAssetLoaded, const FPlayerZeroCharacterData&, CharacterData, UglTFRuntimeAsset*, GltfRuntimeAsset);
@@ -36,8 +35,7 @@ public:
 	
 	void SetGltfConfig(const FglTFRuntimeConfig* Config);
 
-	//void HandleAssetLoaded(const TArray<unsigned char>* Data, const FAsset& Asset);
-	void HandleCharacterAssetLoaded(const TArray<unsigned char>* Array, const FString& FileName);
+	void HandleCharacterAssetLoaded(const FFileData& File, const TArray<unsigned char>& Array);
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
