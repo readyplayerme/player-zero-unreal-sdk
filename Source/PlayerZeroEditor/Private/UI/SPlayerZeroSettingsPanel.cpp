@@ -82,7 +82,7 @@ void SPlayerZeroSettingsPanel::Construct(const FArguments& InArgs)
 		  .AutoHeight()
 		[
 			SNew(STextBlock)
-			.Text(FText::FromString("Character Models"))
+			.Text(FText::FromString("Character Blueprints"))
 			.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf"), 16))
 		]
 		+ SVerticalBox::Slot()
@@ -90,7 +90,7 @@ void SPlayerZeroSettingsPanel::Construct(const FArguments& InArgs)
 		  .AutoHeight()
 		[
 			SNew(STextBlock)
-			.Text(FText::FromString("Here you can import your character models from Studio"))
+			.Text(FText::FromString("Here you can import your character blueprints from Studio"))
 		]
 		+ SVerticalBox::Slot()
 		.AutoHeight()
@@ -254,9 +254,6 @@ void SPlayerZeroSettingsPanel::AddCharacterBlueprint(const FCharacterBlueprint& 
 	TSharedPtr<FPlayerZeroTextureLoader> ImageLoader = MakeShared<FPlayerZeroTextureLoader>();
 	ActiveLoaders.Add(ImageLoader);
 	ImageLoader->OnTextureLoaded.BindRaw(this, &SPlayerZeroSettingsPanel::OnTextureLoaded, ImageWidget, ImageLoader);
-	UE_LOG(LogPlayerZero, Log, TEXT("Loading icon from URL: %s"), *CharacterBlueprint.CharacterModel.IconUrl);
-	UE_LOG(LogPlayerZero, Log, TEXT("Model URL : %s"), *CharacterBlueprint.CharacterModel.ModelUrl);
-	UE_LOG(LogPlayerZero, Log, TEXT("ID: %s"), *CharacterBlueprint.CharacterModel.Id);
 	ImageLoader->LoadIconFromUrl(CharacterBlueprint.CharacterModel.IconUrl);
 }
 

@@ -8,12 +8,10 @@ DECLARE_DELEGATE_TwoParams(FBlueprintApiListResponse, const FBlueprintListRespon
 class PLAYERZERO_API FBlueprintApi : public FWebApi
 {
 public:
-	FBlueprintApiListResponse OnListResponse;
-
 	FBlueprintApi();
 	virtual ~FBlueprintApi() override;
 
-	void ListAsync(const FBlueprintListRequest& Request);
+	void ListAsync(const FBlueprintListRequest& Request, FBlueprintApiListResponse OnComplete);
 
 	void HandleListResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful);
 

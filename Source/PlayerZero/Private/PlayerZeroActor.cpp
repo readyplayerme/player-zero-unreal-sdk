@@ -21,65 +21,66 @@ void APlayerZeroActor::BeginPlay()
 	Super::BeginPlay();
 }
 
+
 void APlayerZeroActor::LoadCharacter(const FPlayerZeroCharacterData& InCharacterData, UglTFRuntimeAsset* GltfAsset)
 {
 	CharacterData = InCharacterData;
-	if(AnimationConfigsByBaseModelId.Contains(CharacterData.BaseModelId))
+	if(AnimationConfigsByStyleId.Contains(CharacterData.BaseModelId))
 	{
-		AnimationConfig = AnimationConfigsByBaseModelId[CharacterData.BaseModelId];
+		AnimationConfig = AnimationConfigsByStyleId[CharacterData.BaseModelId];
 		SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
 		SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
 	}
-}
-
-void APlayerZeroActor::RemoveMeshComponentsOfType(const FString& AssetType)
-{
-	if (LoadedMeshComponentsByAssetType.IsEmpty())
+	RemoveAllMeshes();
+	const double LoadingStartTime = FPlatformTime::Seconds();
+	const TArray<USceneComponent*> NewMeshComponents = LoadMeshComponents(GltfAsset);
+	if (NewMeshComponents.Num() > 0)
 	{
-		UE_LOG( LogPlayerZero, Log, TEXT("No mesh components to remove"));
+		LoadedMeshComponents.Append(NewMeshComponents);
+		if(AnimationConfigsByStyleId.Contains(CharacterData.BaseModelId))
+		{
+			if (MasterPoseComponent == nullptr)
+			{
+				UE_LOG(LogPlayerZero, Error, TEXT("MasterPoseComponent is null for base model %s"), *CharacterData.BaseModelId);
+				return;
+			}
+
+			if (!AnimationConfig.AnimationBlueprint)
+			{
+				UE_LOG(LogPlayerZero, Error, TEXT("AnimationBlueprint is null for base model %s"), *CharacterData.BaseModelId);
+				return;
+			}
+			
+			MasterPoseComponent->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+			MasterPoseComponent->SetAnimClass(AnimationConfig.AnimationBlueprint);
+		}
+
+		UE_LOG(LogPlayerZero, Log, TEXT("Asset loaded in %f seconds"), FPlatformTime::Seconds() - LoadingStartTime);
 		return;
 	}
-	if (LoadedMeshComponentsByAssetType.Contains(AssetType))
-	{
-		TArray<USceneComponent*>& ComponentsToRemove = LoadedMeshComponentsByAssetType[AssetType];
-		for (USceneComponent* ComponentToRemove : ComponentsToRemove)
-		{
-			if (ComponentToRemove)
-			{
-				ComponentToRemove->DestroyComponent();
-				ComponentToRemove = nullptr;
-			}
-		}
-		LoadedMeshComponentsByAssetType.Remove(AssetType);
-	}
+	
+	UE_LOG(LogPlayerZero, Error, TEXT("Failed to load mesh components"));
 }
 
 
 void APlayerZeroActor::RemoveAllMeshes()
 {
-	for (const auto Pairs : LoadedMeshComponentsByAssetType){
-		
-		TArray<USceneComponent*> ComponentsToRemove = Pairs.Value;
-		for (USceneComponent* ComponentToRemove : ComponentsToRemove)
+	for (USceneComponent* ComponentToRemove : LoadedMeshComponents)
+	{
+		if (ComponentToRemove)
 		{
-			if (ComponentToRemove)
-			{
-				ComponentToRemove->DestroyComponent();
-				ComponentToRemove = nullptr;
-			}
+			ComponentToRemove->DestroyComponent();
+			ComponentToRemove = nullptr;
 		}
 	}
-	LoadedMeshComponentsByAssetType.Empty();
+	LoadedMeshComponents.Empty();
 }
 
-TArray<USceneComponent*> APlayerZeroActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAsset, const FString& AssetType)
+TArray<USceneComponent*> APlayerZeroActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAsset)
 {
 	TArray<FglTFRuntimeNode> AllNodes = GltfAsset->GetNodes();
 	TArray<USceneComponent*> NewMeshComponents;
-
-	//TODO cleanup
-	//if baseModel or full character asset changes we need to update master pose component
-	//bool bIsMasterPoseUpdateRequired = AssetType == FAssetApi::BaseModelType || AssetType.IsEmpty();
+	
 	bool bIsMasterPoseUpdateRequired = true;
 	// Loop through all nodes to create mesh components
 	for (const FglTFRuntimeNode& Node : AllNodes)

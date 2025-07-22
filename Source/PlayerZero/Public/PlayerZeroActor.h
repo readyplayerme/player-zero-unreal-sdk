@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "glTFRuntimeAsset.h"
 #include "PlayerZeroCharacterTypes.h"
-#include "PlayerZeroLoaderComponent.h"
 #include "PlayerZeroActor.generated.h"
 
 UCLASS()
@@ -20,7 +19,7 @@ public:
 	FPlayerZeroAnimationConfig AnimationConfig;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Player Zero")
-	TMap<FString, FPlayerZeroAnimationConfig> AnimationConfigsByBaseModelId;
+	TMap<FString, FPlayerZeroAnimationConfig> AnimationConfigsByStyleId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Ready Player Me|Glb Import Settings")
 	FglTFRuntimeStaticMeshConfig StaticMeshConfig;
@@ -36,9 +35,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player Zero")
 	void RemoveAllMeshes();
 	
-	UFUNCTION(BlueprintCallable, Category = "Player Zero")
-	void RemoveMeshComponentsOfType(const FString& AssetType);
-	
 	virtual void Tick(float DeltaTime) override;
 
 protected:
@@ -51,14 +47,14 @@ protected:
 	{
 		return MakeUniqueObjectName(this, T::StaticClass(), *Node.Name);
 	}
-
+	
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Ready Player Me")
 	USceneComponent* AssetRoot;
 
-	TMap<FString, TArray<USceneComponent*>> LoadedMeshComponentsByAssetType;
+	TArray<USceneComponent*> LoadedMeshComponents;
 	
-	TArray<USceneComponent*> LoadMeshComponents(UglTFRuntimeAsset* GltfAsset, const FString& AssetType);
+	TArray<USceneComponent*> LoadMeshComponents(UglTFRuntimeAsset* GltfAsset);
 	USkeletalMeshComponent* CreateSkeletalMeshComponent(UglTFRuntimeAsset* GltfAsset, const FglTFRuntimeNode& Node);
 	UStaticMeshComponent* CreateStaticMeshComponent(UglTFRuntimeAsset* GltfAsset, const FglTFRuntimeNode& Node);
 

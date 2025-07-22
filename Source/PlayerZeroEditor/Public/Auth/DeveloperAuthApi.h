@@ -11,12 +11,12 @@ DECLARE_DELEGATE_TwoParams(FOnDeveloperLoginResponse, const FDeveloperLoginRespo
 class PLAYERZEROEDITOR_API FDeveloperAuthApi : public FWebApi
 {
 public:
-	FOnDeveloperLoginResponse OnLoginResponse;
+	//FOnDeveloperLoginResponse OnLoginResponse;
 	
 	FDeveloperAuthApi();
 
 	void HandleLoginResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful) const;
-	void LoginWithEmail(FDeveloperLoginRequest Request);
+	void LoginWithEmail(FDeveloperLoginRequest Request, FOnDeveloperLoginResponse OnComplete);
 
 private:
 	FString ApiUrl;

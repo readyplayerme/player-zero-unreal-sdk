@@ -16,7 +16,7 @@ void UPlayerZeroDeveloperSettings::PreSave(const ITargetPlatform* TargetPlatform
 {
 	Super::PreSave(TargetPlatform);
 
-	if(ApiKey.IsEmpty() && ApiProxyUrl.IsEmpty() && !ApplicationId.IsEmpty())
+	if(!ApplicationId.IsEmpty())
 	{
 		return;
 	}
@@ -26,27 +26,14 @@ void UPlayerZeroDeveloperSettings::PreSave(const ITargetPlatform* TargetPlatform
 }
 
 #if WITH_EDITOR
-void UPlayerZeroDeveloperSettings::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+void UPlayerZeroDeveloperSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	SaveConfig(CPF_Config, *GetDefaultConfigFilename());
 }
 #endif // WITH_EDITOR
 
-void UPlayerZeroDeveloperSettings::Reset()
-{
-	if(ApplicationId == DemoAppId)
-	{
-		ApplicationId = TEXT("");
-	}
-	if(ApiProxyUrl == DemoProxyUrl)
-	{
-		ApiProxyUrl = TEXT("");
-	}
-	SaveConfig(CPF_Config, *GetDefaultConfigFilename());
-}
-
 FString UPlayerZeroDeveloperSettings::GetApiBaseUrl() const
 {
-	return ApiProxyUrl.IsEmpty() ? ApiBaseUrl : ApiProxyUrl;
+	return ApiBaseUrl;
 }

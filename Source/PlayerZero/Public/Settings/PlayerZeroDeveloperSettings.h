@@ -25,12 +25,6 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "Application ID used for authentication."))
 	FString ApplicationId;
 
-	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "API key used for authentication."))
-	FString ApiKey;
-	
-	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "Proxy URL for API requests. If empty, the base URL will be used."))
-	FString ApiProxyUrl;
-
 	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "Game ID for the Player Zero application. This is used to identify the game in the Player Zero ecosystem."))
 	FString GameId;
 
@@ -39,20 +33,16 @@ public:
 	
 	UPlayerZeroDeveloperSettings();
 	
-	void Reset();
-	
 	FString GetApiBaseUrl() const;
 
 	bool IsValid() const
 	{
-		return !ApplicationId.IsEmpty() && (!ApiKey.IsEmpty() || !ApiProxyUrl.IsEmpty());
+		return !ApplicationId.IsEmpty();
 	}
 
 	virtual void PostInitProperties() override;
 	virtual void PreSave(const ITargetPlatform* TargetPlatform) override;
 private:
-	const FString DemoAppId = TEXT("665e05a50c62c921e5a6ab84");
-	const FString DemoProxyUrl = TEXT("https://api.readyplayer.me/demo");
 	
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

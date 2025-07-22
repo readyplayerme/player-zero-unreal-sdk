@@ -16,6 +16,9 @@ class PLAYERZERO_API UPlayerZeroFunctionLibrary : public UBlueprintFunctionLibra
 {
 	GENERATED_BODY()
 
-public:	
+public:
+	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
+	static FString GetHotLoadedAvatarId();
 
+	
 };

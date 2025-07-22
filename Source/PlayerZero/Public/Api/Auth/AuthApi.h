@@ -11,12 +11,9 @@ DECLARE_DELEGATE_ThreeParams(FOnRefreshTokenResponse, TSharedPtr<FApiRequest>, c
 class PLAYERZERO_API FAuthApi :  public FWebApi
 {
 public:
-	FOnRefreshTokenResponse OnRefreshTokenResponse;
 	
 	FAuthApi();
-	void RefreshToken(const FRefreshTokenRequest& Request);
-	
-	void OnProcessComplete(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful);
+	void RefreshToken(const FRefreshTokenRequest& Request, FOnRefreshTokenResponse OnComplete);
 
 private:
 	FString ApiUrl;

@@ -10,45 +10,28 @@ FAuthApi::FAuthApi()
 {
 	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
 	ApiUrl = FString::Printf(TEXT("%s/refresh"), *PlayerZeroSettings->ApiBaseAuthUrl);
-	OnRequestComplete.BindRaw(this, &FAuthApi::OnProcessComplete);
 }
 
-void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request)
+void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request, FOnRefreshTokenResponse OnComplete )
 {
 	TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
 	ApiRequest->Url = ApiUrl;
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	ApiRequest->Payload = Request.ToJsonString();
-	DispatchRaw(ApiRequest);
-}
-
-void FAuthApi::OnProcessComplete(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	if (!ApiRequest.IsValid())
-	{
-		UE_LOG(LogPlayerZero, Error, TEXT("Invalid ApiRequest in FAuthApi::OnProcessComplete."));
-		return;
-	}
-
-	if (bWasSuccessful && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FString Data = Response->GetContentAsString();
-		FRefreshTokenResponse TokenResponse;
-
-		if (!Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &TokenResponse, 0, 0))
+	DispatchRaw(ApiRequest, FOnDispatchComplete::CreateLambda(
+		[OnComplete](TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bSuccess)
 		{
-			if (OnRefreshTokenResponse.IsBound())
+			if (bSuccess && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
-				OnRefreshTokenResponse.ExecuteIfBound(ApiRequest, TokenResponse, true);
+				FRefreshTokenResponse TokenResponse;
+				if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &TokenResponse, 0, 0))
+				{
+					OnComplete.ExecuteIfBound(ApiRequest, TokenResponse, true);
+					return;
+				}
 			}
-			return;
-		}
-	}
-
-	UE_LOG(LogPlayerZero, Error, TEXT("Failed to refresh token"));
-	if (OnRefreshTokenResponse.IsBound())
-	{
-		OnRefreshTokenResponse.ExecuteIfBound(ApiRequest, FRefreshTokenResponse(), false);
-	}
+			UE_LOG(LogPlayerZero, Warning, TEXT("Auth token refresh request failed."));
+			OnComplete.ExecuteIfBound(ApiRequest, FRefreshTokenResponse(), false);
+		}));
 }

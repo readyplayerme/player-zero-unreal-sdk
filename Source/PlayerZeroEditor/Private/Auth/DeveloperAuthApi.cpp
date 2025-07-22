@@ -8,7 +8,6 @@ FDeveloperAuthApi::FDeveloperAuthApi()
 {
 	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
 	ApiUrl = FString::Printf(TEXT("%s/login"), *PlayerZeroSettings->ApiBaseAuthUrl);
-	OnRequestComplete.BindRaw(this, &FDeveloperAuthApi::HandleLoginResponse);
 }
 
 void FDeveloperAuthApi::HandleLoginResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful) const
@@ -28,12 +27,29 @@ void FDeveloperAuthApi::HandleLoginResponse(TSharedPtr<FApiRequest> ApiRequest, 
 	OnLoginResponse.ExecuteIfBound(DevLoginResponse, bWasSuccessful);
 }
 
-void FDeveloperAuthApi::LoginWithEmail(FDeveloperLoginRequest Request)
+void FDeveloperAuthApi::LoginWithEmail(FDeveloperLoginRequest Request, FOnDeveloperLoginResponse OnComplete)
 {
 	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
 	ApiRequest->Url = ApiUrl;
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	ApiRequest->Payload = Request.ToJsonString();
-	DispatchRaw(ApiRequest);
+	TSharedPtr<FOnDispatchComplete> OnRequestComplete = MakeShared<FOnDispatchComplete>();
+	OnRequestComplete->BindLambda(
+	[this, OnComplete](TSharedPtr<FApiRequest> Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		FDeveloperLoginResponse DevLoginResponse;
+		if(bWasSuccessful && Response.IsValid())
+		{
+			const FString Data = Response->GetContentAsString();
+			if (!Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &DevLoginResponse, 0, 0))
+			{
+				OnComplete.ExecuteIfBound(DevLoginResponse, true);
+				return;
+			}
+			UE_LOG(LogPlayerZero, Error, TEXT("Failed to parse login response: %s"), *Data );
+		}
+		OnComplete.ExecuteIfBound(DevLoginResponse, bWasSuccessful);
+	});
+	DispatchRaw(ApiRequest, OnRequestComplete);
 }

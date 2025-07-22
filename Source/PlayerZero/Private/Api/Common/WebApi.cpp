@@ -13,7 +13,7 @@ FWebApi::~FWebApi()
     
 }
 
-void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest)
+void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest, FOnDispatchComplete OnComplete)
 {
     TSharedPtr<IHttpRequest> Request = Http->CreateRequest();
     FString Url = ApiRequest->Url + BuildQueryString(ApiRequest->QueryParams);
@@ -31,7 +31,20 @@ void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest)
     {
         Request->SetContentAsString(ApiRequest->Payload);
     }
-    Request->OnProcessRequestComplete().BindRaw(this, &FWebApi::OnProcessResponse, ApiRequest);
+    Request->OnProcessRequestComplete().BindLambda(
+        [ApiRequest, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess)
+        {
+            if (bSuccess && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+            {
+                ApiRequest->OnapiRequestComplete.ExecuteIfBound(ApiRequest, Response, true);
+                return;
+            }
+            FString ErrorMessage = Response.IsValid() ? Response->GetContentAsString() : TEXT("Request failed");
+            UE_LOG(LogPlayerZero, Warning, TEXT("WebApi from URL %s request failed: %s"), *Request->GetURL(), *ErrorMessage);
+            ApiRequest->OnRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
+            OnComplete.ExecuteIfBound(ApiRequest, Response, bSuccess);
+        }
+    );
     Request->ProcessRequest();
 }
 
@@ -39,12 +52,12 @@ void FWebApi::OnProcessResponse(FHttpRequestPtr Request, FHttpResponsePtr Respon
 {
     if (bWasSuccessful && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
     {
-        OnRequestComplete.ExecuteIfBound(ApiRequest, Response, true);
+        ApiRequest->OnRequestComplete.ExecuteIfBound(ApiRequest, Response, true);
         return;
     }
     FString ErrorMessage = Response.IsValid() ? Response->GetContentAsString() : TEXT("Request failed");
     UE_LOG(LogPlayerZero, Warning, TEXT("WebApi from URL %s request failed: %s"), *Request->GetURL(), *ErrorMessage);
-    OnRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
+    ApiRequest->OnRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
 }
 
 FString FWebApi::BuildQueryString(const TMap<FString, FString>& QueryParams)
