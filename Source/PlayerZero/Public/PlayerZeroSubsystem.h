@@ -30,8 +30,7 @@ public:
 	FString GetHotLoadedAvatarId();
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
 	void GetAvatarMetaData(const FString& AvatarId) const;
-
-	// Step-by-step functions
+	
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
 	void FindCharacterById(const FString& Id, FOnCharacterDataLoaded OnComplete);
 
