@@ -2,6 +2,7 @@
 #include "HttpModule.h"
 #include "PlayerZero.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"
+#include "Api/Common/WebApiHelpers.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
 
@@ -21,22 +22,20 @@ void FCharacterApi::FindByIdAsync(const FCharacterFindByIdRequest& Request, FOnC
 	ApiRequest->Url = FString::Printf(TEXT("%s/%s"), *BaseUrl, *Request.Id);
 	ApiRequest->Method = GET;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-
-	DispatchRaw(ApiRequest, FOnDispatchComplete::CreateLambda(
+	ApiRequest->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
 		[OnComplete](TSharedPtr<FApiRequest> Req, FHttpResponsePtr Response, bool bSuccess)
 		{
-			if (bSuccess && Response.IsValid())
+			FCharacterFindByIdResponse ParsedResponse;
+			if (bSuccess && TryParseJsonResponse(Response, ParsedResponse))
 			{
-				FCharacterFindByIdResponse Result;
-				if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
-				{
-					OnComplete.ExecuteIfBound(Result, true);
-					return;
-				}
+				UE_LOG(LogPlayerZero, Warning, TEXT("Character FIND request SUCCESS."));
+				OnComplete.ExecuteIfBound(ParsedResponse, true);
+				return;
 			}
 			UE_LOG(LogPlayerZero, Warning, TEXT("Character FIND request failed."));
 			OnComplete.ExecuteIfBound(FCharacterFindByIdResponse(), false);
-		}));
+		});
+	DispatchRaw(ApiRequest);
 }
 
 

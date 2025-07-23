@@ -10,12 +10,11 @@
 FPlayerZeroTextureLoader::FPlayerZeroTextureLoader()
 {
 	FileApi = MakeShared<FFileApi>();
-	FileApi->OnAssetFileRequestComplete.BindRaw(this, &FPlayerZeroTextureLoader::OnIconLoaded);
 }
 
 void FPlayerZeroTextureLoader::LoadIconFromUrl(const FString& Url)
 {
-	FileApi->LoadFileFromUrl(Url);
+	FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateRaw(this, &FPlayerZeroTextureLoader::OnIconLoaded));
 }
 
 void FPlayerZeroTextureLoader::OnIconLoaded(const FFileData& File, const TArray<unsigned char>& Data)

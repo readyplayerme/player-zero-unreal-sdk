@@ -13,7 +13,7 @@ FWebApi::~FWebApi()
     
 }
 
-void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest, FOnDispatchComplete OnComplete)
+void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest)
 {
     TSharedPtr<IHttpRequest> Request = Http->CreateRequest();
     FString Url = ApiRequest->Url + BuildQueryString(ApiRequest->QueryParams);
@@ -32,17 +32,9 @@ void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest, FOnDispatchComplet
         Request->SetContentAsString(ApiRequest->Payload);
     }
     Request->OnProcessRequestComplete().BindLambda(
-        [ApiRequest, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess)
+        [this, ApiRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess)
         {
-            if (bSuccess && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-            {
-                ApiRequest->OnapiRequestComplete.ExecuteIfBound(ApiRequest, Response, true);
-                return;
-            }
-            FString ErrorMessage = Response.IsValid() ? Response->GetContentAsString() : TEXT("Request failed");
-            UE_LOG(LogPlayerZero, Warning, TEXT("WebApi from URL %s request failed: %s"), *Request->GetURL(), *ErrorMessage);
-            ApiRequest->OnRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
-            OnComplete.ExecuteIfBound(ApiRequest, Response, bSuccess);
+            OnProcessResponse(Request, Response, bSuccess, ApiRequest);
         }
     );
     Request->ProcessRequest();
@@ -52,12 +44,12 @@ void FWebApi::OnProcessResponse(FHttpRequestPtr Request, FHttpResponsePtr Respon
 {
     if (bWasSuccessful && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
     {
-        ApiRequest->OnRequestComplete.ExecuteIfBound(ApiRequest, Response, true);
+        ApiRequest->OnApiRequestComplete.ExecuteIfBound(ApiRequest, Response, true);
         return;
     }
     FString ErrorMessage = Response.IsValid() ? Response->GetContentAsString() : TEXT("Request failed");
     UE_LOG(LogPlayerZero, Warning, TEXT("WebApi from URL %s request failed: %s"), *Request->GetURL(), *ErrorMessage);
-    ApiRequest->OnRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
+    ApiRequest->OnApiRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
 }
 
 FString FWebApi::BuildQueryString(const TMap<FString, FString>& QueryParams)

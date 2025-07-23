@@ -1,6 +1,7 @@
 #include "PlayerZeroSubsystem.h"
 
 #include "glTFRuntimeFunctionLibrary.h"
+#include "PlayerZero.h"
 #include "Api/Characters/CharacterApi.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"
 #include "Api/Files/GlbLoader.h"
@@ -9,9 +10,7 @@ void UPlayerZeroSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	FileApi = MakeShared<FFileApi>();
-	FileApi->OnAssetFileRequestComplete.BindUObject(this, &UPlayerZeroSubsystem::HandleCharacterAssetLoaded);
 	CharacterApi = MakeShared<FCharacterApi>();
-	CharacterApi->OnCharacterFindResponse.BindUObject(this, &UPlayerZeroSubsystem::HandleCharacterFindResponse);
 }
 
 void UPlayerZeroSubsystem::Deinitialize()
@@ -36,55 +35,89 @@ void UPlayerZeroSubsystem::GetAvatarMetaData(const FString& AvatarId) const
 {
 	TSharedPtr<FCharacterFindByIdRequest> CharacterFindByIdRequest = MakeShared<FCharacterFindByIdRequest>();
 	CharacterFindByIdRequest->Id = AvatarId;
+
+	
 }
 
-void UPlayerZeroSubsystem::LoadAvatarById(const FString& Id, FOnGltfLoaded OnComplete)
+void UPlayerZeroSubsystem::LoadAvatarById(const FString& Id, const FOnGltfLoaded& OnComplete)
 {
-	FindCharacterById(Id, FOnCharacterDataLoaded::CreateLambda(
-		[this, OnComplete](const FPlayerZeroCharacterData& Character)
-		{
-			FString Url = Character.Id;
 
-			DownloadAvatar(Url, FOnAvatarDownloaded::CreateLambda(
-				[this, OnComplete](const TArray<uint8>& Data)
-				{
-					FglTFRuntimeConfig GltfConfig = FglTFRuntimeConfig();
-					UglTFRuntimeAsset* GltfRuntimeAsset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(Data, GltfConfig);
-					OnComplete.ExecuteIfBound(GltfRuntimeAsset); // Replace nullptr with the actual actor spawned from the GLTF data
-				}));
-		}));
+	TSharedPtr<FCharacterFindByIdRequest> Request = MakeShared<FCharacterFindByIdRequest>();
+	Request->Id = Id;
+	//
+	// CharacterApi->FindByIdAsync(*Request, FOnCharacterFindResponse::CreateLambda(
+	// 	[OnComplete](FCharacterFindByIdResponse Response, bool bWasSuccessful)
+	// 	{
+	// 		if (bWasSuccessful)
+	// 		{
+	// 			OnComplete.ExecuteIfBound(Response.Data);
+	// 		}
+	// 		else
+	// 		{
+	// 			OnComplete.ExecuteIfBound(FPlayerZeroCharacter());
+	// 		}
+	// 	}));
+
+	// FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateLambda(
+	// [OnComplete](const FFileData& File, const TArray<uint8>& Data)
+	// {
+	// 	OnComplete.ExecuteIfBound(Data);
+	// }));
+
+	// UglTFRuntimeAsset* Asset = nullptr;
+	// if (Data.Num() > 0)
+	// {
+	// 	Asset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(Data, Config);
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogPlayerZero, Error, TEXT("GLTF data is empty."));
+	// }
+	// OnComplete.ExecuteIfBound(Asset);
 }
 
 void UPlayerZeroSubsystem::FindCharacterById(const FString& Id, FOnCharacterDataLoaded OnComplete)
 {
-	TSharedPtr<FCharacterFindByIdRequest> CharacterFindByIdRequest = MakeShared<FCharacterFindByIdRequest>();
-	CharacterFindByIdRequest->Id = Id;
+	TSharedPtr<FCharacterFindByIdRequest> Request = MakeShared<FCharacterFindByIdRequest>();
+	Request->Id = Id;
 
-	CharacterApi->FindByIdAsync(*CharacterFindByIdRequest);
-	OnComplete.ExecuteIfBound(FPlayerZeroCharacterData()); // Replace with actual logic to get character data
+	CharacterApi->FindByIdAsync(*Request, FOnCharacterFindResponse::CreateLambda(
+		[OnComplete](FCharacterFindByIdResponse Response, bool bWasSuccessful)
+		{
+			if (bWasSuccessful)
+			{
+				OnComplete.ExecuteIfBound(Response.Data);
+			}
+			else
+			{
+				OnComplete.ExecuteIfBound(FPlayerZeroCharacter());
+			}
+		}));
 }
+
 
 void UPlayerZeroSubsystem::DownloadAvatar(const FString& Url, FOnAvatarDownloaded OnComplete)
 {
+	FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateLambda(
+		[OnComplete](const FFileData& File, const TArray<uint8>& Data)
+		{
+			OnComplete.ExecuteIfBound(Data);
+		}));
 }
 
-void UPlayerZeroSubsystem::LoadGltf(const TArray<uint8>& BinaryData, FOnGltfLoaded OnComplete)
-{
-}
 
-void UPlayerZeroSubsystem::SpawnActorFromGltf(UglTFRuntimeAsset* Asset, const FPlayerZeroCharacterData& Meta,
-	FOnAvatarSpawned OnComplete)
+void UPlayerZeroSubsystem::LoadGltf(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfLoaded OnComplete)
 {
-}
-
-void UPlayerZeroSubsystem::HandleCharacterFindResponse(FCharacterFindByIdResponse CharacterFindByIdResponse,
-                                                       bool bWasSuccessful)
-{
-}
-
-void UPlayerZeroSubsystem::HandleCharacterAssetLoaded(FFileData& File,
-	const TArray<unsigned char>& Array)
-{
+	UglTFRuntimeAsset* Asset = nullptr;
+	if (Data.Num() > 0)
+	{
+		Asset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(Data, Config);
+	}
+	else
+	{
+		UE_LOG(LogPlayerZero, Error, TEXT("GLTF data is empty."));
+	}
+	OnComplete.ExecuteIfBound(Asset);
 }
 
 void UPlayerZeroSubsystem::OnDeepLinkDataReceived(const FString& AvatarId)

@@ -12,25 +12,23 @@ FFileApi::~FFileApi()
 {
 }
 
-void FFileApi::LoadFileFromUrl(const FString& URL)
+void FFileApi::LoadFileFromUrl(const FString& URL, FOnAssetFileRequestComplete OnComplete)
 {
 	const FFileData& File = FFileData(URL);
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
-	HttpRequest->OnProcessRequestComplete().BindRaw(this, &FFileApi::FileRequestComplete, File);
+	HttpRequest->OnProcessRequestComplete().BindLambda( 
+		[this, File, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+		{
+			if (bWasSuccessful && Response.IsValid() && Response->GetContentLength() > 0)
+			{
+				TArray<uint8> Content = Response->GetContent();
+				OnComplete.ExecuteIfBound(File, Content);
+				return;
+			}
+			UE_LOG(LogPlayerZero, Warning, TEXT("Failed to load file from URL. Try loading from cache"));
+			OnComplete.ExecuteIfBound(File, TArray<uint8>());;
+		});
 	HttpRequest->SetURL(URL);
 	HttpRequest->SetVerb("GET");
 	HttpRequest->ProcessRequest();
-}
-
-void FFileApi::FileRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, FFileData File)
-{
-	
-	if (bWasSuccessful && Response.IsValid() && Response->GetContentLength() > 0)
-	{
-		TArray<uint8> Content = Response->GetContent();
-		OnAssetFileRequestComplete.ExecuteIfBound(File, Content);
-		return;
-	}
-	UE_LOG(LogPlayerZero, Warning, TEXT("Failed to load file from URL. Try loading from cache"));
-	OnAssetFileRequestComplete.ExecuteIfBound(File, TArray<uint8>());
 }

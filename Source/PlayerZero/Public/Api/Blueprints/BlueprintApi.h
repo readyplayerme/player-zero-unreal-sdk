@@ -13,8 +13,6 @@ public:
 
 	void ListAsync(const FBlueprintListRequest& Request, FBlueprintApiListResponse OnComplete);
 
-	void HandleListResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful);
-
 private:
 	FString BaseUrl;
 };

@@ -99,7 +99,6 @@ void SPlayerZeroLoginPanel::Initialize()
 	if(!DeveloperAuthApi.IsValid())
 	{
 		DeveloperAuthApi = MakeShared<FDeveloperAuthApi>();
-		DeveloperAuthApi->OnLoginResponse.BindRaw(this, &SPlayerZeroLoginPanel::HandleLoginResponse);
 	}
 }
 
@@ -108,14 +107,17 @@ FReply SPlayerZeroLoginPanel::OnLoginClicked()
 	bFailedLogin = false;
 	UpdateErrorMessages();
 	UPlayerZeroDeveloperSettings* RpmSettings = GetMutableDefault<UPlayerZeroDeveloperSettings>();
-	RpmSettings->Reset();
 	FString Email = EmailTextBox->GetText().ToString();
 	FString Password = PasswordTextBox->GetText().ToString();
 	FEditorCache::SetString(CacheKeyEmail, Email);
 	Email = Email.TrimStartAndEnd();
 	Password = Password.TrimStartAndEnd();
 	const FDeveloperLoginRequest LoginRequest = FDeveloperLoginRequest(Email, Password);
-	DeveloperAuthApi->LoginWithEmail(LoginRequest);
+	DeveloperAuthApi->LoginWithEmail(LoginRequest,FOnDeveloperLoginResponse::CreateLambda(
+		[this](const FDeveloperLoginResponse& Response, bool bWasSuccessful)
+		{
+			this->HandleLoginResponse(Response, bWasSuccessful);
+		})); 
 	return FReply::Handled();
 }
 

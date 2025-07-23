@@ -4,12 +4,16 @@
 #include "PlayerZeroFunctionLibrary.h"
 
 #include "PlayerZeroSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 
-FString UPlayerZeroFunctionLibrary::GetHotLoadedAvatarId()
+FString UPlayerZeroFunctionLibrary::GetHotLoadedAvatarId(UObject* WorldContextObject)
 {
-	if (UPlayerZeroSubsystem* Subsystem = GEngine->GetEngineSubsystem<UPlayerZeroSubsystem>())
+	if (const UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject))
 	{
-		return Subsystem->GetHotLoadedAvatarId();
+		if (UPlayerZeroSubsystem* Subsystem = GameInstance->GetSubsystem<UPlayerZeroSubsystem>())
+		{
+			return Subsystem->GetHotLoadedAvatarId();
+		}
 	}
 	return FString();
 }

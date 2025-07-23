@@ -5,6 +5,8 @@
 #include "HttpModule.h"
 #include "ApiRequest.generated.h"
 
+
+
 UENUM(BlueprintType)
 enum ERequestMethod { 	
 	GET,
@@ -13,7 +15,8 @@ enum ERequestMethod {
 	DELETE,
 	PATCH
 };
-
+struct FApiRequest;
+DECLARE_DELEGATE_ThreeParams(FOnApiRequestComplete, TSharedPtr<FApiRequest>, FHttpResponsePtr, bool);
 
 USTRUCT(BlueprintType)
 struct PLAYERZERO_API FApiRequest
@@ -57,7 +60,7 @@ struct PLAYERZERO_API FApiRequest
 	}
 };
 
-DECLARE_DELEGATE_ThreeParams(FOnApiRequestComplete, TSharedPtr<FApiRequest>, FHttpResponsePtr, bool);
+
 
 USTRUCT(BlueprintType)
 struct PLAYERZERO_API FApiRequestBody

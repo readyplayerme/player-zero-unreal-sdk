@@ -8,7 +8,6 @@
 
 class FHttpModule;
 struct FApiRequest;
-DECLARE_DELEGATE_ThreeParams(FOnDispatchComplete, TSharedPtr<FApiRequest>, FHttpResponsePtr, bool);
 
 class PLAYERZERO_API FWebApi
 {
@@ -17,7 +16,7 @@ public:
 	FWebApi();
 	virtual ~FWebApi();
 	
-	void DispatchRaw(TSharedPtr<FApiRequest> ApiRequest, FOnDispatchComplete OnComplete);
+	void DispatchRaw(TSharedPtr<FApiRequest> ApiRequest);
 protected:	
 	FHttpModule* Http;
 	

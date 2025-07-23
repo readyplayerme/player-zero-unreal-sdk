@@ -11,11 +11,11 @@ struct PLAYERZERO_API FPlayerZeroCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "id"))
 	FString Id;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "createdByApplicationId"))
-	FString CreatedByApplicationId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero")
+	FString BlueprintId;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "glbUrl"))
-	FString GlbUrl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "modelUrl"))
+	FString ModelUrl;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "iconUrl"))
 	FString IconUrl;

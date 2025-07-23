@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "PlayerZeroFunctionLibrary.generated.h"
 
+class UPlayerZeroSubsystem;
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnAssetIdFetched, FString, AssetId);
 
 /**
@@ -18,7 +19,5 @@ class PLAYERZERO_API UPlayerZeroFunctionLibrary : public UBlueprintFunctionLibra
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
-	static FString GetHotLoadedAvatarId();
-
-	
+	static FString GetHotLoadedAvatarId(UObject* WorldContextObject);
 };

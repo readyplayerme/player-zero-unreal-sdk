@@ -13,7 +13,6 @@ DECLARE_DELEGATE_TwoParams(FOnGlbDownloaded, UglTFRuntimeAsset*, const FString&)
 class PLAYERZERO_API FGlbLoader : public FFileApi
 {
 public:
-	FOnGlbDownloaded OnGLtfAssetLoaded;
 	
 	FGlbLoader();
 	FGlbLoader(FglTFRuntimeConfig* Config);

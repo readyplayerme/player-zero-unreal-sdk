@@ -5,7 +5,6 @@
 #include "Api/Blueprints/Models/BlueprintListRequest.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Auth/DevAuthTokenCache.h"
-#include "Auth/DeveloperTokenAuthStrategy.h"
 #include "Auth/Models/DeveloperAuth.h"
 #include "DeveloperAccounts/DeveloperAccountApi.h"
 #include "DeveloperAccounts/Models/ApplicationListRequest.h"
@@ -127,7 +126,7 @@ void SPlayerZeroSettingsPanel::RunPanelSetup(const FString& InUserName)
 
 	if(!DeveloperAccountApi.IsValid())
 	{
-		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>(MakeShared<DeveloperTokenAuthStrategy>());
+		DeveloperAccountApi = MakeShared<FDeveloperAccountApi>();
 		DeveloperAccountApi->OnApplicationListResponse.BindRaw(this, &SPlayerZeroSettingsPanel::HandleApplicationListResponse);
 		DeveloperAccountApi->OnOrganizationResponse.BindRaw(this, &SPlayerZeroSettingsPanel::HandleOrganizationListResponse);
 	}
@@ -135,7 +134,6 @@ void SPlayerZeroSettingsPanel::RunPanelSetup(const FString& InUserName)
 	if (!BlueprintApi.IsValid())
 	{
 		BlueprintApi = MakeShared<FBlueprintApi>();
-		BlueprintApi->OnListResponse.BindRaw(this, &SPlayerZeroSettingsPanel::HandleBlueprintListResponse);
 	}
 	DeveloperAccountApi->ListOrganizationsAsync(FOrganizationListRequest());
 }
@@ -191,7 +189,7 @@ void SPlayerZeroSettingsPanel::LoadBlueprintList()
 	}
 	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetMutableDefault<UPlayerZeroDeveloperSettings>();
 	const FBlueprintListRequest Request = FBlueprintListRequest(PlayerZeroSettings->ApplicationId, false);
-	BlueprintApi->ListAsync(Request);
+	BlueprintApi->ListAsync(Request, FBlueprintApiListResponse::CreateRaw(this, &SPlayerZeroSettingsPanel::HandleBlueprintListResponse));
 }
 
 
@@ -385,9 +383,6 @@ void SPlayerZeroSettingsPanel::OnComboBoxSelectionChanged(TSharedPtr<FString> Ne
 
 FReply SPlayerZeroSettingsPanel::OnLogoutClicked()
 {
-	UPlayerZeroDeveloperSettings* RpmSettings = GetMutableDefault<UPlayerZeroDeveloperSettings>();
-	RpmSettings->Reset();
-
 	if (ContentBox.IsValid())
 	{
 		ContentBox->ClearChildren();

@@ -1,5 +1,6 @@
 ﻿#include "Api/Blueprints/BlueprintApi.h"
 #include "PlayerZero.h"
+#include "Api/Common/WebApiHelpers.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
 
@@ -20,19 +21,18 @@ void FBlueprintApi::ListAsync(const FBlueprintListRequest& Request, FBlueprintAp
 	RequestPtr->Url = FString::Printf(TEXT("%s?applicationId=%s&archived=%s"), *BaseUrl, *Request.ApplicationId, *ArchivedStr);
 	RequestPtr->Method = GET;
 	RequestPtr->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	DispatchRaw(RequestPtr, FOnDispatchComplete::CreateLambda(
-		[this, OnComplete](TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bSuccess)
+	RequestPtr->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
+		[OnComplete](TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bSuccess)
 		{
-			if (bSuccess && Response.IsValid())
+			FBlueprintListResponse ParsedResponse;
+			if (bSuccess && TryParseJsonResponse(Response, ParsedResponse))
 			{
-				FBlueprintListResponse BlueprintListResponse;
-				if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &BlueprintListResponse, 0, 0))
-				{
-					OnComplete.ExecuteIfBound(BlueprintListResponse, true);
-					return;
-				}
+				OnComplete.ExecuteIfBound(ParsedResponse, true);
+				return;
 			}
 			UE_LOG(LogPlayerZero, Warning, TEXT("Blueprint LIST request failed."));
 			OnComplete.ExecuteIfBound(FBlueprintListResponse(), false);
-		}));
+		});
+	
+	DispatchRaw(RequestPtr);
 }

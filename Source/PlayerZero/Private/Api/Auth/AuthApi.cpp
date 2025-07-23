@@ -4,6 +4,7 @@
 #include "Interfaces/IHttpResponse.h"
 #include "Api/Auth/Models/RefreshTokenRequest.h"
 #include "Api/Auth/Models/RefreshTokenResponse.h"
+#include "Api/Common/WebApiHelpers.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
 
 FAuthApi::FAuthApi()
@@ -19,19 +20,18 @@ void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request, FOnRefreshToken
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	ApiRequest->Payload = Request.ToJsonString();
-	DispatchRaw(ApiRequest, FOnDispatchComplete::CreateLambda(
-		[OnComplete](TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bSuccess)
+	ApiRequest->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
+		[OnComplete](TSharedPtr<FApiRequest> Request, FHttpResponsePtr Response, bool bSuccess)
 		{
-			if (bSuccess && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+			FRefreshTokenResponse ParsedResponse;
+			if (bSuccess && TryParseJsonResponse(Response, ParsedResponse))
 			{
-				FRefreshTokenResponse TokenResponse;
-				if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &TokenResponse, 0, 0))
-				{
-					OnComplete.ExecuteIfBound(ApiRequest, TokenResponse, true);
-					return;
-				}
+				OnComplete.ExecuteIfBound(Request, ParsedResponse, true);
+				return;
 			}
+
 			UE_LOG(LogPlayerZero, Warning, TEXT("Auth token refresh request failed."));
-			OnComplete.ExecuteIfBound(ApiRequest, FRefreshTokenResponse(), false);
-		}));
+			OnComplete.ExecuteIfBound(Request, FRefreshTokenResponse(), false);
+		});
+	DispatchRaw(ApiRequest);
 }

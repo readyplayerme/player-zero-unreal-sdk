@@ -1,4 +1,6 @@
 ﻿#include "Auth/DeveloperAuthApi.h"
+
+#include "Api/Common/WebApiHelpers.h"
 #include "Auth/Models/DeveloperLoginRequest.h"
 #include "Auth/Models/DeveloperLoginResponse.h"
 #include "Interfaces/IHttpResponse.h"
@@ -10,23 +12,6 @@ FDeveloperAuthApi::FDeveloperAuthApi()
 	ApiUrl = FString::Printf(TEXT("%s/login"), *PlayerZeroSettings->ApiBaseAuthUrl);
 }
 
-void FDeveloperAuthApi::HandleLoginResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful) const
-{
-	FDeveloperLoginResponse DevLoginResponse;
-	if(bWasSuccessful && Response.IsValid())
-	{
-		const FString Data = Response->GetContentAsString();
-		if (!Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &DevLoginResponse, 0, 0))
-		{
-			OnLoginResponse.ExecuteIfBound(DevLoginResponse, true);
-			return;
-		}
-		UE_LOG(LogPlayerZero, Error, TEXT("Failed to parse login response: %s"), *Data );
-	}
-
-	OnLoginResponse.ExecuteIfBound(DevLoginResponse, bWasSuccessful);
-}
-
 void FDeveloperAuthApi::LoginWithEmail(FDeveloperLoginRequest Request, FOnDeveloperLoginResponse OnComplete)
 {
 	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
@@ -34,22 +19,18 @@ void FDeveloperAuthApi::LoginWithEmail(FDeveloperLoginRequest Request, FOnDevelo
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	ApiRequest->Payload = Request.ToJsonString();
-	TSharedPtr<FOnDispatchComplete> OnRequestComplete = MakeShared<FOnDispatchComplete>();
-	OnRequestComplete->BindLambda(
-	[this, OnComplete](TSharedPtr<FApiRequest> Request, FHttpResponsePtr Response, bool bWasSuccessful)
-	{
-		FDeveloperLoginResponse DevLoginResponse;
-		if(bWasSuccessful && Response.IsValid())
+	ApiRequest->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
+		[this, OnComplete](TSharedPtr<FApiRequest> Req, FHttpResponsePtr Response, bool bWasSuccessful)
 		{
-			const FString Data = Response->GetContentAsString();
-			if (!Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &DevLoginResponse, 0, 0))
+			FDeveloperLoginResponse ParsedResponse;
+			if (bWasSuccessful && TryParseJsonResponse(Response, ParsedResponse))
 			{
-				OnComplete.ExecuteIfBound(DevLoginResponse, true);
+				OnComplete.ExecuteIfBound(ParsedResponse, true);
 				return;
 			}
-			UE_LOG(LogPlayerZero, Error, TEXT("Failed to parse login response: %s"), *Data );
-		}
-		OnComplete.ExecuteIfBound(DevLoginResponse, bWasSuccessful);
-	});
-	DispatchRaw(ApiRequest, OnRequestComplete);
+			UE_LOG(LogPlayerZero, Warning, TEXT("Login with email request failed."));
+			OnComplete.ExecuteIfBound(ParsedResponse, bWasSuccessful);
+
+		});
+	DispatchRaw(ApiRequest);
 }

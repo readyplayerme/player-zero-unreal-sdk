@@ -4,17 +4,18 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "PlayerZeroSubsystem.generated.h"
 
+struct FglTFRuntimeConfig;
+struct FPlayerZeroCharacter;
 struct FFileData;
 struct FCharacterFindByIdResponse;
-class UglTFRuntimeAsset;
 class FFileApi;
 class FCharacterApi;
 
 
-DECLARE_DELEGATE_OneParam(FOnCharacterDataLoaded, const FPlayerZeroCharacterData&);
-DECLARE_DELEGATE_OneParam(FOnAvatarDownloaded, const TArray<uint8>&);
-DECLARE_DELEGATE_OneParam(FOnGltfLoaded, UglTFRuntimeAsset*);
-DECLARE_DELEGATE_OneParam(FOnAvatarSpawned, AActor*);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCharacterDataLoaded, const FPlayerZeroCharacter&, Character);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnAvatarDownloaded, const TArray<uint8>&, FileData);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGltfLoaded, UglTFRuntimeAsset*, GltfAsset);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnAvatarSpawned, AActor*, SpawnedActor);
 
 UCLASS()
 class PLAYERZERO_API UPlayerZeroSubsystem : public UGameInstanceSubsystem
@@ -27,25 +28,30 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
 	FString GetHotLoadedAvatarId();
-
+	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
 	void GetAvatarMetaData(const FString& AvatarId) const;
-	
-	void LoadAvatarById(const FString& Id, FOnGltfLoaded OnComplete);
-    
+
+	// Step-by-step functions
+	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
 	void FindCharacterById(const FString& Id, FOnCharacterDataLoaded OnComplete);
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
 	void DownloadAvatar(const FString& Url, FOnAvatarDownloaded OnComplete);
-	void LoadGltf(const TArray<uint8>& BinaryData, FOnGltfLoaded OnComplete);
-	void SpawnActorFromGltf(UglTFRuntimeAsset* Asset, const FPlayerZeroCharacterData& Meta, FOnAvatarSpawned OnComplete);
-	void HandleCharacterFindResponse(FCharacterFindByIdResponse CharacterFindByIdResponse, bool bWasSuccessful);
 
+	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
+	void LoadGltf(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfLoaded OnComplete);
+	
+	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
+	void LoadAvatarById(const FString& Id, const FOnGltfLoaded& OnComplete);
 
-	void HandleCharacterAssetLoaded(FFileData& File, const TArray<unsigned char>& Array);
-
-	// More API methods...
-
-protected:
-    
 private:
+	// Used for callback chaining internally
+	UPROPERTY()
+	FOnGltfLoaded OnAvatarLoadedDelegate;
+
+	UPROPERTY()
+	FString CachedCharacterUrl;
+	
 	bool bIsInitialized = false;
 	FString CachedAvatarId;
 
@@ -55,5 +61,9 @@ private:
 	//TSharedPtr<FGameEventApi> GameEventApi;
 
 	void OnDeepLinkDataReceived(const FString& AvatarId);
+
+	UPROPERTY()
+	FOnGltfLoaded OnAvatarLoadComplete;
+
 };
 

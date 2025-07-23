@@ -31,7 +31,8 @@ public class PlayerZero : ModuleRules
 				"Slate",
 				"SlateCore",
 				"PakFile", 
-				"StreamingFile"
+				"StreamingFile", 
+				"ImageDownload"
 			}
 			);
 			
