@@ -31,15 +31,26 @@ FString UPlayerZeroSubsystem::GetHotLoadedAvatarId()
 	return CachedAvatarId;
 }
 
-void UPlayerZeroSubsystem::GetAvatarMetaData(const FString& AvatarId) const
+void UPlayerZeroSubsystem::GetAvatarMetaData(const FString& Id, FOnCharacterDataLoaded OnComplete)
 {
-	TSharedPtr<FCharacterFindByIdRequest> CharacterFindByIdRequest = MakeShared<FCharacterFindByIdRequest>();
-	CharacterFindByIdRequest->Id = AvatarId;
+	TSharedPtr<FCharacterFindByIdRequest> Request = MakeShared<FCharacterFindByIdRequest>();
+	Request->Id = Id;
 
-	
+	CharacterApi->FindByIdAsync(*Request, FOnCharacterFindResponse::CreateLambda(
+		[OnComplete](FCharacterFindByIdResponse Response, bool bWasSuccessful)
+		{
+			if (bWasSuccessful)
+			{
+				OnComplete.ExecuteIfBound(Response.Data);
+			}
+			else
+			{
+				OnComplete.ExecuteIfBound(FPlayerZeroCharacter());
+			}
+		}));
 }
 
-void UPlayerZeroSubsystem::LoadAvatarById(const FString& Id, const FOnGltfLoaded& OnComplete)
+void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& Id, const FOnGltfAssetLoaded& OnComplete)
 {
 	// Step 1: Fetch character metadata
 	TSharedPtr<FCharacterFindByIdRequest> Request = MakeShared<FCharacterFindByIdRequest>();
@@ -88,29 +99,7 @@ void UPlayerZeroSubsystem::LoadAvatarById(const FString& Id, const FOnGltfLoaded
 		}));
 }
 
-
-
-void UPlayerZeroSubsystem::FindCharacterById(const FString& Id, FOnCharacterDataLoaded OnComplete)
-{
-	TSharedPtr<FCharacterFindByIdRequest> Request = MakeShared<FCharacterFindByIdRequest>();
-	Request->Id = Id;
-
-	CharacterApi->FindByIdAsync(*Request, FOnCharacterFindResponse::CreateLambda(
-		[OnComplete](FCharacterFindByIdResponse Response, bool bWasSuccessful)
-		{
-			if (bWasSuccessful)
-			{
-				OnComplete.ExecuteIfBound(Response.Data);
-			}
-			else
-			{
-				OnComplete.ExecuteIfBound(FPlayerZeroCharacter());
-			}
-		}));
-}
-
-
-void UPlayerZeroSubsystem::DownloadAvatar(const FString& Url, FOnAvatarDownloaded OnComplete)
+void UPlayerZeroSubsystem::DownloadAvatarData(const FString& Url, FOnAvatarDataDownloaded OnComplete)
 {
 	FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateLambda(
 		[OnComplete](const FFileData& File, const TArray<uint8>& Data)
@@ -120,7 +109,7 @@ void UPlayerZeroSubsystem::DownloadAvatar(const FString& Url, FOnAvatarDownloade
 }
 
 
-void UPlayerZeroSubsystem::LoadGltf(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfLoaded OnComplete)
+void UPlayerZeroSubsystem::LoadGltfAsset(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfAssetLoaded OnComplete)
 {
 	UglTFRuntimeAsset* Asset = nullptr;
 	if (Data.Num() > 0)

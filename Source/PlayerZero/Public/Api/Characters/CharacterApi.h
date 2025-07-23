@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
 #include "Api/Common/WebApi.h"
-#include "Api/Common/WebApiWithAuth.h"
 #include "Models/CharacterFindByIdRequest.h"
 #include "Models/CharacterFindByIdResponse.h"
 
@@ -21,9 +20,7 @@ public:
 protected:
 	template <typename T>
 	FString ConvertToJsonString(const T& Data);
-
-	void HandleCharacterResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful);
-	void HandleFindResponse(FHttpResponsePtr Response, bool bWasSuccessful);
+	
 private:
 	FString BaseUrl;
 };

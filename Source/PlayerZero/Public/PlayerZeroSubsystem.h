@@ -13,8 +13,8 @@ class FCharacterApi;
 
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCharacterDataLoaded, const FPlayerZeroCharacter&, Character);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnAvatarDownloaded, const TArray<uint8>&, FileData);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGltfLoaded, UglTFRuntimeAsset*, GltfAsset);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnAvatarDataDownloaded, const TArray<uint8>&, FileData);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGltfAssetLoaded, UglTFRuntimeAsset*, GltfAsset);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnAvatarSpawned, AActor*, SpawnedActor);
 
 UCLASS()
@@ -28,25 +28,20 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
 	FString GetHotLoadedAvatarId();
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
-	void GetAvatarMetaData(const FString& AvatarId) const;
 	
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
-	void FindCharacterById(const FString& Id, FOnCharacterDataLoaded OnComplete);
+	void GetAvatarMetaData(const FString& Id, FOnCharacterDataLoaded OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
-	void DownloadAvatar(const FString& Url, FOnAvatarDownloaded OnComplete);
+	void DownloadAvatarData(const FString& Url, FOnAvatarDataDownloaded OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
-	void LoadGltf(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfLoaded OnComplete);
+	void LoadGltfAsset(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfAssetLoaded OnComplete);
 	
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
-	void LoadAvatarById(const FString& Id, const FOnGltfLoaded& OnComplete);
+	void LoadAvatarAsset(const FString& Id, const FOnGltfAssetLoaded& OnComplete);
 
 private:
-	// Used for callback chaining internally
-	UPROPERTY()
-	FOnGltfLoaded OnAvatarLoadedDelegate;
 
 	UPROPERTY()
 	FString CachedCharacterUrl;
@@ -60,9 +55,5 @@ private:
 	//TSharedPtr<FGameEventApi> GameEventApi;
 
 	void OnDeepLinkDataReceived(const FString& AvatarId);
-
-	UPROPERTY()
-	FOnGltfLoaded OnAvatarLoadComplete;
-
 };
 
