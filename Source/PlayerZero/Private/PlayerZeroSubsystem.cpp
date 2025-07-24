@@ -5,6 +5,8 @@
 #include "Api/Characters/CharacterApi.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"
 #include "Api/Files/GlbLoader.h"
+#include "Api/Files/Models/FileData.h"
+#include "Utilities/PlayerZeroImageHelper.h"
 
 void UPlayerZeroSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -29,6 +31,22 @@ FString UPlayerZeroSubsystem::GetHotLoadedAvatarId()
 	bIsInitialized = true;
 	CachedAvatarId = TEXT("default_avatar_id"); // Replace with actual logic to get the avatar ID
 	return CachedAvatarId;
+}
+
+void UPlayerZeroSubsystem::GetAvatarIconAsTexture(FString AvatarId, FOnAvatarTextureLoaded OnComplete)
+{
+	const FString Url = FString::Printf(TEXT("https://avatars.readyplayer.me/%s.png"), *AvatarId);
+	FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateLambda(
+	[OnComplete](const FFileData& File, const TArray<uint8>& Data)
+	{
+		if (UTexture2D* Texture = FPlayerZeroImageHelper::CreateTextureFromData(Data))
+		{
+			OnComplete.ExecuteIfBound(Texture);
+			return; 
+		}
+		UE_LOG(LogPlayerZero, Error, TEXT("Failed to load icon from url: %s"), *File.Url);
+		OnComplete.ExecuteIfBound(nullptr);
+	}));
 }
 
 void UPlayerZeroSubsystem::GetAvatarMetaData(const FString& Id, FOnCharacterDataLoaded OnComplete)

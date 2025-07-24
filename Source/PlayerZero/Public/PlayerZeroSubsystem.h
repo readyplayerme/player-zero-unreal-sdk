@@ -12,10 +12,10 @@ class FFileApi;
 class FCharacterApi;
 
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCharacterDataLoaded, const FPlayerZeroCharacter&, Character);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnAvatarDataDownloaded, const TArray<uint8>&, FileData);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGltfAssetLoaded, UglTFRuntimeAsset*, GltfAsset);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnAvatarSpawned, AActor*, SpawnedActor);
+DECLARE_DELEGATE_OneParam(FOnCharacterDataLoaded, const FPlayerZeroCharacter&);
+DECLARE_DELEGATE_OneParam(FOnAvatarDataDownloaded, const TArray<uint8>&);
+DECLARE_DELEGATE_OneParam(FOnGltfAssetLoaded, UglTFRuntimeAsset*);
+DECLARE_DELEGATE_OneParam(FOnAvatarTextureLoaded, UTexture2D*);
 
 UCLASS()
 class PLAYERZERO_API UPlayerZeroSubsystem : public UGameInstanceSubsystem
@@ -25,20 +25,17 @@ class PLAYERZERO_API UPlayerZeroSubsystem : public UGameInstanceSubsystem
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
-
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
+	
 	FString GetHotLoadedAvatarId();
 	
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
+	void GetAvatarIconAsTexture(FString AvatarId, FOnAvatarTextureLoaded OnComplete);
+
 	void GetAvatarMetaData(const FString& Id, FOnCharacterDataLoaded OnComplete);
-
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
+	
 	void DownloadAvatarData(const FString& Url, FOnAvatarDataDownloaded OnComplete);
-
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
+	
 	void LoadGltfAsset(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfAssetLoaded OnComplete);
 	
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
 	void LoadAvatarAsset(const FString& Id, const FOnGltfAssetLoaded& OnComplete);
 
 private:
