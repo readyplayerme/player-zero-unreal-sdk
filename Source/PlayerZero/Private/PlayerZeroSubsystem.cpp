@@ -87,6 +87,7 @@ void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& Id, const FOnGltfAsset
 					UE_LOG(LogPlayerZero, Log, TEXT("Successfully downloaded GLB data of size: %d bytes"), Data.Num());
 					// Step 3: Load the GLTF asset
 					FglTFRuntimeConfig Config;
+					Config.TransformBaseType = EglTFRuntimeTransformBaseType::YForward;
 					UglTFRuntimeAsset* GltfAsset = UglTFRuntimeFunctionLibrary::glTFLoadAssetFromData(Data, Config);
 					
 					if (!GltfAsset)

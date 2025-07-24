@@ -38,12 +38,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Avatar Loader")
 	void LoadAvatar();
-
+	
+	void LogSkeletonCompatibility(USkeletalMesh* Mesh, USkeleton* ExpectedSkeleton);
+	
 protected:
 	virtual void BeginPlay() override;
-
-	UPlayerZeroSubsystem* Subsystem;
-	FOnGltfAssetLoaded OnGltfAssetLoaded;
+	
 private:
 	UFUNCTION()
 	void ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* GltfAsset);
