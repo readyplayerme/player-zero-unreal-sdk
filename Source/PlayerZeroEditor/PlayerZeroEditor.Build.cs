@@ -27,6 +27,7 @@ public class PlayerZeroEditor : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"HTTP",
+				"Json",
 				"JsonUtilities",
 				"PlayerZero",
 				"EditorStyle",
@@ -35,6 +36,7 @@ public class PlayerZeroEditor : ModuleRules
 				"PropertyEditor",
 				"Slate",
 				"SlateCore",
+				"glTFRuntime"
 			}
 			);
 			

@@ -18,5 +18,5 @@ private:
 	UGameEventApi();
 	~UGameEventApi();
 	FString GetToken() const;
-	const FString Url;
+	FString Url;
 };
