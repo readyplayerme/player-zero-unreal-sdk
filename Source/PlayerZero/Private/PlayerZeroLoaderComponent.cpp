@@ -36,9 +36,13 @@ void UPlayerZeroLoaderComponent::LoadAvatar()
 		UE_LOG(LogTemp, Error, TEXT("AvatarLoaderComponent: PlayerZeroSubsystem not found."));
 		return;
 	}
+
 	FOnGltfAssetLoaded OnGltfAssetLoaded;
-	OnGltfAssetLoaded.BindUFunction(this, FName("ReplaceMeshWithGltfAsset"));
+	OnGltfAssetLoaded.BindUObject(this, &UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset);
+
 	Subsystem->LoadAvatarAsset(AvatarId, OnGltfAssetLoaded);
+
+	UE_LOG(LogTemp, Log, TEXT("AvatarLoaderComponent: Requesting avatar asset for AvatarId: %s"), *AvatarId);
 }
 
 void UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* GltfAsset)
@@ -60,9 +64,7 @@ void UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* Glt
 		OnAvatarLoadComplete.Broadcast(nullptr);
 		return;
 	}
-
-
-
+	
 	// Remove old skeletal mesh if present
 	if (TargetMeshComponent)
 	{
