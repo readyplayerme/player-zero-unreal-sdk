@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "glTFRuntimeAsset.h"
-#include "PlayerZeroSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Components/ActorComponent.h"
 #include "PlayerZeroLoaderComponent.generated.h"

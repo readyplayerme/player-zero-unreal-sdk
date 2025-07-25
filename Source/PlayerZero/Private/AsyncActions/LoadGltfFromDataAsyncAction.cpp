@@ -1,7 +1,7 @@
 // Copyright Ready Player Me
 
-#include "LoadGltfFromDataAsyncAction.h"
-#include "PlayerZeroSubsystem.h"
+#include "AsyncActions/LoadGltfFromDataAsyncAction.h"
+#include "Subsystems/PlayerZeroSubsystem.h"
 
 ULoadGltfFromDataAsyncAction* ULoadGltfFromDataAsyncAction::LoadGltfFromDataAsync(UObject* WorldContextObject, const TArray<uint8>& GltfBinaryData, const FglTFRuntimeConfig& Config)
 {
@@ -21,14 +21,13 @@ void ULoadGltfFromDataAsyncAction::Activate()
 		return;
 	}
 
-	if (UWorld* World = ContextObject->GetWorld())
+	if (const UWorld* World = ContextObject->GetWorld())
 	{
 		if (UPlayerZeroSubsystem* Subsystem = World->GetGameInstance()->GetSubsystem<UPlayerZeroSubsystem>())
 		{
 			Subsystem->LoadGltfAsset(Data, RuntimeConfig, FOnGltfAssetLoaded::CreateUObject(this, &ULoadGltfFromDataAsyncAction::HandleCompleted));
 		}
 	}
-
 }
 
 void ULoadGltfFromDataAsyncAction::HandleCompleted(UglTFRuntimeAsset* GltfAsset) const

@@ -1,7 +1,7 @@
 // Copyright Ready Player Me
 
-#include "LoadAvatarGlbDataAsyncAction.h"
-#include "PlayerZeroSubsystem.h"
+#include "AsyncActions/LoadAvatarGlbDataAsyncAction.h"
+#include "Subsystems/PlayerZeroSubsystem.h"
 
 ULoadAvatarGlbDataAsyncAction* ULoadAvatarGlbDataAsyncAction::LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url)
 {

@@ -20,10 +20,7 @@ private:
 	void RegisterMenus();
 	void FillPlayerZeroMenu(UToolMenu* Menu);
 	void OpenLoaderWindow();
-	void OpenCacheEditorWindow();
 	
-	TSharedRef<SDockTab> OnSpawnLoaderWindow(const FSpawnTabArgs& SpawnTabArgs);
-	TSharedRef<SDockTab> OnSpawnCacheWindow(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<SDockTab> OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedPtr<FUICommandList> PluginCommands;
 };

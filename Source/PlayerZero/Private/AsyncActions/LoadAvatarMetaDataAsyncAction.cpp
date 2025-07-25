@@ -1,5 +1,5 @@
-#include "LoadAvatarMetaDataAsyncAction.h"
-#include "PlayerZeroSubsystem.h"
+#include "AsyncActions/LoadAvatarMetaDataAsyncAction.h"
+#include "Subsystems/PlayerZeroSubsystem.h"
 
 ULoadAvatarMetaDataAsyncAction* ULoadAvatarMetaDataAsyncAction::LoadAvatarMetaDataAsync(UObject* WorldContextObject, const FString& AvatarId)
 {

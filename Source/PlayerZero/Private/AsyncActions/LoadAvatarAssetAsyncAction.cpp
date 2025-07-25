@@ -1,7 +1,7 @@
 // Copyright Ready Player Me
 
-#include "LoadAvatarAssetAsyncAction.h"
-#include "PlayerZeroSubsystem.h"
+#include "AsyncActions/LoadAvatarAssetAsyncAction.h"
+#include "Subsystems/PlayerZeroSubsystem.h"
 
 ULoadAvatarAssetAsyncAction* ULoadAvatarAssetAsyncAction::LoadAvatarAssetAsync(UObject* WorldContextObject, const FString& AvatarId)
 {

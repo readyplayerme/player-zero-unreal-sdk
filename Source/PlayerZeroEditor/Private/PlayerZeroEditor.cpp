@@ -1,8 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "PlayerZeroEditor.h"
-#include "UI/SCharacterLoaderWidget.h"
-#include "UI/Commands/LoaderWindowCommands.h"
 #include "UI/Commands/LoginWindowCommands.h"
 #include "UI/SPlayerZeroDeveloperLoginWidget.h"
 #include "Widgets/Docking/SDockTab.h"
@@ -23,7 +21,6 @@ void FPlayerZeroEditorModule::StartupModule()
 	FLoginWindowStyle::ReloadTextures();
 
 	FLoginWindowCommands::Register();
-	FLoaderWindowCommands::Register();
 
 	PluginCommands = MakeShareable(new FUICommandList);
 
@@ -32,22 +29,11 @@ void FPlayerZeroEditorModule::StartupModule()
 		FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::PluginButtonClicked),
 		FCanExecuteAction());
 
-	// Don't show Loader window in the menu
-	// PluginCommands->MapAction(
-	// 	FLoaderWindowCommands::Get().OpenPluginWindow,
-	// 	FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::OpenLoaderWindow),
-	// 	FCanExecuteAction());
-
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FPlayerZeroEditorModule::RegisterMenus));
 
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(DeveloperWindowName, FOnSpawnTab::CreateRaw(this, &FPlayerZeroEditorModule::OnSpawnPluginTab))
 		.SetDisplayName(LOCTEXT("DeveloperLoginWidget", "Player Zero"))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
-	
-	// Don't show Loader window in the menu
-	// FGlobalTabmanager::Get()->RegisterNomadTabSpawner(NewWindowTabName, FOnSpawnTab::CreateRaw(this, &FPlayerZeroEditorModule::OnSpawnLoaderWindow))
-	// 	.SetDisplayName(LOCTEXT("CharacterLoaderWidget", "Avatar Loader"))
-	// 	.SetMenuType(ETabSpawnerMenuType::Hidden);
 }
 
 void FPlayerZeroEditorModule::RegisterMenus()
@@ -82,15 +68,6 @@ void FPlayerZeroEditorModule::FillPlayerZeroMenu(UToolMenu* Menu)
 		FSlateIcon(),
 		FUIAction(FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::PluginButtonClicked))
 	);
-	
-	// Don't show Loader window in the menu
-	// Section.AddMenuEntry(
-	// 	"OpenLoaderWindow",
-	// 	LOCTEXT("OpenLoaderWindow", "Glb Loader"),
-	// 	LOCTEXT("OpenLoaderWindowToolTip", "Avatar Loader Window."),
-	// 	FSlateIcon(),
-	// 	FUIAction(FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::OpenLoaderWindow))
-	// );
 }
 
 void FPlayerZeroEditorModule::ShutdownModule()
@@ -101,13 +78,9 @@ void FPlayerZeroEditorModule::ShutdownModule()
 	FLoginWindowStyle::Shutdown();
 
 	FLoginWindowCommands::Unregister();
-	FLoaderWindowCommands::Unregister();
 
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(DeveloperWindowName);
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(CacheWindowName);
-	
-	// Don't show Loader window in the menu
-	//FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(LoaderWindowName);
 }
 
 TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
@@ -124,15 +97,6 @@ TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnPluginTab(const FSpawnTabAr
 			SNew(SPlayerZeroDeveloperLoginWidget)
 		];
 	
-}
-
-TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnLoaderWindow(const FSpawnTabArgs& SpawnTabArgs)
-{
-	return SNew(SDockTab)
-		.TabRole(NomadTab)
-		[
-			SNew(SCharacterLoaderWidget)
-		];
 }
 
 void FPlayerZeroEditorModule::PluginButtonClicked()

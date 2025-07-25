@@ -2,7 +2,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
-#include "PlayerZeroSubsystem.h"
+#include "Subsystems/PlayerZeroSubsystem.h"
 
 UPlayerZeroLoaderComponent::UPlayerZeroLoaderComponent()
 {
@@ -101,7 +101,6 @@ void UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* Glt
 				UE_LOG(LogTemp, Error, TEXT("AvatarLoader: Failed to load skeletal mesh from node %s"), *Node.Name);
 				continue;
 			}
-			LogSkeletonCompatibility(SkeletalMesh, TargetSkeleton);
 			// Create new skeletal mesh component
 			USkeletalMeshComponent* NewMeshComp = NewObject<USkeletalMeshComponent>(Owner);
 			NewMeshComp->SetSkeletalMesh(SkeletalMesh);
