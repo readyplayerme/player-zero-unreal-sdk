@@ -1,7 +1,7 @@
 #include "LoadAvatarMetaDataAsyncAction.h"
 #include "PlayerZeroSubsystem.h"
 
-ULoadAvatarMetaDataAsyncAction* ULoadAvatarMetaDataAsyncAction::Get(UObject* WorldContextObject, const FString& AvatarId)
+ULoadAvatarMetaDataAsyncAction* ULoadAvatarMetaDataAsyncAction::LoadAvatarMetaDataAsync(UObject* WorldContextObject, const FString& AvatarId)
 {
 	ULoadAvatarMetaDataAsyncAction* Node = NewObject<ULoadAvatarMetaDataAsyncAction>();
 	Node->CachedAvatarId = AvatarId;
@@ -13,7 +13,7 @@ void ULoadAvatarMetaDataAsyncAction::Activate()
 {
 	if (!ContextObject)
 	{
-		OnCompleted.Broadcast(FPlayerZeroCharacter());
+		OnFailed.Broadcast();
 		return;
 	}
 
@@ -28,5 +28,10 @@ void ULoadAvatarMetaDataAsyncAction::Activate()
 
 void ULoadAvatarMetaDataAsyncAction::OnDataLoaded(const FPlayerZeroCharacter& Character)
 {
+	if (Character.Id.IsEmpty())
+	{
+		OnFailed.Broadcast();
+		return;
+	}
 	OnCompleted.Broadcast(Character);
 }

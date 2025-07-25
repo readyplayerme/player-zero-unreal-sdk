@@ -3,7 +3,7 @@
 #include "LoadGltfFromDataAsyncAction.h"
 #include "PlayerZeroSubsystem.h"
 
-ULoadGltfFromDataAsyncAction* ULoadGltfFromDataAsyncAction::Load(UObject* WorldContextObject, const TArray<uint8>& GltfBinaryData, const FglTFRuntimeConfig& Config)
+ULoadGltfFromDataAsyncAction* ULoadGltfFromDataAsyncAction::LoadGltfFromDataAsync(UObject* WorldContextObject, const TArray<uint8>& GltfBinaryData, const FglTFRuntimeConfig& Config)
 {
 	ULoadGltfFromDataAsyncAction* Node = NewObject<ULoadGltfFromDataAsyncAction>();
 	Node->ContextObject = WorldContextObject;

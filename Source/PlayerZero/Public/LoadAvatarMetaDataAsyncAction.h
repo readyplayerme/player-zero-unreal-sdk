@@ -8,6 +8,7 @@
 #include "LoadAvatarMetaDataAsyncAction.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAvatarMetaDataLoadedBP, const FPlayerZeroCharacter&, MetaData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAvatarMetaDataFailureBP);
 
 UCLASS()
 class PLAYERZERO_API ULoadAvatarMetaDataAsyncAction : public UBlueprintAsyncActionBase
@@ -18,8 +19,11 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAvatarMetaDataLoadedBP OnCompleted;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnAvatarMetaDataFailureBP OnFailed;
+
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
-	static ULoadAvatarMetaDataAsyncAction* Get(UObject* WorldContextObject, const FString& AvatarId);
+	static ULoadAvatarMetaDataAsyncAction* LoadAvatarMetaDataAsync(UObject* WorldContextObject, const FString& AvatarId);
 
 	virtual void Activate() override;
 

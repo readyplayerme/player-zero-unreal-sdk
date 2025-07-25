@@ -15,7 +15,7 @@ void ULoadAvatarImageAsyncAction::Activate()
 {
 	if (!ContextObject)
 	{
-		OnCompleted.Broadcast(nullptr);
+		OnFailed.Broadcast();
 		return;
 	}
 
@@ -30,5 +30,10 @@ void ULoadAvatarImageAsyncAction::Activate()
 
 void ULoadAvatarImageAsyncAction::OnIconLoaded(UTexture2D* Texture)
 {
+	if (!Texture)
+	{
+		OnFailed.Broadcast();
+		return;
+	}
 	OnCompleted.Broadcast(Texture);
 }

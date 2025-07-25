@@ -6,7 +6,8 @@
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "LoadAvatarGlbDataAsyncAction.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAvatarDataDownloadedDelegate, const TArray<uint8>&, Data);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAvatarDataDownloadedBP, const TArray<uint8>&, Data);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAvatarDataDownloadFailureBP);
 
 UCLASS()
 class PLAYERZERO_API ULoadAvatarGlbDataAsyncAction : public UBlueprintAsyncActionBase
@@ -15,10 +16,13 @@ class PLAYERZERO_API ULoadAvatarGlbDataAsyncAction : public UBlueprintAsyncActio
 
 public:
 	UPROPERTY(BlueprintAssignable)
-	FOnAvatarDataDownloadedDelegate OnCompleted;
+	FOnAvatarDataDownloadedBP OnCompleted;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAvatarDataDownloadFailureBP OnFailed;
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
-	static ULoadAvatarGlbDataAsyncAction* Download(UObject* WorldContextObject, const FString& Url);
+	static ULoadAvatarGlbDataAsyncAction* LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url);
 
 	virtual void Activate() override;
 

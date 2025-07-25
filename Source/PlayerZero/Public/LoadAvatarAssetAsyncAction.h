@@ -4,25 +4,30 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
-#include "LoadAvatarGltfAssetAsyncAction.generated.h"
+#include "LoadAvatarAssetAsyncAction.generated.h"
 
 class UglTFRuntimeAsset;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAvatarGltfLoaded, UglTFRuntimeAsset*, GltfAsset);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAvatarGltfLoadFailed);
 
 /**
  * 
  */
 UCLASS()
-class PLAYERZERO_API ULoadAvatarGltfAssetAsyncAction : public UBlueprintAsyncActionBase
+class PLAYERZERO_API ULoadAvatarAssetAsyncAction : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAvatarGltfLoaded OnCompleted;
-
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnAvatarGltfLoadFailed OnFailed;
+	
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
-	static ULoadAvatarGltfAssetAsyncAction* LoadAvatarGltfAssetAsync(UObject* WorldContextObject, const FString& AvatarId);
+	static ULoadAvatarAssetAsyncAction* LoadAvatarAssetAsync(UObject* WorldContextObject, const FString& AvatarId);
 
 	virtual void Activate() override;
 	void HandleCompleted(UglTFRuntimeAsset* GltfAsset) const;

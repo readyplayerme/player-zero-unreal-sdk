@@ -3,7 +3,7 @@
 #include "LoadAvatarGlbDataAsyncAction.h"
 #include "PlayerZeroSubsystem.h"
 
-ULoadAvatarGlbDataAsyncAction* ULoadAvatarGlbDataAsyncAction::Download(UObject* WorldContextObject, const FString& Url)
+ULoadAvatarGlbDataAsyncAction* ULoadAvatarGlbDataAsyncAction::LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url)
 {
 	ULoadAvatarGlbDataAsyncAction* Node = NewObject<ULoadAvatarGlbDataAsyncAction>();
 	Node->CachedUrl = Url;
@@ -15,11 +15,11 @@ void ULoadAvatarGlbDataAsyncAction::Activate()
 {
 	if (!ContextObject)
 	{
-		OnCompleted.Broadcast({});
+		OnFailed.Broadcast();
 		return;
 	}
 
-	if (UWorld* World = ContextObject->GetWorld())
+	if (const UWorld* World = ContextObject->GetWorld())
 	{
 		if (UPlayerZeroSubsystem* Subsystem = World->GetGameInstance()->GetSubsystem<UPlayerZeroSubsystem>())
 		{
@@ -30,5 +30,10 @@ void ULoadAvatarGlbDataAsyncAction::Activate()
 
 void ULoadAvatarGlbDataAsyncAction::OnDataDownloaded(const TArray<uint8>& Data)
 {
+	if (Data.Num() == 0)
+	{
+		OnFailed.Broadcast();
+		return;
+	}
 	OnCompleted.Broadcast(Data);
 }
