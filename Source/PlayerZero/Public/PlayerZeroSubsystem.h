@@ -1,5 +1,6 @@
 #pragma once
 
+#include "glTFRuntimeAsset.h"
 #include "PlayerZeroCharacterTypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "PlayerZeroSubsystem.generated.h"
