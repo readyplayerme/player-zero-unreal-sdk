@@ -11,29 +11,32 @@
 
 class UPlayerZeroDeveloperSettings;
 
-UGameEventApi::UGameEventApi()
+FGameEventApi::FGameEventApi()
 {
 	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
 	Url = FString::Printf(TEXT("%s/v1/public/events"), *PlayerZeroSettings->GetApiBaseUrl());
 }
 
-UGameEventApi::~UGameEventApi()
+FGameEventApi::~FGameEventApi()
 {
 }
 
-FString UGameEventApi::GetToken() const
+FString FGameEventApi::GetToken() const
 {
-	// This mimics ZeroQueryParams.GetParams().TryGetValue("token")
+	// TODO add logic for token retrieval
 	return TEXT("YourTokenHere"); // Replace with actual logic
 }
 
-template<typename TPayload>
-void UGameEventApi::SendGameEventAsync(const TPayload& RequestPayload, FOnGameEventSent OnComplete)
+template<typename TEvent>
+void FGameEventApi::SendGameEventAsync(const TEvent& Event, FOnGameEventSent OnComplete)
 {
 	FString Token = GetToken();
 	
-	const TPayload PayloadWithToken = RequestPayload;
-	PayloadWithToken.Token = Token;
+	TEvent PayloadWithToken = Event;
+	if constexpr (HasToken_v<TEvent>)
+	{
+		PayloadWithToken.Token = Token;
+	}
 	FString JsonPayload;
 	if (!FJsonObjectConverter::UStructToJsonObjectString(PayloadWithToken, JsonPayload))
 	{

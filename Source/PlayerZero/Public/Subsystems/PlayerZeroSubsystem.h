@@ -2,6 +2,7 @@
 
 #include "glTFRuntimeAsset.h"
 #include "PlayerZeroCharacterTypes.h"
+#include "Api/GameEvents/GameEventApi.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "PlayerZeroSubsystem.generated.h"
 
@@ -50,7 +51,6 @@ private:
 	// Add your persistent API instances, settings, etc.
 	TSharedPtr<FCharacterApi> CharacterApi;
 	TSharedPtr<FFileApi> FileApi;
-	//TSharedPtr<FGameEventApi> GameEventApi;
 
 	void OnDeepLinkDataReceived(const FString& AvatarId);
 };

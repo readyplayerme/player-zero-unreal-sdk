@@ -1,22 +1,30 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "JsonObjectConverter.h"
 #include "Api/Common/WebApi.h"
-#include "Api/Common/WebApiWithAuth.h"
 
 DECLARE_DELEGATE_TwoParams(FOnGameEventSent, bool /*bSuccess*/, const FString& /*Response*/);
 
-class PLAYERZERO_API UGameEventApi : public FWebApi
+template<typename T, typename = void>
+struct HasToken : std::false_type {};
+
+template<typename T>
+struct HasToken<T, std::void_t<decltype(std::declval<T>().Token)>> : std::true_type {};
+
+template<typename T>
+constexpr bool HasToken_v = HasToken<T>::value;
+
+class PLAYERZERO_API FGameEventApi : public FWebApi
 {
 	
 public:
-	template<typename TPayload>
-	void SendGameEventAsync(const TPayload& RequestPayload, FOnGameEventSent OnComplete);
-
+	template<typename TEvent>
+	void SendGameEventAsync(const TEvent& Event, FOnGameEventSent OnComplete);
+	
+	FGameEventApi();
+	~FGameEventApi();
 private:
-	UGameEventApi();
-	~UGameEventApi();
+
 	FString GetToken() const;
 	FString Url;
 };
