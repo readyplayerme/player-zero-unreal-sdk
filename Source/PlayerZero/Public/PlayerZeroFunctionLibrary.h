@@ -10,7 +10,6 @@
 class UImage;
 class UPlayerZeroSubsystem;
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnAvatarImageLoaded, const UImage*, AvatarImage);
 /**
  * 
  */
@@ -22,8 +21,5 @@ class PLAYERZERO_API UPlayerZeroFunctionLibrary : public UBlueprintFunctionLibra
 public:
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
 	static FString GetHotLoadedAvatarId(UObject* WorldContextObject);
-
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject"))
-	static void LoadAvatarImage(UObject* WorldContextObject, const FString& AvatarId, const FVector2D& ImageSize, UImage* Image);
 
 };

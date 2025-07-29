@@ -27,10 +27,8 @@ public class PlayerZero : ModuleRules
 			{
 				"Core",
 				"glTFRuntime",
-				"DeveloperSettings",
 				"Slate",
 				"SlateCore",
-				"PakFile", 
 				"StreamingFile", 
 				"ImageDownload"
 			}
@@ -46,7 +44,9 @@ public class PlayerZero : ModuleRules
 				"JsonUtilities",
 				"HTTP",
 				"UMG",
+				"Projects",
 				"ImageWrapper",
+				"DeveloperSettings",
 			}
 			);
 		

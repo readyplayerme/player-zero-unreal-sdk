@@ -1,6 +1,9 @@
 #include "Subsystems/PlayerZeroSubsystem.h"
+
+#include "CharacterLoaderConfig.h"
 #include "glTFRuntimeFunctionLibrary.h"
 #include "PlayerZero.h"
+#include "PlayerZeroConfigProcessor.h"
 #include "Api/Characters/CharacterApi.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"
 #include "Api/Files/GlbLoader.h"
@@ -32,9 +35,9 @@ FString UPlayerZeroSubsystem::GetHotLoadedAvatarId()
 	return CachedAvatarId;
 }
 
-void UPlayerZeroSubsystem::GetAvatarIconAsTexture(FString AvatarId, FOnAvatarTextureLoaded OnComplete)
+void UPlayerZeroSubsystem::GetAvatarIconAsTexture(FString AvatarId, const FAvatarRenderConfig& Config, FOnAvatarTextureLoaded OnComplete)
 {
-	const FString Url = FString::Printf(TEXT("https://avatars.readyplayer.me/%s.png"), *AvatarId);
+	const FString Url = FString::Printf(TEXT("https://avatars.readyplayer.me/%s.png%s"), *AvatarId, *FPlayerZeroConfigProcessor::ProcessRender(Config));
 	FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateLambda(
 	[OnComplete](const FFileData& File, const TArray<uint8>& Data)
 	{
@@ -67,14 +70,14 @@ void UPlayerZeroSubsystem::GetAvatarMetaData(const FString& Id, FOnCharacterData
 		}));
 }
 
-void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& Id, const FOnGltfAssetLoaded& OnComplete)
+void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& Id, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete)
 {
 	// Step 1: Fetch character metadata
 	TSharedPtr<FCharacterFindByIdRequest> Request = MakeShared<FCharacterFindByIdRequest>();
 	Request->Id = Id;
 
 	CharacterApi->FindByIdAsync(*Request, FOnCharacterFindResponse::CreateLambda(
-		[this, OnComplete](FCharacterFindByIdResponse Response, bool bCharacterFetchSuccessful)
+		[this, Config, OnComplete](FCharacterFindByIdResponse Response, bool bCharacterFetchSuccessful)
 		{
 			if (!bCharacterFetchSuccessful || Response.Data.Id.IsEmpty())
 			{
@@ -83,7 +86,7 @@ void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& Id, const FOnGltfAsset
 				return;
 			}
 
-			const FString GlbUrl = Response.Data.ModelUrl;
+			const FString GlbUrl = Response.Data.ModelUrl + FPlayerZeroConfigProcessor::ProcessCharacter(Config);
 			UE_LOG( LogPlayerZero, Log, TEXT("Character GLB URL: %s"), *GlbUrl);
 			if (GlbUrl.IsEmpty())
 			{
@@ -117,9 +120,10 @@ void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& Id, const FOnGltfAsset
 		}));
 }
 
-void UPlayerZeroSubsystem::DownloadAvatarData(const FString& Url, FOnAvatarDataDownloaded OnComplete)
+void UPlayerZeroSubsystem::DownloadAvatarData(const FString& Url, const FCharacterConfig& Config, FOnAvatarDataDownloaded OnComplete)
 {
-	FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateLambda(
+	const FString ProcessedUrlParams = Url + FPlayerZeroConfigProcessor::ProcessCharacter(Config);
+	FileApi->LoadFileFromUrl(ProcessedUrlParams, FOnAssetFileRequestComplete::CreateLambda(
 		[OnComplete](const FFileData& File, const TArray<uint8>& Data)
 		{
 			OnComplete.ExecuteIfBound(Data);

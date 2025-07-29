@@ -21,7 +21,7 @@ void UPlayerZeroLoaderComponent::BeginPlay()
 	}
 }
 
-void UPlayerZeroLoaderComponent::LoadAvatar()
+void UPlayerZeroLoaderComponent::LoadAvatar(const FCharacterConfig& CharacterConfig)
 {
 	if (AvatarId.IsEmpty())
 	{
@@ -40,7 +40,7 @@ void UPlayerZeroLoaderComponent::LoadAvatar()
 	FOnGltfAssetLoaded OnGltfAssetLoaded;
 	OnGltfAssetLoaded.BindUObject(this, &UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset);
 
-	Subsystem->LoadAvatarAsset(AvatarId, OnGltfAssetLoaded);
+	Subsystem->LoadAvatarAsset(AvatarId, CharacterConfig, OnGltfAssetLoaded);
 
 	UE_LOG(LogTemp, Log, TEXT("AvatarLoaderComponent: Requesting avatar asset for AvatarId: %s"), *AvatarId);
 }

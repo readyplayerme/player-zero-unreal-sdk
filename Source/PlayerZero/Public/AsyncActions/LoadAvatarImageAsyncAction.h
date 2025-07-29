@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AvatarRenderConfig.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "LoadAvatarImageAsyncAction.generated.h"
 
@@ -27,13 +28,13 @@ public:
 	FOnAvatarImageLoadFailed OnFailed;
 	
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
-	static ULoadAvatarImageAsyncAction* LoadAvatarImageAsync(UObject* WorldContextObject, const FString& AvatarId);
+	static ULoadAvatarImageAsyncAction* LoadAvatarImageAsync(UObject* WorldContextObject, const FString& AvatarId, const FAvatarRenderConfig& Config);
 
 	virtual void Activate() override;
 
 private:
 	FString CachedAvatarId;
 	UObject* ContextObject;
-
+	FAvatarRenderConfig Config;
 	void OnIconLoaded(UTexture2D* Texture);
 };

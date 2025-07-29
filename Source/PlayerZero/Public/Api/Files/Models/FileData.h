@@ -32,18 +32,28 @@ struct PLAYERZERO_API FFileData
 		Url = "";
 	}
 	
-	FFileData(const FString& InUrl , const FString& InName = "")
+	FFileData(const FString& InUrl, const FString& InName = "")
 		: Name(InName), Url(InUrl)
 	{
-		if (InUrl.EndsWith(TEXT(".glb")))
+		// Step 1: Remove query parameters for processing
+		FString CleanUrl = InUrl;
+		int32 QueryStartIndex;
+		if (InUrl.FindChar(TEXT('?'), QueryStartIndex))
+		{
+			CleanUrl = InUrl.Left(QueryStartIndex);
+		}
+
+		// Step 2: Determine file type from extension (case-insensitive)
+		if (CleanUrl.EndsWith(TEXT(".glb"), ESearchCase::IgnoreCase))
 		{
 			FileType = EFileType::GLB;
 		}
-		else if (InUrl.EndsWith(TEXT(".png")))
+		else if (CleanUrl.EndsWith(TEXT(".png"), ESearchCase::IgnoreCase))
 		{
 			FileType = EFileType::PNG;
 		}
-		else if (InUrl.EndsWith(TEXT(".jpg")) || InUrl.EndsWith(TEXT(".jpeg")))
+		else if (CleanUrl.EndsWith(TEXT(".jpg"), ESearchCase::IgnoreCase) ||
+				 CleanUrl.EndsWith(TEXT(".jpeg"), ESearchCase::IgnoreCase))
 		{
 			FileType = EFileType::JPEG;
 		}
@@ -53,9 +63,10 @@ struct PLAYERZERO_API FFileData
 			UE_LOG(LogTemp, Error, TEXT("Unable to determine file type for URL: %s"), *InUrl);
 		}
 
+		// Step 3: Fallback to filename (no query) if Name was not provided
 		if (Name.IsEmpty())
 		{
-			Name = FPaths::GetCleanFilename(InUrl);
+			Name = FPaths::GetCleanFilename(CleanUrl); // Use clean URL for filename
 		}
 	}
 };

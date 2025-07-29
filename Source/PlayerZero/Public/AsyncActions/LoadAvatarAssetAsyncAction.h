@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CharacterLoaderConfig.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "LoadAvatarAssetAsyncAction.generated.h"
 
@@ -27,7 +28,7 @@ public:
 	FOnAvatarGltfLoadFailed OnFailed;
 	
 	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
-	static ULoadAvatarAssetAsyncAction* LoadAvatarAssetAsync(UObject* WorldContextObject, const FString& AvatarId);
+	static ULoadAvatarAssetAsyncAction* LoadAvatarAssetAsync(UObject* WorldContextObject, const FString& AvatarId, const FCharacterConfig& CharacterConfig);
 
 	virtual void Activate() override;
 	void HandleCompleted(UglTFRuntimeAsset* GltfAsset) const;
@@ -35,5 +36,5 @@ public:
 private:
 	FString CachedAvatarId;
 	UObject* ContextObject;
-	
+	FCharacterConfig CharacterConfig;
 };

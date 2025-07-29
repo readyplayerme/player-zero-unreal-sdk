@@ -3,11 +3,12 @@
 #include "AsyncActions/LoadAvatarAssetAsyncAction.h"
 #include "Subsystems/PlayerZeroSubsystem.h"
 
-ULoadAvatarAssetAsyncAction* ULoadAvatarAssetAsyncAction::LoadAvatarAssetAsync(UObject* WorldContextObject, const FString& AvatarId)
+ULoadAvatarAssetAsyncAction* ULoadAvatarAssetAsyncAction::LoadAvatarAssetAsync(UObject* WorldContextObject, const FString& AvatarId, const FCharacterConfig& CharacterConfig)
 {
 	ULoadAvatarAssetAsyncAction* Node = NewObject<ULoadAvatarAssetAsyncAction>();
 	Node->CachedAvatarId = AvatarId;
 	Node->ContextObject = WorldContextObject;
+	Node->CharacterConfig = CharacterConfig;
 	return Node;
 }
 
@@ -23,7 +24,7 @@ void ULoadAvatarAssetAsyncAction::Activate()
 	{
 		if (UPlayerZeroSubsystem* Subsystem = World->GetGameInstance()->GetSubsystem<UPlayerZeroSubsystem>())
 		{
-			Subsystem->LoadAvatarAsset(CachedAvatarId, FOnGltfAssetLoaded::CreateUObject(this, &ULoadAvatarAssetAsyncAction::HandleCompleted));
+			Subsystem->LoadAvatarAsset(CachedAvatarId, CharacterConfig, FOnGltfAssetLoaded::CreateUObject(this, &ULoadAvatarAssetAsyncAction::HandleCompleted));
 		}
 	}
 }

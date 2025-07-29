@@ -6,6 +6,8 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "PlayerZeroSubsystem.generated.h"
 
+struct FAvatarRenderConfig;
+struct FCharacterConfig;
 struct FglTFRuntimeConfig;
 struct FPlayerZeroCharacter;
 struct FFileData;
@@ -30,15 +32,15 @@ public:
 	
 	FString GetHotLoadedAvatarId();
 	
-	void GetAvatarIconAsTexture(FString AvatarId, FOnAvatarTextureLoaded OnComplete);
+	void GetAvatarIconAsTexture(FString AvatarId, const FAvatarRenderConfig& Config, FOnAvatarTextureLoaded OnComplete);
 
 	void GetAvatarMetaData(const FString& Id, FOnCharacterDataLoaded OnComplete);
 	
-	void DownloadAvatarData(const FString& Url, FOnAvatarDataDownloaded OnComplete);
+	void DownloadAvatarData(const FString& Url, const FCharacterConfig& Config, FOnAvatarDataDownloaded OnComplete);
 	
 	void LoadGltfAsset(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfAssetLoaded OnComplete);
 	
-	void LoadAvatarAsset(const FString& Id, const FOnGltfAssetLoaded& OnComplete);
+	void LoadAvatarAsset(const FString& Id, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete);
 
 private:
 
