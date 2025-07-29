@@ -31,10 +31,20 @@ void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest)
     {
         Request->SetContentAsString(ApiRequest->Payload);
     }
+
+    TSharedPtr<FWebApi> Self = AsShared();
+    TWeakPtr<FApiRequest> WeakApiRequest = ApiRequest;
+    
     Request->OnProcessRequestComplete().BindLambda(
-        [this, ApiRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess)
+        [Self, WeakApiRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess)
         {
-            OnProcessResponse(Request, Response, bSuccess, ApiRequest);
+            if (!Self.IsValid() || !WeakApiRequest.IsValid())
+            {
+                UE_LOG(LogTemp, Warning, TEXT("FWebApi or ApiRequest was invalid when processing HTTP response to URL: %s"), *Request->GetURL());
+                return;
+            }
+            
+            Self->OnProcessResponse(Request, Response, bSuccess, WeakApiRequest.Pin());
         }
     );
     Request->ProcessRequest();

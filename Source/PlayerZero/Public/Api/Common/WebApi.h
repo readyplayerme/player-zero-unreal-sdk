@@ -9,7 +9,7 @@
 class FHttpModule;
 struct FApiRequest;
 
-class PLAYERZERO_API FWebApi
+class PLAYERZERO_API FWebApi : public TSharedFromThis<FWebApi>
 {
 public:
 	
