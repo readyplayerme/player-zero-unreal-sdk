@@ -15,6 +15,13 @@ static const TMap<ETextureAtlas, FString> TEXTURE_ATLAS_TO_STRING =
 	{ ETextureAtlas::Low, "256" }
 };
 
+static const TMap<ETextureQuality, FString> TEXTURE_QUALITY_TO_STRING =
+{
+	{ ETextureQuality::High, "high" },
+	{ ETextureQuality::Medium, "medium" },
+	{ ETextureQuality::Low, "low" }
+};
+
 static const TMap<ETextureChannel, FString> TEXTURE_CHANNEL_TO_STRING =
 {
 	{ ETextureChannel::BaseColor, "baseColor" },
@@ -117,7 +124,7 @@ FString FPlayerZeroConfigProcessor::ProcessCharacter(const FCharacterConfig& Con
 	const bool UseDraco = FPluginInfo::IsDracoPluginIncluded() && Config.bUseDracoMeshCompression;
 	const FString MorphTargetsParam = ProcessMorphTargets(Config.MorphTargetGroups, Config.MorphTargets);
 	TArray<FString> Parameters;
-	Parameters.Add("textureQuality=" + FString::FromInt(static_cast<int>(Config.TextureQuality)));
+Parameters.Add("textureQuality=" + TEXTURE_QUALITY_TO_STRING[Config.TextureQuality]);
 	Parameters.Add("meshLOD=" + FString::FromInt(static_cast<int>(Config.MeshLod)));
 	Parameters.Add("textureAtlas=" + TEXTURE_ATLAS_TO_STRING[Config.TextureAtlas]);
 	Parameters.Add("textureSizeLimit=" + TEXTURE_SIZE_LIMIT_TO_STRING[Config.TextureSizeLimit]);
