@@ -35,6 +35,7 @@ struct PLAYERZERO_API FFileData
 	FFileData(const FString& InUrl, const FString& InName = "")
 		: Name(InName), Url(InUrl)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("FFileData In URL: %s"), *InUrl);
 		// Step 1: Remove query parameters for processing
 		FString CleanUrl = InUrl;
 		int32 QueryStartIndex;
@@ -42,7 +43,7 @@ struct PLAYERZERO_API FFileData
 		{
 			CleanUrl = InUrl.Left(QueryStartIndex);
 		}
-
+		UE_LOG(LogTemp, Warning, TEXT("CleanUrl: %s"), *CleanUrl);
 		// Step 2: Determine file type from extension (case-insensitive)
 		if (CleanUrl.EndsWith(TEXT(".glb"), ESearchCase::IgnoreCase))
 		{

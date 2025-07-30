@@ -7,7 +7,7 @@ struct PLAYERZERO_API FGameMatchEndedProperties
 {
 	GENERATED_BODY()
 
-	UPROPERTY(meta = (JsonProperty = "session_id"))
+	UPROPERTY(meta = (JsonProperty = "game_match_id"))
 	FString SessionId;
 
 	UPROPERTY(meta = (JsonProperty = "game_id"))
@@ -29,7 +29,7 @@ struct PLAYERZERO_API FGameMatchEnded
 	GENERATED_BODY()
 
 	UPROPERTY(meta = (JsonProperty = "event"))
-	FString Event = "game_match_ended";
+	FString Event = "user_game_match_ended";
 
 	UPROPERTY(meta = (JsonProperty = "properties"))
 	FGameMatchEndedProperties Properties;

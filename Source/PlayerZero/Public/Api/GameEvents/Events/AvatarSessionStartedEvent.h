@@ -7,11 +7,11 @@ struct PLAYERZERO_API FAvatarSessionStartedProperties
 {
 	GENERATED_BODY()
 
-	UPROPERTY(meta = (JsonProperty = "session_id"))
+	UPROPERTY(meta = (JsonProperty = "avatar_id"))
 	FString AvatarId;
 
-	UPROPERTY(meta = (JsonProperty = "game_id"))
-	FString AvatarType;
+	UPROPERTY(meta = (JsonProperty = "avatar_type"))
+	FString AvatarType = "fullbody";
 
 	UPROPERTY(meta = (JsonProperty = "game_id"))
 	FString GameId;
@@ -19,7 +19,7 @@ struct PLAYERZERO_API FAvatarSessionStartedProperties
 	UPROPERTY(meta = (JsonProperty = "game_session_id"))
 	FString GameSessionId;
 	
-	UPROPERTY(meta = (JsonProperty = "session_id"))
+	UPROPERTY(meta = (JsonProperty = "avatar_session_id"))
 	FString SessionId;
 	
 	UPROPERTY(meta = (JsonProperty = "sdk_version"))

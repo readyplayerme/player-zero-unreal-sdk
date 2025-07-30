@@ -22,9 +22,15 @@ void FCharacterApi::FindByIdAsync(const FCharacterFindByIdRequest& Request, FOnC
 	ApiRequest->Url = FString::Printf(TEXT("%s/%s"), *BaseUrl, *Request.Id);
 	ApiRequest->Method = GET;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
+	
+	TSharedPtr<FCharacterApi> SharedThis = StaticCastSharedRef<FCharacterApi>(AsShared());
 	ApiRequest->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
-		[OnComplete](TSharedPtr<FApiRequest> Req, FHttpResponsePtr Response, bool bSuccess)
+		[SharedThis, OnComplete](TSharedPtr<FApiRequest> Req, FHttpResponsePtr Response, bool bSuccess)
 		{
+			if (!SharedThis.IsValid())
+			{
+				return;
+			}
 			FCharacterFindByIdResponse ParsedResponse;
 			if (bSuccess && TryParseJsonResponse(Response, ParsedResponse))
 			{

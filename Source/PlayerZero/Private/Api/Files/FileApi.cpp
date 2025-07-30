@@ -16,9 +16,14 @@ void FFileApi::LoadFileFromUrl(const FString& URL, FOnAssetFileRequestComplete O
 {
 	const FFileData& File = FFileData(URL);
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+	TSharedPtr<FFileApi> Self = AsShared();
 	HttpRequest->OnProcessRequestComplete().BindLambda( 
-		[this, File, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+		[Self, File, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 		{
+			if (!Self.IsValid())
+			{
+				return;
+			}
 			if (bWasSuccessful && Response.IsValid() && Response->GetContentLength() > 0)
 			{
 				TArray<uint8> Content = Response->GetContent();

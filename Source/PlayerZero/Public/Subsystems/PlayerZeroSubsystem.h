@@ -6,6 +6,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "PlayerZeroSubsystem.generated.h"
 
+class UPlayerZeroDeveloperSettings;
 struct FAvatarRenderConfig;
 struct FCharacterConfig;
 struct FglTFRuntimeConfig;
@@ -42,7 +43,26 @@ public:
 	
 	void LoadAvatarAsset(const FString& Id, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete);
 
+	void StartSessions();
+	void StartHeartbeat();
+	void GameSessionStart();
+	void GameSessionEnd();
+	void AvatarSessionStart();
+	void AvatarSessionEnd();
+	void EndSessions();
+
 private:
+
+	const UPlayerZeroDeveloperSettings* PlayerZeroSettings;
+	FTimerHandle HeartbeatTimerHandle;
+	FDateTime LastPlayerActivity;
+	FVector2D LastMousePosition;
+	FString AvatarSessionId;
+	FString GameSessionId;
+	bool HeartbeatActive = false;
+	
+	void SendHeartbeat();
+	bool DetectPlayerActivity();
 
 	UPROPERTY()
 	FString CachedCharacterUrl;
@@ -53,6 +73,7 @@ private:
 	// Add your persistent API instances, settings, etc.
 	TSharedPtr<FCharacterApi> CharacterApi;
 	TSharedPtr<FFileApi> FileApi;
+	TSharedPtr<FGameEventApi> GameEventApi;
 
 	void OnDeepLinkDataReceived(const FString& AvatarId);
 };

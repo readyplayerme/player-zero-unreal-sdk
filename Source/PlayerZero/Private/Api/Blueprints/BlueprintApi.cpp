@@ -21,9 +21,15 @@ void FBlueprintApi::ListAsync(const FBlueprintListRequest& Request, FBlueprintAp
 	RequestPtr->Url = FString::Printf(TEXT("%s?applicationId=%s&archived=%s"), *BaseUrl, *Request.ApplicationId, *ArchivedStr);
 	RequestPtr->Method = GET;
 	RequestPtr->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
+	TSharedPtr<FBlueprintApi> SharedThis = StaticCastSharedRef<FBlueprintApi>(AsShared());
+
 	RequestPtr->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
-		[OnComplete](TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bSuccess)
+		[SharedThis, OnComplete](TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bSuccess)
 		{
+			if (!SharedThis.IsValid())
+			{
+				return;
+			}
 			FBlueprintListResponse ParsedResponse;
 			if (bSuccess && TryParseJsonResponse(Response, ParsedResponse))
 			{

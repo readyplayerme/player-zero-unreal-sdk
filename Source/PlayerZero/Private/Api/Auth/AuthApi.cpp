@@ -20,9 +20,15 @@ void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request, FOnRefreshToken
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	ApiRequest->Payload = Request.ToJsonString();
+	TSharedPtr<FAuthApi> SharedThis = StaticCastSharedRef<FAuthApi>(AsShared());
 	ApiRequest->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
-		[OnComplete](TSharedPtr<FApiRequest> Request, FHttpResponsePtr Response, bool bSuccess)
+		[SharedThis, OnComplete](TSharedPtr<FApiRequest> Request, FHttpResponsePtr Response, bool bSuccess)
 		{
+			if (SharedThis.IsValid() == false)
+			{
+				UE_LOG(LogPlayerZero, Warning, TEXT("FAuthApi is no longer valid when processing HTTP response to URL: %s"), *Request->Url);
+				return;
+			}
 			FRefreshTokenResponse ParsedResponse;
 			if (bSuccess && TryParseJsonResponse(Response, ParsedResponse))
 			{

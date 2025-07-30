@@ -7,21 +7,24 @@ struct PLAYERZERO_API FGameMatchStartedEventProperties
 {
 	GENERATED_BODY()
 
-	UPROPERTY(meta = (JsonProperty = "session_id"))
-	FString SessionId;
-
-	UPROPERTY(meta = (JsonProperty = "game_id"))
-	FString GameId;
-
 	UPROPERTY(meta = (JsonProperty = "avatar_id"))
 	FString AvatarId;
+
+	UPROPERTY(meta = (JsonProperty = "application_id"))
+	FString ApplicationId;
 
 	UPROPERTY(meta = (JsonProperty = "product_name"))
 	FString ProductName;
 
+	UPROPERTY(meta = (JsonProperty = "game_id"))
+	FString GameId;
+
 	UPROPERTY(meta = (JsonProperty = "game_session_id"))
 	FString GameSessionId;
 
+	UPROPERTY(meta = (JsonProperty = "game_match_id"))
+	FString SessionId;
+	
 	UPROPERTY(meta = (JsonProperty = "start_context"))
 	FString StartContext;
 
@@ -59,7 +62,7 @@ struct PLAYERZERO_API FGameMatchStartedEvent
 	GENERATED_BODY()
 
 	UPROPERTY(meta = (JsonProperty = "event"))
-	FString Event = "game_match_started";
+	FString Event = "user_game_match_started";
 
 	UPROPERTY(meta = (JsonProperty = "properties"))
 	FGameMatchStartedEventProperties Properties;
