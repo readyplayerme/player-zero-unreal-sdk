@@ -3,12 +3,12 @@
 #include "AsyncActions/LoadAvatarImageAsyncAction.h"
 #include "Subsystems/PlayerZeroSubsystem.h"
 
-ULoadAvatarImageAsyncAction* ULoadAvatarImageAsyncAction::LoadAvatarImageAsync(UObject* WorldContextObject, const FString& AvatarId, const FAvatarRenderConfig& Config)
+ULoadAvatarImageAsyncAction* ULoadAvatarImageAsyncAction::LoadAvatarImageAsync(UObject* WorldContextObject, const FString& AvatarId, const FAvatarRenderConfig& AvatarRenderConfig)
 {
 	ULoadAvatarImageAsyncAction* Node = NewObject<ULoadAvatarImageAsyncAction>();
 	Node->CachedAvatarId = AvatarId;
 	Node->ContextObject = WorldContextObject;
-	Node->Config = Config;
+	Node->AvatarRenderConfig = AvatarRenderConfig;
 	return Node;
 }
 
@@ -24,7 +24,7 @@ void ULoadAvatarImageAsyncAction::Activate()
 	{
 		if (UPlayerZeroSubsystem* Subsystem = World->GetGameInstance()->GetSubsystem<UPlayerZeroSubsystem>())
 		{
-			Subsystem->GetAvatarIconAsTexture(CachedAvatarId, Config, FOnAvatarTextureLoaded::CreateUObject(this, &ULoadAvatarImageAsyncAction::OnIconLoaded));
+			Subsystem->GetAvatarIconAsTexture(CachedAvatarId, AvatarRenderConfig, FOnAvatarTextureLoaded::CreateUObject(this, &ULoadAvatarImageAsyncAction::OnIconLoaded));
 		}
 	}
 }

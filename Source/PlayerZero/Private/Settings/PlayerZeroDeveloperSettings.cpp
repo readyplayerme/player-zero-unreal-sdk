@@ -2,7 +2,7 @@
 
 #include "Settings/PlayerZeroDeveloperSettings.h"
 
-UPlayerZeroDeveloperSettings::UPlayerZeroDeveloperSettings() : ApiBaseUrl(TEXT("https://api.readyplayer.me")), ApiBaseAuthUrl(TEXT("https://readyplayer.me/api/auth")), DefaultAvatarId((TEXT("68304bfa19a6664919431f4e")))
+UPlayerZeroDeveloperSettings::UPlayerZeroDeveloperSettings() : ApiBaseUrl(TEXT("https://api.readyplayer.me")), ApiBaseAuthUrl(TEXT("https://readyplayer.me/api/auth")), DefaultAvatarId((TEXT("688b3deec85bec2f31fd6d6d")))
 {
 	LoadConfig();
 }

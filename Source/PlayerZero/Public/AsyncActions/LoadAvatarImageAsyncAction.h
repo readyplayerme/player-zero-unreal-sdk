@@ -27,14 +27,14 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAvatarImageLoadFailed OnFailed;
 	
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
-	static ULoadAvatarImageAsyncAction* LoadAvatarImageAsync(UObject* WorldContextObject, const FString& AvatarId, const FAvatarRenderConfig& Config);
+	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true", AutoCreateRefTerm = "AvatarRenderConfig"))
+	static ULoadAvatarImageAsyncAction* LoadAvatarImageAsync(UObject* WorldContextObject, const FString& AvatarId, const FAvatarRenderConfig& AvatarRenderConfig = FAvatarRenderConfig());
 
 	virtual void Activate() override;
 
 private:
 	FString CachedAvatarId;
 	UObject* ContextObject;
-	FAvatarRenderConfig Config;
+	FAvatarRenderConfig AvatarRenderConfig;
 	void OnIconLoaded(UTexture2D* Texture);
 };

@@ -2,10 +2,14 @@
 #include "glTFRuntimeFunctionLibrary.h"
 #include "PlayerZero.h"
 #include "PlayerZeroConfigProcessor.h"
+#include "Api/AvatarCodes/AvatarCodeApi.h"
+#include "Api/AvatarCodes/Models/AvatarCodeRequest.h"
+#include "Api/AvatarCodes/Models/AvatarCodeResponse.h"
 #include "Api/Characters/CharacterApi.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"
 #include "Api/Files/GlbLoader.h"
 #include "Api/Files/Models/FileData.h"
+#include "Api/GameEvents/GameEventApi.h"
 #include "Api/GameEvents/Events/AvatarSessionEndedEvent.h"
 #include "Api/GameEvents/Events/AvatarSessionHeartbeatEvent.h"
 #include "Api/GameEvents/Events/AvatarSessionStartedEvent.h"
@@ -26,6 +30,7 @@ void UPlayerZeroSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	FileApi = MakeShared<FFileApi>();
 	CharacterApi = MakeShared<FCharacterApi>();
 	GameEventApi = MakeShared<FGameEventApi>();
+	AvatarCodeApi = MakeShared<FAvatarCodeApi>();
 	LastPlayerActivity = FDateTime::UtcNow();
 	PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
 	LoadCachedAvatarId(); 
@@ -61,12 +66,16 @@ void UPlayerZeroSubsystem::LoadCachedAvatarId()
 	}
 	else
 	{
-		CachedAvatarId = TEXT(""); // or fallback default
+		CachedAvatarId = PlayerZeroSettings->DefaultAvatarId;
 	}
 }
 
 FString UPlayerZeroSubsystem::GetAvatarId()
 {
+	if (CachedAvatarId.IsEmpty())
+	{
+		CachedAvatarId = PlayerZeroSettings->DefaultAvatarId;
+	}
 	return CachedAvatarId;
 }
 
@@ -169,6 +178,28 @@ void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& AvatarId, const FChara
 					}
 					OnComplete.ExecuteIfBound(GltfAsset);
 				}));
+		}));
+}
+
+void UPlayerZeroSubsystem::GetAvatarFromAvatarCode(const FString& AvatarCode, FOnAvatarCodeLoaded OnComplete)
+{
+	TWeakObjectPtr<UPlayerZeroSubsystem> WeakThis(this);
+	AvatarCodeApi->GetAvatarCode(AvatarCode, FOnAvatarCodeResponse::CreateLambda(
+		[WeakThis, AvatarCode, OnComplete](const FAvatarCodeResponse& Response, bool bWasSuccessful)
+		{
+			if (!WeakThis.IsValid())
+			{
+				return;
+			}
+			if (bWasSuccessful && !Response.Data.AvatarId.IsEmpty())
+			{
+				OnComplete.ExecuteIfBound(Response.Data.AvatarId);
+			}
+			else
+			{
+				UE_LOG(LogPlayerZero, Error, TEXT("Failed to get avatar Id for AvatarCode: %s"), *AvatarCode);
+				OnComplete.ExecuteIfBound(TEXT(""));
+			}
 		}));
 }
 

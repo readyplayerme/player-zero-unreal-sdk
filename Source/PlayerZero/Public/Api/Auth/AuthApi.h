@@ -8,7 +8,7 @@ struct FRefreshTokenRequest;
 
 DECLARE_DELEGATE_ThreeParams(FOnRefreshTokenResponse, TSharedPtr<FApiRequest>, const FRefreshTokenResponse&, bool);
 
-class PLAYERZERO_API FAuthApi :  public FWebApi
+class PLAYERZERO_API FAuthApi : public FWebApi
 {
 public:
 	

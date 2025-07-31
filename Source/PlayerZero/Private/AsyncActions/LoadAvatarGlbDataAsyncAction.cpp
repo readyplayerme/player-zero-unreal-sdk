@@ -3,12 +3,12 @@
 #include "AsyncActions/LoadAvatarGlbDataAsyncAction.h"
 #include "Subsystems/PlayerZeroSubsystem.h"
 
-ULoadAvatarGlbDataAsyncAction* ULoadAvatarGlbDataAsyncAction::LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url, const FCharacterConfig& Config)
+ULoadAvatarGlbDataAsyncAction* ULoadAvatarGlbDataAsyncAction::LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url, const FCharacterConfig& CharacterConfig)
 {
 	ULoadAvatarGlbDataAsyncAction* Node = NewObject<ULoadAvatarGlbDataAsyncAction>();
 	Node->CachedUrl = Url;
 	Node->ContextObject = WorldContextObject;
-	Node->Config = Config;
+	Node->CharacterConfig = CharacterConfig;
 	return Node;
 }
 
@@ -24,7 +24,7 @@ void ULoadAvatarGlbDataAsyncAction::Activate()
 	{
 		if (UPlayerZeroSubsystem* Subsystem = World->GetGameInstance()->GetSubsystem<UPlayerZeroSubsystem>())
 		{
-			Subsystem->DownloadAvatarData(CachedUrl, Config, FOnAvatarDataDownloaded::CreateUObject(this, &ULoadAvatarGlbDataAsyncAction::OnDataDownloaded));
+			Subsystem->DownloadAvatarData(CachedUrl, CharacterConfig, FOnAvatarDataDownloaded::CreateUObject(this, &ULoadAvatarGlbDataAsyncAction::OnDataDownloaded));
 		}
 	}
 }
