@@ -9,7 +9,7 @@ struct PLAYERZERO_API FAvatarSessionEndedProperties : TJsonSerializable<FAvatarS
 	TSharedPtr<FJsonObject> ToJson() const 
 	{
 		TSharedPtr<FJsonObject> Json = MakeShared<FJsonObject>();
-		Json->SetStringField(TEXT("session_id"), SessionId);
+		Json->SetStringField(TEXT("avatar_session_id"), SessionId);
 		Json->SetStringField(TEXT("game_id"), GameId);
 		return Json;
 	}

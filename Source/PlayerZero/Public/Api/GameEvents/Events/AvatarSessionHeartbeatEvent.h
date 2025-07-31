@@ -12,7 +12,7 @@ struct PLAYERZERO_API FAvatarSessionHeartbeatProperties : TJsonSerializable<FAva
 	TSharedPtr<FJsonObject> ToJson() const
 	{
 		TSharedPtr<FJsonObject> Json = MakeShared<FJsonObject>();
-		Json->SetStringField(TEXT("session_id"), SessionId);
+		Json->SetStringField(TEXT("avatar_session_id"), SessionId);
 		Json->SetStringField(TEXT("game_id"), GameId);
 		Json->SetNumberField(TEXT("last_avatar_activity_at"), LastAvatarActivityAt);
 		return Json;

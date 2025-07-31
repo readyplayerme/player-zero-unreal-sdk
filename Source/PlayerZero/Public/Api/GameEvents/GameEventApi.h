@@ -23,9 +23,7 @@ public:
 	void SendGameEventAsync(const TGameEventWrapper<TProps>& Wrapper, FOnGameEventSent OnComplete);
 	
 	FGameEventApi();
-	~FGameEventApi();
+	
 private:
-
-	FString GetToken() const;
 	FString Url;
 };

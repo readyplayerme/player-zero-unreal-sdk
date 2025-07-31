@@ -18,16 +18,6 @@ FGameEventApi::FGameEventApi()
 	Url = FString::Printf(TEXT("%s/v1/public/events"), *PlayerZeroSettings->GetApiBaseUrl());
 }
 
-FGameEventApi::~FGameEventApi()
-{
-}
-
-FString FGameEventApi::GetToken() const
-{
-	// TODO add logic for token retrieval
-	return TEXT(""); // Replace with actual logic
-}
-
 template<typename TProps>
 void FGameEventApi::SendGameEventAsync(const TGameEventWrapper<TProps>& Wrapper, FOnGameEventSent OnComplete)
 {
@@ -48,20 +38,19 @@ void FGameEventApi::SendGameEventAsync(const TGameEventWrapper<TProps>& Wrapper,
 	ApiRequest->Payload = JsonPayload;
 
 	TSharedPtr<FGameEventApi> SharedThis = StaticCastSharedRef<FGameEventApi>(AsShared());
+	const FString& EventName = Wrapper.Event;
 	ApiRequest->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
-		[SharedThis, OnComplete](TSharedPtr<FApiRequest> Request, FHttpResponsePtr Response, bool bSuccess)
+		[SharedThis, EventName, OnComplete](TSharedPtr<FApiRequest> Request, FHttpResponsePtr Response, bool bSuccess)
 		{
 			if (!SharedThis.IsValid()) return;
-			UE_LOG(LogPlayerZero, Log , TEXT("GameEventApi Request event Payload: %s"), *Request->Payload);
 			if (bSuccess && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
-				UE_LOG(LogPlayerZero, Log, TEXT("GameEventApi SUCCESS Payload: %s"), *Request->Payload);
 				OnComplete.ExecuteIfBound(true, Response->GetContentAsString());
 			}
 			else
 			{
 				FString ErrorMsg = Response.IsValid() ? Response->GetContentAsString() : TEXT("Request failed");
-				UE_LOG(LogPlayerZero, Warning, TEXT("GameEventApi FAIL: %s Payload: %s"), *ErrorMsg , *Request->Payload);
+				UE_LOG(LogPlayerZero, Warning, TEXT("%s event failed to send Payload: %s Error: %s"),*EventName , *Request->Payload, *ErrorMsg);
 				OnComplete.ExecuteIfBound(false, ErrorMsg);
 			}
 		});

@@ -262,17 +262,16 @@ void UPlayerZeroSubsystem::SendHeartbeat()
 	TGameEventWrapper<FAvatarSessionHeartbeatProperties> Event;
 	Event.Event = TEXT("avatar_session_heartbeat");
 	Event.Properties = Props;
-	Event.Token = TEXT("");
 
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogPlayerZero, Log, TEXT("Heartbeat Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("Heartbeat Event sent"));
 		}
 		else
 		{
-			UE_LOG(LogPlayerZero, Warning, TEXT("Heartbeat Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("Heartbeat Event failed"));
 		}
 	}));
 }
@@ -289,17 +288,16 @@ void UPlayerZeroSubsystem::GameSessionStart()
 	TGameEventWrapper<FGameSessionStartedEventProperties> Event;
 	Event.Event = TEXT("user_game_session_started");
 	Event.Properties = Props;
-	Event.Token = TEXT("");
 	
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionStart Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionStart Event sent"));
 		}
 		else
 		{
-			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionStart Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionStart Event failed"));
 		}
 	}));
 }
@@ -313,17 +311,16 @@ void UPlayerZeroSubsystem::GameSessionEnd()
 	TGameEventWrapper<FGameSessionEndedEventProperties> Event;
 	Event.Event = TEXT("user_game_session_ended");
 	Event.Properties = Props;
-	Event.Token = TEXT("");
 
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnd Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnd Event sent"));
 		}
 		else
 		{
-			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnd Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnd Event failed"));
 		}
 	}));
 }
@@ -345,17 +342,16 @@ void UPlayerZeroSubsystem::GameMatchStart()
 	TGameEventWrapper<FGameMatchStartedEventProperties> Event;
 	Event.Event = TEXT("user_game_match_started");
 	Event.Properties = Props;
-	Event.Token = TEXT("");
 
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnd Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnd Event sent"));
 		}
 		else
 		{
-			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnd Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnd Event failed"));
 		}
 	}));
 }
@@ -370,17 +366,16 @@ void UPlayerZeroSubsystem::GameMatchEnd()
 	TGameEventWrapper<FGameMatchEndedProperties> Event;
 	Event.Event = TEXT("user_game_session_ended");
 	Event.Properties = Props;
-	Event.Token = TEXT("");
 
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnd Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnd Event sent"));
 		}
 		else
 		{
-			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnd Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnd Event failed"));
 		}
 	}));
 }
@@ -391,22 +386,21 @@ void UPlayerZeroSubsystem::AvatarSessionStart()
 	Props.SessionId = AvatarSessionId;
 	Props.GameId = PlayerZeroSettings->GameId;
 	Props.AvatarId = CachedAvatarId; 
-	Props.SdkVersion = "0.1.0";
-	Props.SdkPlatform = "Unreal";
+	Props.SdkVersion = TEXT("0.1.0");
+	Props.SdkPlatform = TEXT("Unreal");
 	TGameEventWrapper<FAvatarSessionStartedProperties> Event;
 	Event.Event = TEXT("avatar_session_started");
 	Event.Properties = Props;
-	Event.Token = TEXT("");
 	
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
-		if (!bSuccess)
+		if (bSuccess)
 		{
-			UE_LOG(LogPlayerZero, Log, TEXT("AvatarSessionStart Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("AvatarSessionStart Event sent"));
 		}
 		else
 		{
-			UE_LOG(LogPlayerZero, Warning, TEXT("AvatarSessionStart Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("AvatarSessionStart Event failed"));
 		}
 	}));
 }
@@ -420,18 +414,17 @@ void UPlayerZeroSubsystem::AvatarSessionEnd()
 	TGameEventWrapper<FAvatarSessionEndedProperties> Event;
 	Event.Event = TEXT("avatar_session_ended");
 	Event.Properties = Props;
-	Event.Token = TEXT("");
 
 	
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogPlayerZero, Log, TEXT("AvatarSessionEnd Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("AvatarSessionEnd Event sent"));
 		}
 		else
 		{
-			UE_LOG(LogPlayerZero, Warning, TEXT("AvatarSessionEnd Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("AvatarSessionEnd Event failed"));
 		}
 	}));
 }
@@ -447,17 +440,16 @@ void UPlayerZeroSubsystem::EndSessions()
 		TGameEventWrapper<FAvatarSessionEndedProperties> Event;
 		Event.Event = TEXT("avatar_session_ended");
 		Event.Properties = Props;
-		Event.Token = TEXT("");
 
 		GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 		{
 			if ( bSuccess)
 			{
-				UE_LOG(LogPlayerZero, Log, TEXT("AvatarSessionEnded sent: %s"), *Response);
+				UE_LOG(LogPlayerZero, Log, TEXT("AvatarSessionEnded sent"));
 			}
 			else
 			{
-				UE_LOG(LogPlayerZero, Warning, TEXT("AvatarSessionEnded failed: %s"), *Response);
+				UE_LOG(LogPlayerZero, Warning, TEXT("AvatarSessionEnded failed"));
 			}
 		}));
 		AvatarSessionId.Empty();
@@ -472,18 +464,17 @@ void UPlayerZeroSubsystem::EndSessions()
 		TGameEventWrapper<FGameSessionEndedEventProperties> Event;
 		Event.Event = TEXT("user_game_session_ended");
 		Event.Properties = Props;
-		Event.Token = TEXT("");
 
-		auto Api = MakeShared<FGameEventApi>();
-		Api->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
+		GameEventApi = MakeShared<FGameEventApi>();
+		GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 		{
 			if ( bSuccess)
 			{
-				UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnded sent: %s"), *Response);
+				UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnded sent"));
 			}
 			else
 			{
-				UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnded failed: %s"), *Response);
+				UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnded failed"));
 			}
 		}));
 		GameSessionId.Empty();

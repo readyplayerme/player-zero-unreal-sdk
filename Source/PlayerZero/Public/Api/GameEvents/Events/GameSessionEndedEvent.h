@@ -13,7 +13,7 @@ struct PLAYERZERO_API FGameSessionEndedEventProperties : TJsonSerializable<FGame
 	TSharedPtr<FJsonObject> ToJson() const
 	{
 		TSharedPtr<FJsonObject> Json = MakeShared<FJsonObject>();
-		Json->SetStringField(TEXT("session_id"), SessionId);
+		Json->SetStringField(TEXT("game_session_id"), SessionId);
 		Json->SetStringField(TEXT("game_id"), GameId);
 		Json->SetNumberField(TEXT("matches_played"), MatchesPlayed);
 		Json->SetNumberField(TEXT("matches_won"), MatchesWon);
