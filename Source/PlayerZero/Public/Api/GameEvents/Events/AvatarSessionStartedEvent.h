@@ -7,28 +7,41 @@ struct PLAYERZERO_API FAvatarSessionStartedProperties
 {
 	GENERATED_BODY()
 
-	UPROPERTY(meta = (JsonProperty = "avatar_id"))
+	UPROPERTY()
 	FString AvatarId;
 
-	UPROPERTY(meta = (JsonProperty = "avatar_type"))
+	UPROPERTY()
 	FString AvatarType = "fullbody";
 
-	UPROPERTY(meta = (JsonProperty = "game_id"))
+	UPROPERTY()
 	FString GameId;
 	
-	UPROPERTY(meta = (JsonProperty = "game_session_id"))
+	UPROPERTY()
 	FString GameSessionId;
 	
-	UPROPERTY(meta = (JsonProperty = "avatar_session_id"))
+	UPROPERTY()
 	FString SessionId;
 	
-	UPROPERTY(meta = (JsonProperty = "sdk_version"))
+	UPROPERTY()
 	FString SdkVersion;
 	
-	UPROPERTY(meta = (JsonProperty = "sdk_platform"))
+	UPROPERTY()
 	FString SdkPlatform;
 	
 	// TODO add device context;
+
+	TSharedPtr<FJsonObject> ToJson() const
+	{
+		TSharedPtr<FJsonObject> Json = MakeShared<FJsonObject>();
+		Json->SetStringField(TEXT("avatar_id"), AvatarId);
+		Json->SetStringField(TEXT("avatar_type"), AvatarType);
+		Json->SetStringField(TEXT("game_id"), GameId);
+		Json->SetStringField(TEXT("game_session_id"), GameSessionId);
+		Json->SetStringField(TEXT("avatar_session_id"), SessionId);
+		Json->SetStringField(TEXT("sdk_version"), SdkVersion);
+		Json->SetStringField(TEXT("sdk_platform"), SdkPlatform);
+		return Json;
+	}
 };
 
 USTRUCT()

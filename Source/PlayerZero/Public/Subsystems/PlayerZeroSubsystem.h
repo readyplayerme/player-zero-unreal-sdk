@@ -30,8 +30,11 @@ class PLAYERZERO_API UPlayerZeroSubsystem : public UGameInstanceSubsystem
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+
+	void SaveCachedAvatarId(const FString& AvatarId);
+	void LoadCachedAvatarId();
 	
-	FString GetHotLoadedAvatarId();
+	FString GetAvatarId();
 	
 	void GetAvatarIconAsTexture(FString AvatarId, const FAvatarRenderConfig& Config, FOnAvatarTextureLoaded OnComplete);
 
@@ -41,12 +44,14 @@ public:
 	
 	void LoadGltfAsset(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfAssetLoaded OnComplete);
 	
-	void LoadAvatarAsset(const FString& Id, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete);
-
+	void LoadAvatarAsset(const FString& AvatarId, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete);
+	
 	void StartSessions();
 	void StartHeartbeat();
 	void GameSessionStart();
 	void GameSessionEnd();
+	void GameMatchStart();
+	void GameMatchEnd();
 	void AvatarSessionStart();
 	void AvatarSessionEnd();
 	void EndSessions();
@@ -70,11 +75,11 @@ private:
 	bool bIsInitialized = false;
 	FString CachedAvatarId;
 
-	// Add your persistent API instances, settings, etc.
 	TSharedPtr<FCharacterApi> CharacterApi;
 	TSharedPtr<FFileApi> FileApi;
 	TSharedPtr<FGameEventApi> GameEventApi;
 
 	void OnDeepLinkDataReceived(const FString& AvatarId);
+	
 };
 

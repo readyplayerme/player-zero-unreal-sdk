@@ -7,8 +7,8 @@
 #include "Interfaces/IHttpResponse.h"
 #include "JsonObjectConverter.h"
 #include "PlayerZero.h"
+#include "Api/GameEvents/GameEventTypes.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
-#include "Utilities/JsonHelper.h"
 
 class UPlayerZeroDeveloperSettings;
 
@@ -28,21 +28,16 @@ FString FGameEventApi::GetToken() const
 	return TEXT(""); // Replace with actual logic
 }
 
-template<typename TEvent>
-void FGameEventApi::SendGameEventAsync(const TEvent& Event, FOnGameEventSent OnComplete)
+template<typename TProps>
+void FGameEventApi::SendGameEventAsync(const TGameEventWrapper<TProps>& Wrapper, FOnGameEventSent OnComplete)
 {
-	FString Token = GetToken();
-	
-	TEvent PayloadWithToken = Event;
-	if constexpr (HasToken_v<TEvent>)
-	{
-		PayloadWithToken.Token = Token;
-	}
-	
+	TSharedPtr<FJsonObject> WrappedPayload = Wrapper.ToWrappedJson();
+
 	FString JsonPayload;
-	if (!FJsonHelper::StructToCleanJsonString(PayloadWithToken, JsonPayload))
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonPayload);
+	if (!FJsonSerializer::Serialize(WrappedPayload.ToSharedRef(), Writer))
 	{
-		OnComplete.ExecuteIfBound(false, TEXT("Failed to serialize JSON"));
+		OnComplete.ExecuteIfBound(false, TEXT("Failed to serialize wrapped JSON"));
 		return;
 	}
 	
@@ -51,27 +46,22 @@ void FGameEventApi::SendGameEventAsync(const TEvent& Event, FOnGameEventSent OnC
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	ApiRequest->Payload = JsonPayload;
+
 	TSharedPtr<FGameEventApi> SharedThis = StaticCastSharedRef<FGameEventApi>(AsShared());
 	ApiRequest->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
 		[SharedThis, OnComplete](TSharedPtr<FApiRequest> Request, FHttpResponsePtr Response, bool bSuccess)
 		{
-			if (!SharedThis.IsValid())
-			{
-				return;
-			}
-			// print request URL and payload for debugging
-
+			if (!SharedThis.IsValid()) return;
+			UE_LOG(LogPlayerZero, Log , TEXT("GameEventApi Request event Payload: %s"), *Request->Payload);
 			if (bSuccess && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
-				UE_LOG(LogPlayerZero, Log, TEXT("GameEventApi SUCCESS Request URL: %s"), *Request->Url);
-				UE_LOG(LogPlayerZero, Log, TEXT("Game EventApi SUCCESS Request Payload: %s"), *Request->Payload);
+				UE_LOG(LogPlayerZero, Log, TEXT("GameEventApi SUCCESS Payload: %s"), *Request->Payload);
 				OnComplete.ExecuteIfBound(true, Response->GetContentAsString());
 			}
 			else
 			{
-				UE_LOG(LogPlayerZero, Log, TEXT("GameEventApi FAIL Request URL: %s"), *Request->Url);
-				UE_LOG(LogPlayerZero, Log, TEXT("Game EventApi FAIL Request Payload: %s"), *Request->Payload);
 				FString ErrorMsg = Response.IsValid() ? Response->GetContentAsString() : TEXT("Request failed");
+				UE_LOG(LogPlayerZero, Warning, TEXT("GameEventApi FAIL: %s Payload: %s"), *ErrorMsg , *Request->Payload);
 				OnComplete.ExecuteIfBound(false, ErrorMsg);
 			}
 		});

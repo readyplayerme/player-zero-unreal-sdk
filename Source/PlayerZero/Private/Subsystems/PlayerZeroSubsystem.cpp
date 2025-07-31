@@ -8,11 +8,17 @@
 #include "Api/Files/Models/FileData.h"
 #include "Api/GameEvents/Events/AvatarSessionEndedEvent.h"
 #include "Api/GameEvents/Events/AvatarSessionHeartbeatEvent.h"
+#include "Api/GameEvents/Events/AvatarSessionStartedEvent.h"
+#include "Api/GameEvents/Events/GameMatchEndedEvent.h"
+#include "Api/GameEvents/Events/GameMatchStartedEvent.h"
 #include "Api/GameEvents/Events/GameSessionEndedEvent.h"
 #include "Api/GameEvents/Events/GameSessionStartedEvent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
 #include "Utilities/PlayerZeroImageHelper.h"
+
+constexpr const TCHAR* ConfigSection = TEXT("/Script/PlayerZero");
+constexpr const TCHAR* CachedAvatarIdKey = TEXT("PZ_CACHED_AVATAR_ID");
 
 void UPlayerZeroSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -22,6 +28,7 @@ void UPlayerZeroSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	GameEventApi = MakeShared<FGameEventApi>();
 	LastPlayerActivity = FDateTime::UtcNow();
 	PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
+	LoadCachedAvatarId(); 
 	// TODO: Replace with real hot-loaded ID check
 	if (true )
 	{
@@ -38,16 +45,28 @@ void UPlayerZeroSubsystem::Deinitialize()
 	HeartbeatActive = false;
 }
 
-FString UPlayerZeroSubsystem::GetHotLoadedAvatarId()
+void UPlayerZeroSubsystem::SaveCachedAvatarId(const FString& AvatarId)
 {
-	if (bIsInitialized)
+	CachedAvatarId = AvatarId;
+
+	GConfig->SetString(ConfigSection, CachedAvatarIdKey, *AvatarId, GGameIni);
+	GConfig->Flush(false, GGameIni);
+}
+
+void UPlayerZeroSubsystem::LoadCachedAvatarId()
+{
+	if (FString AvatarIdFromConfig; GConfig->GetString(ConfigSection, CachedAvatarIdKey, AvatarIdFromConfig, GGameIni))
 	{
-		return CachedAvatarId;
+		CachedAvatarId = AvatarIdFromConfig;
 	}
-	
-	// Initialize the SDK and set the CachedAvatarId
-	bIsInitialized = true;
-	CachedAvatarId = TEXT("default_avatar_id"); // Replace with actual logic to get the avatar ID
+	else
+	{
+		CachedAvatarId = TEXT(""); // or fallback default
+	}
+}
+
+FString UPlayerZeroSubsystem::GetAvatarId()
+{
 	return CachedAvatarId;
 }
 
@@ -96,14 +115,13 @@ void UPlayerZeroSubsystem::GetAvatarMetaData(const FString& Id, FOnCharacterData
 		}));
 }
 
-void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& Id, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete)
+void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& AvatarId, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete)
 {
-	// Step 1: Fetch character metadata
 	TSharedPtr<FCharacterFindByIdRequest> Request = MakeShared<FCharacterFindByIdRequest>();
-	Request->Id = Id;
+	Request->Id = AvatarId;
  	TWeakObjectPtr<UPlayerZeroSubsystem> WeakThis(this);
 	CharacterApi->FindByIdAsync(*Request, FOnCharacterFindResponse::CreateLambda(
-		[WeakThis, Config, OnComplete](FCharacterFindByIdResponse Response, bool bCharacterFetchSuccessful)
+		[WeakThis, Config, AvatarId, OnComplete](FCharacterFindByIdResponse Response, bool bCharacterFetchSuccessful)
 		{
 			if (!WeakThis.IsValid())
 			{
@@ -125,7 +143,7 @@ void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& Id, const FCharacterCo
 			}
 			
 			WeakThis->FileApi->LoadFileFromUrl(GlbUrl, FOnAssetFileRequestComplete::CreateLambda(
-				[WeakThis, OnComplete](const FFileData& File, const TArray<uint8>& Data)
+				[WeakThis, AvatarId, OnComplete](const FFileData& File, const TArray<uint8>& Data)
 				{
 					if (!WeakThis.IsValid())
 					{
@@ -137,6 +155,9 @@ void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& Id, const FCharacterCo
 						OnComplete.ExecuteIfBound(nullptr);
 						return;
 					}
+					// TODO remove if not needed
+					//WeakThis->SaveCachedAvatarId(AvatarId); // Save the avatar ID for future use
+					
 					// Step 3: Load the GLTF asset
 					FglTFRuntimeConfig Config;
 					Config.TransformBaseType = EglTFRuntimeTransformBaseType::YForward;
@@ -184,22 +205,6 @@ void UPlayerZeroSubsystem::LoadGltfAsset(const TArray<uint8>& Data, const FglTFR
 void UPlayerZeroSubsystem::StartSessions()
 {
 	AvatarSessionId = GameSessionId = FGuid::NewGuid().ToString();
-
-	GConfig->SetString(
-		TEXT("/Script/PlayerZero.PlayerZeroAnalytics"),
-		TEXT("PZ_SESSION_ID"),
-		*GameSessionId,
-		GGameIni
-	);
-
-	GConfig->SetString(
-		TEXT("/Script/PlayerZero.PlayerZeroAnalytics"),
-		TEXT("PZ_AVATAR_SESSION_ID"),
-		*AvatarSessionId,
-		GGameIni
-	);
-
-	GConfig->Flush(false, GGameIni); // force write to disk immediately
 	GameSessionStart();
 	AvatarSessionStart();
 	StartHeartbeat();
@@ -223,18 +228,20 @@ void UPlayerZeroSubsystem::SendHeartbeat()
 	Props.SessionId = AvatarSessionId;
 	Props.LastAvatarActivityAt = LastPlayerActivity.ToUnixTimestamp() * 1000;
 
-	FAvatarSessionHeartbeat HeartbeatEvent;
-	HeartbeatEvent.Properties = Props;
+	TGameEventWrapper<FAvatarSessionHeartbeatProperties> Event;
+	Event.Event = TEXT("avatar_session_heartbeat");
+	Event.Properties = Props;
+	Event.Token = TEXT("");
 
-	GameEventApi->SendGameEventAsync(HeartbeatEvent, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
+	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Heartbeat Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("Heartbeat Event sent: %s"), *Response);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Heartbeat Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("Heartbeat Event failed: %s"), *Response);
 		}
 	}));
 }
@@ -242,23 +249,26 @@ void UPlayerZeroSubsystem::SendHeartbeat()
 void UPlayerZeroSubsystem::GameSessionStart()
 {	
 	FGameSessionStartedEventProperties Props;
-	Props.SessionId = GameSessionId;
+	Props.SessionId = AvatarSessionId;
 	Props.GameId = PlayerZeroSettings->GameId; 
-	Props.AvatarId = "AvatarId"; // Replace with actual avatar ID
+	Props.AvatarId = CachedAvatarId;
 	Props.ApplicationId = PlayerZeroSettings->ApplicationId; 
-	Props.ProductName = "ProductName"; 
-	FGameSessionStartedEvent Event;
+	Props.ProductName = FApp::GetProjectName();
+	
+	TGameEventWrapper<FGameSessionStartedEventProperties> Event;
+	Event.Event = TEXT("user_game_session_started");
 	Event.Properties = Props;
+	Event.Token = TEXT("");
 	
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogTemp, Log, TEXT("GameSessionStart Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionStart Event sent: %s"), *Response);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("GameSessionStart Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionStart Event failed: %s"), *Response);
 		}
 	}));
 }
@@ -266,45 +276,106 @@ void UPlayerZeroSubsystem::GameSessionStart()
 void UPlayerZeroSubsystem::GameSessionEnd()
 {
 	FGameSessionEndedEventProperties Props;
-	Props.SessionId = GameSessionId;
+	Props.SessionId = AvatarSessionId;
 	Props.GameId = PlayerZeroSettings->GameId;
 	
-	FGameSessionEndedEvent Event;
+	TGameEventWrapper<FGameSessionEndedEventProperties> Event;
+	Event.Event = TEXT("user_game_session_ended");
 	Event.Properties = Props;
+	Event.Token = TEXT("");
 
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogTemp, Log, TEXT("GameSessionEnd Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnd Event sent: %s"), *Response);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("GameSessionEnd Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnd Event failed: %s"), *Response);
+		}
+	}));
+}
+
+void UPlayerZeroSubsystem::GameMatchStart()
+{
+	FGameMatchStartedEventProperties Props;
+	Props.AvatarId = CachedAvatarId;
+	Props.ApplicationId = PlayerZeroSettings->ApplicationId;
+	Props.ProductName = FApp::GetProjectName(); // TODO Replace with actual product name
+	Props.GameId = PlayerZeroSettings->GameId;
+	Props.GameSessionId = GameSessionId;
+	Props.SessionId = AvatarSessionId;
+	// Props.StartContext = "StartContext"; // TODO Replace with actual start context
+	// Props.LiveOpsId = "LiveOpsId"; // TODO Replace with actual LiveOps ID
+	// Props.Tier = "Tier"; // TODO Replace with actual tier
+	// Props.Round = 1; // TODO Replace with actual round number
+	
+	TGameEventWrapper<FGameMatchStartedEventProperties> Event;
+	Event.Event = TEXT("user_game_match_started");
+	Event.Properties = Props;
+	Event.Token = TEXT("");
+
+	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
+	{
+		if (bSuccess)
+		{
+			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnd Event sent: %s"), *Response);
+		}
+		else
+		{
+			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnd Event failed: %s"), *Response);
+		}
+	}));
+}
+
+void UPlayerZeroSubsystem::GameMatchEnd()
+{
+   	FGameMatchEndedProperties Props;
+	Props.GameId = PlayerZeroSettings->GameId;
+	Props.SessionId = AvatarSessionId;
+	Props.Score = 0;
+	
+	TGameEventWrapper<FGameMatchEndedProperties> Event;
+	Event.Event = TEXT("user_game_session_ended");
+	Event.Properties = Props;
+	Event.Token = TEXT("");
+
+	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
+	{
+		if (bSuccess)
+		{
+			UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnd Event sent: %s"), *Response);
+		}
+		else
+		{
+			UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnd Event failed: %s"), *Response);
 		}
 	}));
 }
 
 void UPlayerZeroSubsystem::AvatarSessionStart()
 {
-	FGameSessionStartedEventProperties Props;
+	FAvatarSessionStartedProperties Props;
 	Props.SessionId = AvatarSessionId;
 	Props.GameId = PlayerZeroSettings->GameId;
-	Props.AvatarId = "AvatarId"; // TODO Replace with actual avatar ID
-	Props.ApplicationId = PlayerZeroSettings->ApplicationId;
-	Props.ProductName = "ProductName"; // TODO Replace with actual product name
-	FGameSessionStartedEvent Event;
+	Props.AvatarId = CachedAvatarId; 
+	Props.SdkVersion = "0.1.0";
+	Props.SdkPlatform = "Unreal";
+	TGameEventWrapper<FAvatarSessionStartedProperties> Event;
+	Event.Event = TEXT("avatar_session_started");
 	Event.Properties = Props;
+	Event.Token = TEXT("");
 	
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
-		if (bSuccess)
+		if (!bSuccess)
 		{
-			UE_LOG(LogTemp, Log, TEXT("AvatarSessionStart Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("AvatarSessionStart Event sent: %s"), *Response);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AvatarSessionStart Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("AvatarSessionStart Event failed: %s"), *Response);
 		}
 	}));
 }
@@ -315,19 +386,21 @@ void UPlayerZeroSubsystem::AvatarSessionEnd()
 	Props.SessionId = AvatarSessionId;
 	Props.GameId = PlayerZeroSettings->GameId;
 	
-	FAvatarSessionEnded Event;
+	TGameEventWrapper<FAvatarSessionEndedProperties> Event;
+	Event.Event = TEXT("avatar_session_ended");
 	Event.Properties = Props;
+	Event.Token = TEXT("");
 
 	
 	GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 	{
 		if (bSuccess)
 		{
-			UE_LOG(LogTemp, Log, TEXT("AvatarSessionEnd Event sent: %s"), *Response);
+			UE_LOG(LogPlayerZero, Log, TEXT("AvatarSessionEnd Event sent: %s"), *Response);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AvatarSessionEnd Event failed: %s"), *Response);
+			UE_LOG(LogPlayerZero, Warning, TEXT("AvatarSessionEnd Event failed: %s"), *Response);
 		}
 	}));
 }
@@ -339,18 +412,21 @@ void UPlayerZeroSubsystem::EndSessions()
 		FAvatarSessionEndedProperties Props;
 		Props.SessionId = AvatarSessionId;
 		Props.GameId = PlayerZeroSettings->GameId;
-		FAvatarSessionEnded Event;
+
+		TGameEventWrapper<FAvatarSessionEndedProperties> Event;
+		Event.Event = TEXT("avatar_session_ended");
 		Event.Properties = Props;
+		Event.Token = TEXT("");
 
 		GameEventApi->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 		{
 			if ( bSuccess)
 			{
-				UE_LOG(LogTemp, Log, TEXT("AvatarSessionEnded sent: %s"), *Response);
+				UE_LOG(LogPlayerZero, Log, TEXT("AvatarSessionEnded sent: %s"), *Response);
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("AvatarSessionEnded failed: %s"), *Response);
+				UE_LOG(LogPlayerZero, Warning, TEXT("AvatarSessionEnded failed: %s"), *Response);
 			}
 		}));
 		AvatarSessionId.Empty();
@@ -361,19 +437,22 @@ void UPlayerZeroSubsystem::EndSessions()
 		FGameSessionEndedEventProperties Props;
 		Props.SessionId = GameSessionId;
 		Props.GameId = PlayerZeroSettings->GameId;
-		FGameSessionEndedEvent Event;
+		
+		TGameEventWrapper<FGameSessionEndedEventProperties> Event;
+		Event.Event = TEXT("user_game_session_ended");
 		Event.Properties = Props;
+		Event.Token = TEXT("");
 
 		auto Api = MakeShared<FGameEventApi>();
 		Api->SendGameEventAsync(Event, FOnGameEventSent::CreateLambda([](bool bSuccess, const FString& Response)
 		{
 			if ( bSuccess)
 			{
-				UE_LOG(LogTemp, Log, TEXT("GameSessionEnded sent: %s"), *Response);
+				UE_LOG(LogPlayerZero, Log, TEXT("GameSessionEnded sent: %s"), *Response);
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("GameSessionEnded failed: %s"), *Response);
+				UE_LOG(LogPlayerZero, Warning, TEXT("GameSessionEnded failed: %s"), *Response);
 			}
 		}));
 		GameSessionId.Empty();
@@ -400,4 +479,5 @@ bool UPlayerZeroSubsystem::DetectPlayerActivity()
 
 void UPlayerZeroSubsystem::OnDeepLinkDataReceived(const FString& AvatarId)
 {
+	// TODO implement deep link handling logic
 }

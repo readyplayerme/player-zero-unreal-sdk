@@ -1,42 +1,31 @@
 #pragma once
+#include "Api/GameEvents/GameEventTypes.h"
 
-#include "GameSessionEndedEvent.generated.h"
-
-USTRUCT()
-struct PLAYERZERO_API FGameSessionEndedEventProperties
+struct PLAYERZERO_API FGameSessionEndedEventProperties : TJsonSerializable<FGameSessionEndedEventProperties>
 {
-	GENERATED_BODY()
-
-	UPROPERTY(meta = (JsonProperty = "session_id"))
 	FString SessionId;
-
-	UPROPERTY(meta = (JsonProperty = "game_id"))
 	FString GameId;
-
-	UPROPERTY(meta = (JsonProperty = "matches_played"))
 	int32 MatchesPlayed;
-
-	UPROPERTY(meta = (JsonProperty = "matches_won"))
 	int32 MatchesWon;
-
-	UPROPERTY(meta = (JsonProperty = "score"))
-	int32 score;
-	
-	UPROPERTY(meta = (JsonProperty = "currency_obtained"))
+	int32 Score;
 	TMap<FString, FString> CurrencyObtained = TMap<FString, FString>();
-};
 
-USTRUCT()
-struct PLAYERZERO_API FGameSessionEndedEvent
-{
-	GENERATED_BODY()
+	TSharedPtr<FJsonObject> ToJson() const
+	{
+		TSharedPtr<FJsonObject> Json = MakeShared<FJsonObject>();
+		Json->SetStringField(TEXT("session_id"), SessionId);
+		Json->SetStringField(TEXT("game_id"), GameId);
+		Json->SetNumberField(TEXT("matches_played"), MatchesPlayed);
+		Json->SetNumberField(TEXT("matches_won"), MatchesWon);
+		Json->SetNumberField(TEXT("score"), Score);
+		
+		TSharedPtr<FJsonObject> CurrencyJson = MakeShared<FJsonObject>();
+		for (const auto& Pair : CurrencyObtained)
+		{
+			CurrencyJson->SetStringField(Pair.Key, Pair.Value);
+		}
+		Json->SetObjectField(TEXT("currency_obtained"), CurrencyJson);
 
-	UPROPERTY(meta = (JsonProperty = "event"))
-	FString Event = "game_match_ended";
-
-	UPROPERTY(meta = (JsonProperty = "properties"))
-	FGameSessionEndedEventProperties Properties;
-
-	UPROPERTY(meta = (JsonProperty = "token"))
-	FString Token;
+		return Json;
+	}
 };

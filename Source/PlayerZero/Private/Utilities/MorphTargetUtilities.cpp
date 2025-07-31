@@ -1,4 +1,4 @@
-#include "MorphTargetUtilities.h"
+#include "Utilities/MorphTargetUtilities.h"
 
 static const TMap<EAvatarMorphTarget, FString> ALL_MORPH_TARGETS_TO_STRING =
 {

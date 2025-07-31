@@ -11,7 +11,7 @@ FString UPlayerZeroFunctionLibrary::GetHotLoadedAvatarId(UObject* WorldContextOb
 	{
 		if (UPlayerZeroSubsystem* Subsystem = GameInstance->GetSubsystem<UPlayerZeroSubsystem>())
 		{
-			return Subsystem->GetHotLoadedAvatarId();
+			return Subsystem->GetAvatarId();
 		}
 	}
 	return FString();

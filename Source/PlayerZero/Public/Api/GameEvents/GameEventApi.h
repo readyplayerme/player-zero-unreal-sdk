@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GameEventTypes.h"
 #include "Api/Common/WebApi.h"
 
 DECLARE_DELEGATE_TwoParams(FOnGameEventSent, bool /*bSuccess*/, const FString& /*Response*/);
@@ -18,8 +19,8 @@ class PLAYERZERO_API FGameEventApi : public FWebApi
 {
 	
 public:
-	template<typename TEvent>
-	void SendGameEventAsync(const TEvent& Event, FOnGameEventSent OnComplete);
+	template<typename TProps>
+	void SendGameEventAsync(const TGameEventWrapper<TProps>& Wrapper, FOnGameEventSent OnComplete);
 	
 	FGameEventApi();
 	~FGameEventApi();

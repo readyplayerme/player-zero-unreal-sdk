@@ -1,45 +1,26 @@
 #pragma once
+#include "Api/GameEvents/GameEventTypes.h"
 
-#include "GameSessionStartedEvent.generated.h"
-
-USTRUCT()
-struct PLAYERZERO_API FGameSessionStartedEventProperties
+struct PLAYERZERO_API FGameSessionStartedEventProperties : TJsonSerializable<FGameSessionStartedEventProperties>
 {
-	GENERATED_BODY()
-
-	UPROPERTY(meta = (JsonProperty = "avatar_id"))
 	FString AvatarId;
-
-	UPROPERTY(meta = (JsonProperty = "application_id"))
 	FString ApplicationId;
-
-	UPROPERTY(meta = (JsonProperty = "product_name"))
 	FString ProductName;
-
-	UPROPERTY(meta = (JsonProperty = "game_id"))
 	FString GameId;
-
-	UPROPERTY(meta = (JsonProperty = "game_session_id"))
 	FString SessionId;
-	
-	UPROPERTY(meta = (JsonProperty = "game_entry_point"))
 	FString GameEntryPoint;
-
-	UPROPERTY(meta = (JsonProperty = "live_ops_id"))
 	FString LiveOpsId;
-};
 
-USTRUCT()
-struct PLAYERZERO_API FGameSessionStartedEvent
-{
-	GENERATED_BODY()
-
-	UPROPERTY(meta = (JsonProperty = "event"))
-	FString Event = "user_game_session_started";
-
-	UPROPERTY(meta = (JsonProperty = "properties"))
-	FGameSessionStartedEventProperties Properties;
-
-	UPROPERTY(meta = (JsonProperty = "token"))
-	FString Token;
+	TSharedPtr<FJsonObject> ToJson() const
+	{
+		TSharedPtr<FJsonObject> Json = MakeShared<FJsonObject>();
+		Json->SetStringField(TEXT("avatar_id"), AvatarId);
+		Json->SetStringField(TEXT("application_id"), ApplicationId);
+		Json->SetStringField(TEXT("product_name"), ProductName);
+		Json->SetStringField(TEXT("game_id"), GameId);
+		Json->SetStringField(TEXT("game_session_id"), SessionId);
+		Json->SetStringField(TEXT("game_entry_point"), GameEntryPoint);
+		Json->SetStringField(TEXT("live_ops_id"), LiveOpsId);
+		return Json;
+	}
 };

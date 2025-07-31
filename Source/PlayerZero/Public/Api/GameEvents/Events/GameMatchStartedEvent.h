@@ -1,72 +1,50 @@
 #pragma once
+#include "Api/GameEvents/GameEventTypes.h"
 
-#include "GameMatchStartedEvent.generated.h"
-
-USTRUCT()
-struct PLAYERZERO_API FGameMatchStartedEventProperties
+struct PLAYERZERO_API FGameMatchStartedEventProperties : TJsonSerializable<FGameMatchStartedEventProperties>
 {
-	GENERATED_BODY()
-
-	UPROPERTY(meta = (JsonProperty = "avatar_id"))
 	FString AvatarId;
-
-	UPROPERTY(meta = (JsonProperty = "application_id"))
 	FString ApplicationId;
-
-	UPROPERTY(meta = (JsonProperty = "product_name"))
 	FString ProductName;
-
-	UPROPERTY(meta = (JsonProperty = "game_id"))
 	FString GameId;
-
-	UPROPERTY(meta = (JsonProperty = "game_session_id"))
 	FString GameSessionId;
-
-	UPROPERTY(meta = (JsonProperty = "game_match_id"))
 	FString SessionId;
-	
-	UPROPERTY(meta = (JsonProperty = "start_context"))
 	FString StartContext;
-
-	UPROPERTY(meta = (JsonProperty = "live_ops_id"))
 	FString LiveOpsId;
-	
-	UPROPERTY(meta = (JsonProperty = "tier"))
 	FString Tier;
-	
-	UPROPERTY(meta = (JsonProperty = "round"))
 	int32 Round;
-
-	UPROPERTY(meta = (JsonProperty = "map_id"))
 	FString MapId;
-
-	UPROPERTY(meta = (JsonProperty = "game_mode"))
 	FString GameMode;
-
-	UPROPERTY(meta = (JsonProperty = "class"))
 	FString Class;
-
-	UPROPERTY(meta = (JsonProperty = "team"))
 	FString Team;
-	
-	UPROPERTY(meta = (JsonProperty = "loadout"))
 	TMap<FString, FString> Loadout;
-
-	UPROPERTY(meta = (JsonProperty = "lobby_id"))
 	FString LobbyId;
-};
 
-USTRUCT()
-struct PLAYERZERO_API FGameMatchStartedEvent
-{
-	GENERATED_BODY()
+	TSharedPtr<FJsonObject> ToJson() const
+	{
+		TSharedPtr<FJsonObject> Json = MakeShared<FJsonObject>();
+		Json->SetStringField(TEXT("avatar_id"), AvatarId);
+		Json->SetStringField(TEXT("application_id"), ApplicationId);
+		Json->SetStringField(TEXT("product_name"), ProductName);
+		Json->SetStringField(TEXT("game_id"), GameId);
+		Json->SetStringField(TEXT("game_session_id"), GameSessionId);
+		Json->SetStringField(TEXT("game_match_id"), SessionId);
+		Json->SetStringField(TEXT("start_context"), StartContext);
+		Json->SetStringField(TEXT("live_ops_id"), LiveOpsId);
+		Json->SetStringField(TEXT("tier"), Tier);
+		Json->SetNumberField(TEXT("round"), Round);
+		Json->SetStringField(TEXT("map_id"), MapId);
+		Json->SetStringField(TEXT("game_mode"), GameMode);
+		Json->SetStringField(TEXT("class"), Class);
+		Json->SetStringField(TEXT("team"), Team);
 
-	UPROPERTY(meta = (JsonProperty = "event"))
-	FString Event = "user_game_match_started";
+		TSharedPtr<FJsonObject> LoadoutJson = MakeShared<FJsonObject>();
+		for (const auto& Pair : Loadout)
+		{
+			LoadoutJson->SetStringField(Pair.Key, Pair.Value);
+		}
+		Json->SetObjectField(TEXT("loadout"), LoadoutJson);
 
-	UPROPERTY(meta = (JsonProperty = "properties"))
-	FGameMatchStartedEventProperties Properties;
-
-	UPROPERTY(meta = (JsonProperty = "token"))
-	FString Token;
+		return Json;
+	}
 };
