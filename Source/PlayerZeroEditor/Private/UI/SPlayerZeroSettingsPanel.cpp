@@ -57,7 +57,7 @@ void SPlayerZeroSettingsPanel::Construct(const FArguments& InArgs)
 		  .AutoHeight()
 		[
 			SNew(STextBlock)
-			.Text(FText::FromString("Select the Ready Player Me application to link to project"))
+			.Text(FText::FromString("Select the Player Zero application to link to project"))
 		]
 
 		+ SVerticalBox::Slot()
@@ -155,7 +155,7 @@ void SPlayerZeroSettingsPanel::PopulateSettingsContent(TArray<FApplication> InAp
 {
 	if(InApplicationList.Num() == 0)
 	{
-		UE_LOG( LogPlayerZero, Error, TEXT("No applications found, check your Ready PLayer Me Settings") );
+		UE_LOG( LogPlayerZero, Error, TEXT("No applications found, check your Player Zero Settings") );
 		return;
 	}
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
@@ -274,8 +274,8 @@ void SPlayerZeroSettingsPanel::HandleBlueprintListResponse(const FBlueprintListR
 		UE_LOG(LogPlayerZero, Log, TEXT("Blueprint LIST request completed."));
 		if(Response.Data.Num() == 0)
 		{
-			UE_LOG(LogPlayerZero, Error, TEXT("No Avatar styles found. Make sure you have uploaded your character models to Ready Player Me Studio"));
-			UpdateErrorMessage("No Avatar styles found. Make sure you have uploaded your character models to Ready Player Me Studio");
+			UE_LOG(LogPlayerZero, Error, TEXT("No Avatar styles found. Make sure you have created character blueprints in your Player Zero application"));
+			UpdateErrorMessage("No Avatar styles found. Make sure you have uploaded your character models to Player Zero");
 			return;
 		}
 		UE_LOG(LogPlayerZero, Log, TEXT("Blueprints listed successfully. Count: %d"), Response.Data.Num());

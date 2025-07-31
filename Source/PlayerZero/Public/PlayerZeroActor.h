@@ -21,10 +21,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Player Zero")
 	TMap<FString, FPlayerZeroAnimationConfig> AnimationConfigsByStyleId;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Ready Player Me|Glb Import Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Player Zero|Glb Import Settings")
 	FglTFRuntimeStaticMeshConfig StaticMeshConfig;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Ready Player Me|Glb Import Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Player Zero|Glb Import Settings")
 	FglTFRuntimeSkeletalMeshConfig SkeletalMeshConfig;
 
 	FPlayerZeroCharacterData CharacterData;
@@ -49,7 +49,7 @@ protected:
 	}
 	
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Ready Player Me")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Player Zero")
 	USceneComponent* AssetRoot;
 
 	TArray<USceneComponent*> LoadedMeshComponents;

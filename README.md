@@ -1,19 +1,105 @@
-# Ready Player Me NextGen SDK for Unreal Engine
+# 📦 Player Zero SDK for Unreal Engine
 
-This is the Unreal Engine SDK for Ready Player Me NextGen avatars. It allows you to easily integrate our avatars into your Unreal Engine project.
+The Player Zero SDK makes it easy to load and display Ready Player Me avatars in Unreal Engine. It supports avatar loading, shortcodes, and render capture.
 
-### Requirements
-- Unreal Engine 5.0 or later
-- Visual Studio 2022
-- glTFRuntime plugin available here: https://github.com/rdeioris/glTFRuntime
-- TransientObjectSaver plugin available here: https://github.com/readyplayerme/TransientObjectSaver
+---
 
-### Installation
-1. Download the latest release from the [Releases](https://github.com/readyplayerme/rpm-unreal-next-gen-sdk/releases) page.
-2. Extract the contents of the zip file into your project's Plugins directory. If the Plugins directory does not exist, create it.
-3. Open your project's .sln file in your IDE and build.
-4. Run your project and launch the Unreal Editor.
-5. In the Editor, go to Edit -> Plugins and enable the Ready Player Me NextGen SDK plugin.
+## ✅ Requirements
+
+- Unreal Engine **5.0 or later**
+- **Visual Studio 2022**
+- [glTFRuntime Plugin](https://github.com/rdeioris/glTFRuntime)
+
+---
+
+## 🚀 Installation Guide
+1. **Download the SDK**  
+   Get the latest release from the [Releases Page](https://github.com/readyplayerme/player-zero-unreal-sdk/releases).
+2. **Add to Plugins Folder**  
+   Extract the contents of the ZIP file into your project’s `Plugins` directory: `YourProject/Plugins/PlayerZeroSdk/`
+3. **Install glTFRuntime**
+- Clone or download the [glTFRuntime plugin](https://github.com/rdeioris/glTFRuntime).
+- Place it inside your `Plugins` folder alongside the PlayerZero SDK:
+  `YourProject/Plugins/glTFRuntime/`
+4. **Build the Project**  
+   Open your project’s `.uproject` file. When prompted, choose to build the project in Visual Studio 2022.
+
+    Alternatively, open the `.sln` file in Visual Studio and build the entire solution manually.
+
+5. **Enable the Plugin**
+- Launch the Unreal Editor.
+- Go to **Edit > Plugins**
+- Search for **Player Zero SDK** and enable it.
+- Restart the editor when prompted.
+
+---
+
+## 🧪 Next Steps
+
+- To verify installation, open the included **demo map**:
+  `Content/PlayerZeroSdk/Maps/PlayerZeroDemo.umap`
+- Check the documentation below to learn how to load avatars and avatar renders.
+
+
+## 🎮 Demo Map: Testing the PlayerZero SDK
+
+The plugin includes a sample map that demonstrates the full PlayerZero avatar loading and image rendering pipeline.
+
+---
+
+### 📍 Location
+
+You can find the demo map inside the Player Zero plugin folder under: `Content/PlayerZeroDemo.umap`.
+
+---
+
+### 🧪 How to Open the Demo
+
+1. In the **Content Browser**, navigate to:  
+   `Content > PlayerZeroSdk > Maps`
+
+2. Double-click on `PlayerZeroDemo` to open the map.
+
+---
+
+### 🎭 Map Setup
+
+The map contains:
+
+#### 🧱 `BP_PlayerZeroDemoActor`
+- Found in the **World Outliner**
+- Includes a `PlayerZeroLoaderComponent` which handles avatar loading
+- In the Details panel, you can set:
+    - `AvatarId`: Will auto-load the avatar on **BeginPlay**
+    - `TargetSkeleton`: Optional skeleton for retargeting
+    - `AnimationBlueprint`: Optional animation controller
+
+---
+
+### 🖼️ UI Widget: `WBP_PlayerZeroDemo`
+
+- Automatically added to viewport in the **Level Blueprint**
+- Contains:
+    - `BP_AvatarCode` widget with a **text input field**
+        - Input a shortcode and press Enter to fetch the corresponding avatar
+    - **Avatar Image Preview**
+        - Displays an avatar thumbnail loaded using the `LoadAvatarImageAsync` Blueprint node
+
+---
+
+### ✅ Testing the Demo
+
+1. Press **Play** in the editor.
+2. If `AvatarId` was set in `BP_PlayerZeroDemoActor`, an avatar should appear.
+3. Test shortcode input:
+    - Enter a valid **Avatar Code** into the input field
+    - If successful, the avatar ID will be fetched and the avatar image will appear
+
+---
+
+### 💡 Pro Tip
+
+You can extend the demo setup or use the `PlayerZeroLoaderComponent` and Blueprint nodes (`LoadAvatarImageAsync`) in your own UI or gameplay logic.
 
 ---
 # Documentation

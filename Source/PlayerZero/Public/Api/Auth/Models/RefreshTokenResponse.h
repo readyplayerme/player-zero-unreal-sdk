@@ -10,10 +10,10 @@ struct PLAYERZERO_API FRefreshTokenResponseBody : public FApiResponse
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me|Auth|Response")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero|API")
 	FString Token;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me|Auth|Response")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero|API")
 	FString RefreshToken;
 
 	FString ToJsonString() const
