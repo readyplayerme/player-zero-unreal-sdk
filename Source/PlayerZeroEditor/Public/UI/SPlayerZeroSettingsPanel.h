@@ -40,7 +40,7 @@ private:
 	TArray<TSharedPtr<FString>> ComboBoxItems;
 	TSharedPtr<STextBlock> SelectedApplicationTextBlock;
 	TArray<UTexture2D*> CharacterStyleTextures;
-	TArray<FApplication> UserApplications;
+	TArray<FApplication> ApplicationList;
 	TMap<FString, FCharacterBlueprint> LoadedBlueprints;
 	TArray<TSharedPtr<FPlayerZeroTextureLoader>> ActiveLoaders;
 	FString UserName;
@@ -48,6 +48,7 @@ private:
 	void LoadBlueprintList();
 	void UpdateErrorMessage(const FString& Message);
 	void PopulateSettingsContent(TArray<FApplication> InApplicationList);
+	void SetApplicationIdFromEditorTool(const FString& NewApplicationId);
 	void OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> Image, TSharedPtr<FPlayerZeroTextureLoader> RpmTextureLoader);
 	void AddCharacterBlueprint(const FCharacterBlueprint& CharacterBlueprint);
 	void HandleBlueprintListResponse(const FBlueprintListResponse& Response, bool bWasSuccessful);
@@ -60,5 +61,5 @@ private:
 	FText GetSelectedComboBoxItemText() const;
 	FText GetWelcomeText() const;
 
-	TArray<FApplication> ApplicationList;
+
 };

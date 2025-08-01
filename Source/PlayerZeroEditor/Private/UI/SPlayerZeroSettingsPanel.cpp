@@ -1,5 +1,6 @@
 ﻿#include "UI/SPlayerZeroSettingsPanel.h"
-#include "PlayerZero.h"
+
+#include "PlayerZeroEditor.h"
 #include "PlayerZeroTextureLoader.h"
 #include "Api/Blueprints/BlueprintApi.h"
 #include "Api/Blueprints/Models/BlueprintListRequest.h"
@@ -153,9 +154,10 @@ void SPlayerZeroSettingsPanel::UpdateErrorMessage(const FString& Message)
 
 void SPlayerZeroSettingsPanel::PopulateSettingsContent(TArray<FApplication> InApplicationList)
 {
+
 	if(InApplicationList.Num() == 0)
 	{
-		UE_LOG( LogPlayerZero, Error, TEXT("No applications found, check your Player Zero Settings") );
+		UE_LOG( LogPlayerZeroEditor, Error, TEXT("No applications found, check your Player Zero Settings") );
 		return;
 	}
 	const FDeveloperAuth DevAuthData = FDevAuthTokenCache::GetAuthData();
@@ -166,8 +168,10 @@ void SPlayerZeroSettingsPanel::PopulateSettingsContent(TArray<FApplication> InAp
 	for (const FApplication& App : ApplicationList)
 	{
 		Items.Add(App.Name);
-		if (App.Id == RpmSettings->ApplicationId)
+
+		if (RpmSettings->ApplicationId.IsEmpty())
 		{
+			SetApplicationIdFromEditorTool(App.Id);
 			Active = App.Name;
 		}
 	}
@@ -179,6 +183,26 @@ void SPlayerZeroSettingsPanel::PopulateSettingsContent(TArray<FApplication> InAp
 	}
 	PopulateComboBoxItems(Items, Active);
 	LoadBlueprintList();
+}
+
+void SPlayerZeroSettingsPanel::SetApplicationIdFromEditorTool(const FString& NewApplicationId)
+{
+	// Get settings object
+	UPlayerZeroDeveloperSettings* Settings = GetMutableDefault<UPlayerZeroDeveloperSettings>();
+	if (Settings)
+	{
+		Settings->ApplicationId = NewApplicationId;
+
+		// Mark dirty so it's saved
+		Settings->SaveConfig();
+
+		// Optional: for editor to immediately reflect changes
+#if WITH_EDITOR
+		Settings->TryUpdateDefaultConfigFile();
+#endif
+
+		UE_LOG(LogPlayerZeroEditor, Log, TEXT("PlayerZero: ApplicationId was set to %s"), *NewApplicationId);
+	}
 }
 
 void SPlayerZeroSettingsPanel::LoadBlueprintList()
@@ -271,14 +295,14 @@ void SPlayerZeroSettingsPanel::HandleBlueprintListResponse(const FBlueprintListR
 	LoadedBlueprints.Empty();
 	if(bWasSuccessful)
 	{
-		UE_LOG(LogPlayerZero, Log, TEXT("Blueprint LIST request completed."));
+		UE_LOG(LogPlayerZeroEditor, Log, TEXT("Blueprint LIST request completed."));
 		if(Response.Data.Num() == 0)
 		{
-			UE_LOG(LogPlayerZero, Error, TEXT("No Avatar styles found. Make sure you have created character blueprints in your Player Zero application"));
+			UE_LOG(LogPlayerZeroEditor, Error, TEXT("No Avatar styles found. Make sure you have created character blueprints in your Player Zero application"));
 			UpdateErrorMessage("No Avatar styles found. Make sure you have uploaded your character models to Player Zero");
 			return;
 		}
-		UE_LOG(LogPlayerZero, Log, TEXT("Blueprints listed successfully. Count: %d"), Response.Data.Num());
+		UE_LOG(LogPlayerZeroEditor, Log, TEXT("Blueprints listed successfully. Count: %d"), Response.Data.Num());
 		for (FCharacterBlueprint CharacterBlueprint : Response.Data)
 		{
 			LoadedBlueprints.Add(CharacterBlueprint.Id, CharacterBlueprint);
@@ -287,7 +311,7 @@ void SPlayerZeroSettingsPanel::HandleBlueprintListResponse(const FBlueprintListR
 		UpdateErrorMessage("");
 		return;
 	}
-	UE_LOG(LogPlayerZero, Error, TEXT("Failed to list base models"));
+	UE_LOG(LogPlayerZeroEditor, Error, TEXT("Failed to list base models"));
 	UpdateErrorMessage("Failed to load base models. Please try again.");
 }
 
@@ -298,17 +322,17 @@ void SPlayerZeroSettingsPanel::HandleOrganizationListResponse(const FOrganizatio
 		// log success
 		if (Response.Data.Num() == 0)
 		{
-			UE_LOG(LogPlayerZero, Error, TEXT("No organizations found"));
+			UE_LOG(LogPlayerZeroEditor, Error, TEXT("No organizations found"));
 			return;
 		}
-		UE_LOG(LogPlayerZero, Log, TEXT("Organizations listed successfully. Count: %d"), Response.Data.Num());
+		UE_LOG(LogPlayerZeroEditor, Log, TEXT("Organizations listed successfully. Count: %d"), Response.Data.Num());
 		FApplicationListRequest Request;
 		Request.Params.Add("organizationId", Response.Data[0].Id);
 		DeveloperAccountApi->ListApplicationsAsync(Request);
 		return;
 	}
 
-	UE_LOG(LogPlayerZero, Error, TEXT("Failed to list organizations"));
+	UE_LOG(LogPlayerZeroEditor, Error, TEXT("Failed to list organizations"));
 }
 
 void SPlayerZeroSettingsPanel::HandleApplicationListResponse(const FApplicationListResponse& Response, bool bWasSuccessful)
@@ -316,30 +340,13 @@ void SPlayerZeroSettingsPanel::HandleApplicationListResponse(const FApplicationL
 	if (bWasSuccessful)
 	{
 		// log success
-		UE_LOG(LogPlayerZero, Log, TEXT("Applications listed successfully. Count: %d"), Response.Data.Num());
-		const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
-		UserApplications = Response.Data;
-		FString Active;
-		TArray<FString> Items;
-		for (const FApplication& App : UserApplications)
-		{
-			Items.Add(App.Name);
-			if (App.Id == PlayerZeroSettings->ApplicationId)
-			{
-				Active = App.Name;
-			}
-		}
-		if (Active.IsEmpty() && Items.Num() > 0)
-		{
-			const auto NewActiveItem = MakeShared<FString>(Items[0]);
-			OnComboBoxSelectionChanged(NewActiveItem, ESelectInfo::Direct);
-			SelectedApplicationTextBlock->SetText(FText::FromString(*NewActiveItem));
-		}
-		PopulateComboBoxItems(Items, Active);
+		UE_LOG(LogPlayerZeroEditor, Log, TEXT("Applications listed successfully. Count: %d"), Response.Data.Num());
+
+		PopulateSettingsContent(Response.Data);
 	}
 	else
 	{
-		UE_LOG(LogPlayerZero, Error, TEXT("Failed to list applications"));
+		UE_LOG(LogPlayerZeroEditor, Error, TEXT("Failed to list applications"));
 	}
 	LoadBlueprintList();
 }
@@ -375,9 +382,7 @@ void SPlayerZeroSettingsPanel::OnComboBoxSelectionChanged(TSharedPtr<FString> Ne
 	});
 	if (Application)
 	{
-		UPlayerZeroDeveloperSettings* RpmSettings = GetMutableDefault<UPlayerZeroDeveloperSettings>();
-		RpmSettings->ApplicationId = Application->Id;
-		RpmSettings->SaveConfig();
+		SetApplicationIdFromEditorTool(Application->Id);
 	}
 }
 

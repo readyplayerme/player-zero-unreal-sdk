@@ -35,16 +35,12 @@ struct PLAYERZERO_API FFileData
 	FFileData(const FString& InUrl, const FString& InName = "")
 		: Name(InName), Url(InUrl)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("FFileData In URL: %s"), *InUrl);
-		// Step 1: Remove query parameters for processing
 		FString CleanUrl = InUrl;
 		int32 QueryStartIndex;
 		if (InUrl.FindChar(TEXT('?'), QueryStartIndex))
 		{
 			CleanUrl = InUrl.Left(QueryStartIndex);
 		}
-		UE_LOG(LogTemp, Warning, TEXT("CleanUrl: %s"), *CleanUrl);
-		// Step 2: Determine file type from extension (case-insensitive)
 		if (CleanUrl.EndsWith(TEXT(".glb"), ESearchCase::IgnoreCase))
 		{
 			FileType = EFileType::GLB;
@@ -63,11 +59,10 @@ struct PLAYERZERO_API FFileData
 			FileType = EFileType::None;
 			UE_LOG(LogTemp, Error, TEXT("Unable to determine file type for URL: %s"), *InUrl);
 		}
-
-		// Step 3: Fallback to filename (no query) if Name was not provided
+		
 		if (Name.IsEmpty())
 		{
-			Name = FPaths::GetCleanFilename(CleanUrl); // Use clean URL for filename
+			Name = FPaths::GetCleanFilename(CleanUrl); 
 		}
 	}
 };

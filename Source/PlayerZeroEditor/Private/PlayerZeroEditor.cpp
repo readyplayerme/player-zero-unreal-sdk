@@ -13,7 +13,7 @@ static const FName DeveloperWindowName("LoginWindow");
 static const FName LoaderWindowName("LoaderWindow");
 static const FName CacheWindowName("CacheGeneratorWindow");
 #define LOCTEXT_NAMESPACE "PlayerZeroEditorModule"
-
+DEFINE_LOG_CATEGORY(LogPlayerZeroEditor);
 
 void FPlayerZeroEditorModule::StartupModule()
 {

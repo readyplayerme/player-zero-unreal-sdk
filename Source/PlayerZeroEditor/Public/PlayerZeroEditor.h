@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+PLAYERZEROEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogPlayerZeroEditor, Log, All);
+
 class PLAYERZEROEDITOR_API FPlayerZeroEditorModule : public IModuleInterface
 {
 public:

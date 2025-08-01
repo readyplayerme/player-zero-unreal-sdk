@@ -139,7 +139,6 @@ void FDeveloperAccountApi::OnAuthTokenRefreshed(TSharedPtr<FApiRequest> ApiReque
 
 void FDeveloperAccountApi::ListApplicationsAsync(const FApplicationListRequest& Request)
 {
-    // TODO find better way to get settings (or move to editor only code)
     const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
     ApiBaseUrl = PlayerZeroSettings->GetApiBaseUrl();
     const FString QueryString = BuildQueryString(Request.Params);
