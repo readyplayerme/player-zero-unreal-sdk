@@ -1,6 +1,6 @@
 ﻿#include "PlayerZeroTextureLoader.h"
 #include "PlayerZero.h"
-#include "Api/Files/GlbLoader.h"
+#include "Api/Files/FileApi.h"
 #include "Api/Files/Models/FileData.h"
 #include "Async/Async.h"
 #include "Modules/ModuleManager.h"
