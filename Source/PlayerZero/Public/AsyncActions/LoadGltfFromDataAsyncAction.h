@@ -19,7 +19,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnGltfFromDataLoaded OnCompleted;
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true", AutoCreateRefTerm = "glTFRuntimeConfig"))
+	UFUNCTION(BlueprintCallable, Category = "Player Zero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true", AutoCreateRefTerm = "glTFRuntimeConfig"))
 	static ULoadGltfFromDataAsyncAction* LoadGltfFromDataAsync(UObject* WorldContextObject, const TArray<uint8>& GltfBinaryData, const FglTFRuntimeConfig& glTFRuntimeConfig = FglTFRuntimeConfig());
 
 	virtual void Activate() override;

@@ -27,7 +27,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAvatarGltfLoadFailed OnFailed;
 	
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true", AutoCreateRefTerm = "CharacterConfig"))
+	UFUNCTION(BlueprintCallable, Category = "Player Zero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true", AutoCreateRefTerm = "CharacterConfig"))
 	static ULoadAvatarAssetAsyncAction* LoadAvatarAssetAsync(UObject* WorldContextObject, const FString& AvatarId, const FCharacterConfig& CharacterConfig = FCharacterConfig());
 
 	virtual void Activate() override;

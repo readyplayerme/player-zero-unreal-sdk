@@ -38,7 +38,7 @@ void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest)
         {
             if (!Self.IsValid() || !ApiRequest.IsValid())
             {
-                UE_LOG(LogTemp, Warning, TEXT("FWebApi or ApiRequest was invalid when processing HTTP response to URL: %s"), *Request->GetURL());
+                UE_LOG(LogPlayerZero, Warning, TEXT("FWebApi or ApiRequest was invalid when processing HTTP response to URL: %s"), *Request->GetURL());
                 return;
             }
             

@@ -17,22 +17,22 @@ class PLAYERZERO_API UPlayerZeroLoaderComponent : public UActorComponent
 public:
 	UPlayerZeroLoaderComponent();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar Loader", meta=(AllowAbstract = "false"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta=(AllowAbstract = "false"))
 	TSubclassOf<UAnimInstance> AnimationBlueprint;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar Loader")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero")
 	FString AvatarId;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar Loader")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero")
 	USkeletalMeshComponent* TargetMeshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar Loader")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero")
 	USkeleton* TargetSkeleton;
 
-	UPROPERTY(BlueprintAssignable, Category = "Avatar Loader")
+	UPROPERTY(BlueprintAssignable, Category = "Player Zero")
 	FOnAvatarLoadComplete OnAvatarLoadComplete;
 
-	UFUNCTION(BlueprintCallable, Category = "Avatar Loader")
+	UFUNCTION(BlueprintCallable, Category = "Player Zero")
 	void LoadAvatar( const FCharacterConfig& Config);
 	
 	void LogSkeletonCompatibility(USkeletalMesh* Mesh, USkeleton* ExpectedSkeleton);

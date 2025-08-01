@@ -1,4 +1,6 @@
 #include "PlayerZeroLoaderComponent.h"
+
+#include "PlayerZero.h"
 #include "GameFramework/Actor.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
@@ -25,7 +27,7 @@ void UPlayerZeroLoaderComponent::LoadAvatar(const FCharacterConfig& CharacterCon
 {
 	if (AvatarId.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AvatarLoaderComponent: No AvatarId set."));
+		UE_LOG(LogPlayerZero, Warning, TEXT("AvatarLoaderComponent: No AvatarId set."));
 		return;
 	}
 
@@ -33,7 +35,7 @@ void UPlayerZeroLoaderComponent::LoadAvatar(const FCharacterConfig& CharacterCon
 
 	if (!Subsystem)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AvatarLoaderComponent: PlayerZeroSubsystem not found."));
+		UE_LOG(LogPlayerZero, Error, TEXT("AvatarLoaderComponent: PlayerZeroSubsystem not found."));
 		return;
 	}
 
@@ -41,18 +43,13 @@ void UPlayerZeroLoaderComponent::LoadAvatar(const FCharacterConfig& CharacterCon
 	OnGltfAssetLoaded.BindUObject(this, &UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset);
 
 	Subsystem->LoadAvatarAsset(AvatarId, CharacterConfig, OnGltfAssetLoaded);
-
-	UE_LOG(LogTemp, Log, TEXT("AvatarLoaderComponent: Requesting avatar asset for AvatarId: %s"), *AvatarId);
 }
 
 void UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* GltfAsset)
 {
-
-	UE_LOG(LogTemp, Log, TEXT("AvatarLoader: Replacing mesh with GLTF asset."));
-	
 	if (!GltfAsset)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AvatarLoader: GLTF asset is null."));
+		UE_LOG(LogPlayerZero, Error, TEXT("AvatarLoader: GLTF asset is null."));
 		OnAvatarLoadComplete.Broadcast(nullptr);
 		return;
 	}
@@ -60,7 +57,7 @@ void UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* Glt
 	AActor* Owner = GetOwner();
 	if (!Owner)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AvatarLoader: Owner is null."));
+		UE_LOG(LogPlayerZero, Error, TEXT("AvatarLoader: Owner is null."));
 		OnAvatarLoadComplete.Broadcast(nullptr);
 		return;
 	}
@@ -80,7 +77,7 @@ void UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* Glt
 	MeshConfig.bIgnoreMissingBones = true;
 	if (!TargetSkeleton)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AvatarLoader: No TargetSkeleton set. Using default skeleton."));
+		UE_LOG(LogPlayerZero, Warning, TEXT("AvatarLoader: No TargetSkeleton set. Using default skeleton."));
 		MeshConfig.Skeleton = TargetSkeleton;
 		MeshConfig.SkeletonConfig.CopyRotationsFrom = TargetSkeleton;
 		MeshConfig.SkeletonConfig.bAssignUnmappedBonesToParent = true;
@@ -98,7 +95,7 @@ void UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* Glt
 			USkeletalMesh* SkeletalMesh = GltfAsset->LoadSkeletalMesh(Node.MeshIndex, Node.SkinIndex, MeshConfig);
 			if (!SkeletalMesh)
 			{
-				UE_LOG(LogTemp, Error, TEXT("AvatarLoader: Failed to load skeletal mesh from node %s"), *Node.Name);
+				UE_LOG(LogPlayerZero, Error, TEXT("AvatarLoader: Failed to load skeletal mesh from node %s"), *Node.Name);
 				continue;
 			}
 			// Create new skeletal mesh component
@@ -139,7 +136,7 @@ void UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* Glt
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AvatarLoader: No skeletal mesh components were created."));
+		UE_LOG(LogPlayerZero, Warning, TEXT("AvatarLoader: No skeletal mesh components were created."));
 		OnAvatarLoadComplete.Broadcast(nullptr);
 	}
 }
@@ -148,7 +145,7 @@ void UPlayerZeroLoaderComponent::LogSkeletonCompatibility(USkeletalMesh* Mesh, U
 {
 	if (!Mesh || !ExpectedSkeleton)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Bone check: Invalid mesh or skeleton"));
+		UE_LOG(LogPlayerZero, Warning, TEXT("Bone check: Invalid mesh or skeleton"));
 		return;
 	}
 
@@ -157,12 +154,12 @@ void UPlayerZeroLoaderComponent::LogSkeletonCompatibility(USkeletalMesh* Mesh, U
 
 	if (MeshBoneCount != SkeletonBoneCount)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Bone count mismatch: Mesh has %d bones, Skeleton has %d bones."),
+		UE_LOG(LogPlayerZero, Warning, TEXT("Bone count mismatch: Mesh has %d bones, Skeleton has %d bones."),
 			MeshBoneCount, SkeletonBoneCount);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("Bone count matches (%d bones)."), MeshBoneCount);
+		UE_LOG(LogPlayerZero, Log, TEXT("Bone count matches (%d bones)."), MeshBoneCount);
 	}
 
 	// Optional: Compare bone names
@@ -178,7 +175,7 @@ void UPlayerZeroLoaderComponent::LogSkeletonCompatibility(USkeletalMesh* Mesh, U
 
 		if (MeshBoneName != SkeletonBoneName)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Bone mismatch at index %d: Mesh has '%s', Skeleton has '%s'"),
+			UE_LOG(LogPlayerZero, Warning, TEXT("Bone mismatch at index %d: Mesh has '%s', Skeleton has '%s'"),
 				BoneIndex, *MeshBoneName.ToString(), *SkeletonBoneName.ToString());
 		}
 	}

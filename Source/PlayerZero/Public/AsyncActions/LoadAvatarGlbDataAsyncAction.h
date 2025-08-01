@@ -22,7 +22,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAvatarDataDownloadFailureBP OnFailed;
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true", AutoCreateRefTerm = "CharacterConfig"))
+	UFUNCTION(BlueprintCallable, Category = "Player Zero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true", AutoCreateRefTerm = "CharacterConfig"))
 	static ULoadAvatarGlbDataAsyncAction* LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url, const FCharacterConfig& CharacterConfig = FCharacterConfig());
 
 	virtual void Activate() override;

@@ -7,7 +7,7 @@
 #include "Api/AvatarCodes/Models/AvatarCodeResponse.h"
 #include "Api/Characters/CharacterApi.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"
-#include "Api/Files/GlbLoader.h"
+#include "Api/Files/FileApi.h"
 #include "Api/Files/Models/FileData.h"
 #include "Api/GameEvents/GameEventApi.h"
 #include "Api/GameEvents/Events/AvatarSessionEndedEvent.h"

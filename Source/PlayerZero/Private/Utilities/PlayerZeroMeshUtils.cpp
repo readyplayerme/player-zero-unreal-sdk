@@ -8,7 +8,7 @@ void FPlayerZeroMeshUtils::LogSkeletonCompatibility(USkeletalMesh* Mesh, USkelet
 {
 	if (!Mesh || !ExpectedSkeleton)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Bone check: Invalid mesh or skeleton"));
+		UE_LOG(LogPlayerZero, Warning, TEXT("Bone check: Invalid mesh or skeleton"));
 		return;
 	}
 
@@ -17,12 +17,12 @@ void FPlayerZeroMeshUtils::LogSkeletonCompatibility(USkeletalMesh* Mesh, USkelet
 
 	if (MeshBoneCount != SkeletonBoneCount)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Bone count mismatch: Mesh has %d bones, Skeleton has %d bones."),
+		UE_LOG(LogPlayerZero, Warning, TEXT("Bone count mismatch: Mesh has %d bones, Skeleton has %d bones."),
 			MeshBoneCount, SkeletonBoneCount);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("Bone count matches (%d bones)."), MeshBoneCount);
+		UE_LOG(LogPlayerZero, Log, TEXT("Bone count matches (%d bones)."), MeshBoneCount);
 	}
 
 	const FReferenceSkeleton& MeshRefSkeleton = Mesh->GetRefSkeleton();
@@ -37,7 +37,7 @@ void FPlayerZeroMeshUtils::LogSkeletonCompatibility(USkeletalMesh* Mesh, USkelet
 
 		if (MeshBoneName != SkeletonBoneName)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Bone mismatch at index %d: Mesh has '%s', Skeleton has '%s'"),
+			UE_LOG(LogPlayerZero, Warning, TEXT("Bone mismatch at index %d: Mesh has '%s', Skeleton has '%s'"),
 				BoneIndex, *MeshBoneName.ToString(), *SkeletonBoneName.ToString());
 		}
 	}
