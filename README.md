@@ -34,6 +34,72 @@ The Player Zero SDK makes it easy to load and display Ready Player Me avatars in
 
 ---
 
+## ⚙️ Plugin Setup & Configuration
+
+After importing the PlayerZero SDK plugin, follow these steps to complete your setup.
+
+---
+
+### 🛠️ 1. Open the Developer Window
+
+You can access the custom editor window from the top toolbar:
+
+> **Player Zero ➜ Developer Window**
+
+This opens the **PlayerZero Developer Login** panel.
+
+---
+
+### 🔐 2. Sign in With Your Developer Account
+
+Use your PlayerZero Developer account credentials:
+
+- **Email**
+- **Password**
+
+Once logged in:
+
+- You’ll see a **dropdown** containing all applications linked to your account.
+- Select the **application** you want this project to be associated with.
+- Your **existing character blueprints** will be displayed visually (IDs only, non-interactable).
+
+---
+
+### ⚙️ 3. Configure Plugin Settings
+
+Go to:
+
+> **Project Settings ➜ Game ➜ Player Zero Settings**
+
+Here’s what you’ll find:
+
+| Setting                | Description                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| **Api Base Url**       | (Auto-set) URL for API requests. No need to change this.                    |
+| **Api Base Auth Url**  | (Auto-set) Auth URL. No need to change this.                                |
+| **Application Id**     | Auto-filled after sign-in. **Do not change manually unless instructed.**    |
+| **Game Id**            | 🔴 **Required.** Used to track analytics and earnings. Contact us to get it. |
+| **Default Avatar Id**  | Optional fallback avatar ID to use if none is set during load.              |
+
+> ⚠️ Make sure your **Game Id** is set correctly — this is essential for revenue tracking!
+
+---
+
+### ✅ Summary
+
+| Step | Action                                       |
+|------|----------------------------------------------|
+| 1    | Open **Developer Window**                   |
+| 2    | Log in with your **PlayerZero** account     |
+| 3    | Select your **Application**                 |
+| 4    | Go to **Project Settings ➜ Player Zero**    |
+| 5    | Verify Application ID and set **Game ID**   |
+| 6    | (Optional) Set a **Default Avatar ID**      |
+
+Once this is done, you’re ready to start using the **PlayerZero avatar and analytics tools** in your game.
+
+---
+
 ## 🧪 Next Steps
 
 - To verify installation, open the included **demo map**:
