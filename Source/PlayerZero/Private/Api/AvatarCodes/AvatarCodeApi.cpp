@@ -9,7 +9,7 @@
 FAvatarCodeApi::FAvatarCodeApi()
 {
 	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
-	ApiUrl = FString::Printf(TEXT("%s/v3/avatars/code"), *PlayerZeroSettings->ApiBaseAuthUrl);
+	ApiUrl = FString::Printf(TEXT("%s/v3/avatars/code"), *PlayerZeroSettings->GetApiBaseUrl());
 }
 
 void FAvatarCodeApi::GetAvatarCode(const FString& AvatarCode, FOnAvatarCodeResponse OnComplete)
