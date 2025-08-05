@@ -152,7 +152,7 @@ void SPlayerZeroSettingsPanel::UpdateErrorMessage(const FString& Message)
 	}
 }
 
-void SPlayerZeroSettingsPanel::PopulateSettingsContent(TArray<FApplication> InApplicationList)
+void SPlayerZeroSettingsPanel::PopulateSettingsContent(TArray<FPlayerZeroApplication> InApplicationList)
 {
 
 	if(InApplicationList.Num() == 0)
@@ -165,7 +165,7 @@ void SPlayerZeroSettingsPanel::PopulateSettingsContent(TArray<FApplication> InAp
 	ApplicationList = InApplicationList;
 	FString Active;
 	TArray<FString> Items;
-	for (const FApplication& App : ApplicationList)
+	for (const FPlayerZeroApplication& App : ApplicationList)
 	{
 		Items.Add(App.Name);
 
@@ -376,7 +376,7 @@ FText SPlayerZeroSettingsPanel::GetWelcomeText() const
 void SPlayerZeroSettingsPanel::OnComboBoxSelectionChanged(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo)
 {
 	SelectedComboBoxItem = NewValue;
-	FApplication* Application = ApplicationList.FindByPredicate([&](const FApplication& Item)
+	FPlayerZeroApplication* Application = ApplicationList.FindByPredicate([&](const FPlayerZeroApplication& Item)
 	{
 		return Item.Name == *NewValue;
 	});
