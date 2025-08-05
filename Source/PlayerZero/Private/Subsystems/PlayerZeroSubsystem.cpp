@@ -1,5 +1,6 @@
 #include "Subsystems/PlayerZeroSubsystem.h"
 #include "glTFRuntimeFunctionLibrary.h"
+#include "AvatarConfig.h"
 #include "PlayerZero.h"
 #include "PlayerZeroConfigProcessor.h"
 #include "Api/AvatarCodes/AvatarCodeApi.h"
@@ -124,7 +125,7 @@ void UPlayerZeroSubsystem::GetAvatarMetaData(const FString& Id, FOnCharacterData
 		}));
 }
 
-void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& AvatarId, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete)
+void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& AvatarId, const FAvatarConfig& Config, const FOnGltfAssetLoaded& OnComplete)
 {
 	TSharedPtr<FCharacterFindByIdRequest> Request = MakeShared<FCharacterFindByIdRequest>();
 	Request->Id = AvatarId;
@@ -203,7 +204,7 @@ void UPlayerZeroSubsystem::GetAvatarFromAvatarCode(const FString& AvatarCode, FO
 		}));
 }
 
-void UPlayerZeroSubsystem::DownloadAvatarData(const FString& Url, const FCharacterConfig& Config, FOnAvatarDataDownloaded OnComplete)
+void UPlayerZeroSubsystem::DownloadAvatarData(const FString& Url, const FAvatarConfig& Config, FOnAvatarDataDownloaded OnComplete)
 {
 	const FString ProcessedUrlParams = Url + FPlayerZeroConfigProcessor::ProcessCharacter(Config);
 	TWeakObjectPtr<UPlayerZeroSubsystem> WeakThis(this);

@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "PlayerZeroCharacterTypes.h"
 #include "Engine/DataAsset.h"
-#include "CharacterLoaderConfig.generated.h"
+#include "AvatarConfig.generated.h"
 
 USTRUCT(BlueprintType)
-struct PLAYERZERO_API FCharacterConfig 
+struct PLAYERZERO_API FAvatarConfig 
 {
 	GENERATED_BODY()
 

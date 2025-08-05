@@ -23,7 +23,7 @@ void UPlayerZeroLoaderComponent::BeginPlay()
 	}
 }
 
-void UPlayerZeroLoaderComponent::LoadAvatar(const FCharacterConfig& CharacterConfig)
+void UPlayerZeroLoaderComponent::LoadAvatar(const FAvatarConfig& CharacterConfig)
 {
 	if (AvatarId.IsEmpty())
 	{

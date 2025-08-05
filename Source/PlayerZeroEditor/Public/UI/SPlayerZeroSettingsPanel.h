@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Api/Blueprints/Models/CharacterBlueprint.h"
+#include "DeveloperAccounts/Models/ApplicationListResponse.h"
 #include "Widgets/SCompoundWidget.h"
 
 struct FBlueprintListResponse;
@@ -15,7 +16,6 @@ class FRpmTextureLoader;
 struct FRpmAsset;
 class FAssetApi;
 struct FAssetListResponse;
-struct FPlayerZeroApplication;
 
 DECLARE_DELEGATE(FOnLogout);
 

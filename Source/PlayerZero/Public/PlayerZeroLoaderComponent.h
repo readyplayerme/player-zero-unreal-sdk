@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "PlayerZeroLoaderComponent.generated.h"
 
-struct FCharacterConfig;
+struct FAvatarConfig;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAvatarLoadComplete, USkeletalMeshComponent*, LoadedMeshComponent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -33,7 +33,7 @@ public:
 	FOnAvatarLoadComplete OnAvatarLoadComplete;
 
 	UFUNCTION(BlueprintCallable, Category = "Player Zero")
-	void LoadAvatar( const FCharacterConfig& Config);
+	void LoadAvatar( const FAvatarConfig& Config);
 	
 	void LogSkeletonCompatibility(USkeletalMesh* Mesh, USkeleton* ExpectedSkeleton);
 	

@@ -1,6 +1,7 @@
 // PlayerZeroMeshUtils.cpp
 
 #include "Utilities/PlayerZeroMeshUtils.h"
+#include "PlayerZero.h"
 #include "Animation/Skeleton.h"
 #include "Engine/SkeletalMesh.h"
 

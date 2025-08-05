@@ -12,7 +12,7 @@ class FCharacterApi;
 class FGameEventApi;
 
 struct FAvatarRenderConfig;
-struct FCharacterConfig;
+struct FAvatarConfig;
 struct FglTFRuntimeConfig;
 struct FPlayerZeroCharacter;
 struct FFileData;
@@ -40,9 +40,9 @@ public:
 	
 	void GetAvatarIconAsTexture(FString AvatarId, const FAvatarRenderConfig& Config, FOnAvatarTextureLoaded OnComplete);
 	void GetAvatarMetaData(const FString& Id, FOnCharacterDataLoaded OnComplete);
-	void DownloadAvatarData(const FString& Url, const FCharacterConfig& Config, FOnAvatarDataDownloaded OnComplete);
+	void DownloadAvatarData(const FString& Url, const FAvatarConfig& Config, FOnAvatarDataDownloaded OnComplete);
 	void LoadGltfAsset(const TArray<uint8>& Data, const FglTFRuntimeConfig& Config, FOnGltfAssetLoaded OnComplete);
-	void LoadAvatarAsset(const FString& AvatarId, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete);
+	void LoadAvatarAsset(const FString& AvatarId, const FAvatarConfig& Config, const FOnGltfAssetLoaded& OnComplete);
 	void GetAvatarFromAvatarCode(const FString& AvatarCode, FOnAvatarCodeLoaded OnComplete);
 	
 	void StartSessions();
