@@ -82,7 +82,7 @@ FString UPlayerZeroSubsystem::GetAvatarId()
 
 void UPlayerZeroSubsystem::GetAvatarIconAsTexture(FString AvatarId, const FAvatarRenderConfig& Config, FOnAvatarTextureLoaded OnComplete)
 {
-	const FString Url = FString::Printf(TEXT("https://avatars.readyplayer.me/%s.png%s"), *AvatarId, *FPlayerZeroConfigProcessor::ProcessRender(Config));
+	const FString Url = FString::Printf(TEXT("%s%s.png%s"), *AvatarsBaseUrl, *AvatarId,  *FPlayerZeroConfigProcessor::ProcessRender(Config));
 
 	TWeakObjectPtr<UPlayerZeroSubsystem> WeakThis(this);
 	FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateLambda(

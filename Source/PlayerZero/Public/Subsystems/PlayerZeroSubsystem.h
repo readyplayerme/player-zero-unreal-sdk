@@ -58,6 +58,7 @@ public:
 private:
 
 	const UPlayerZeroDeveloperSettings* PlayerZeroSettings;
+	const FString AvatarsBaseUrl = TEXT("https://avatars.readyplayer.me/");
 	FTimerHandle HeartbeatTimerHandle;
 	FDateTime LastPlayerActivity;
 	FVector2D LastMousePosition;
