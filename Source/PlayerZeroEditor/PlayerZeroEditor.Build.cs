@@ -53,6 +53,7 @@ public class PlayerZeroEditor : ModuleRules
 				"Json", 
 				"UMG",
 				"ImageWrapper",
+				"DeveloperToolSettings"
 			}
 			);
 		

@@ -7,6 +7,7 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
+#include "Settings/ProjectPackagingSettings.h"
 #include "UI/LoginWindowStyle.h"
 
 static const FName DeveloperWindowName("LoginWindow");
@@ -15,8 +16,26 @@ static const FName CacheWindowName("CacheGeneratorWindow");
 #define LOCTEXT_NAMESPACE "PlayerZeroEditorModule"
 DEFINE_LOG_CATEGORY(LogPlayerZeroEditor);
 
+namespace
+{
+	void AddGLTFRuntimeToCookingDirectories()
+	{
+		UProjectPackagingSettings* PackagingSetting = GetMutableDefault<UProjectPackagingSettings>();
+		if (!PackagingSetting->DirectoriesToAlwaysCook.ContainsByPredicate([](const auto& Item){ return Item.Path == "/ReadyPlayerMe/glTFRuntime";} ))
+		{
+			PackagingSetting->DirectoriesToAlwaysCook.Add(FDirectoryPath{"/glTFRuntime"});
+#if ENGINE_MAJOR_VERSION > 4
+			PackagingSetting->TryUpdateDefaultConfigFile();
+#else
+			PackagingSetting->UpdateDefaultConfigFile();
+#endif
+		}
+	}
+}
+
 void FPlayerZeroEditorModule::StartupModule()
 {
+	AddGLTFRuntimeToCookingDirectories();
 	FLoginWindowStyle::Initialize();
 	FLoginWindowStyle::ReloadTextures();
 
