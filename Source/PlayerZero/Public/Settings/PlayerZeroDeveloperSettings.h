@@ -13,13 +13,13 @@ UCLASS(config = Game, defaultconfig, meta = (DisplayName = "Player Zero Settings
 class PLAYERZERO_API UPlayerZeroDeveloperSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(VisibleAnywhere, Config, Category = "Player Zero Settings", meta = (ReadOnly  = "true", ToolTip = "Base URL for requests."))
-	FString ApiBaseUrl;
 
 public:
+
+	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ReadOnly  = "true", ToolTip = "Base URL for requests."))
+	FString ApiBaseUrl;
 	
-	UPROPERTY(VisibleAnywhere, Config, Category = "Player Zero Settings", meta = (ReadOnly  = "true", ToolTip = "Base URL for authentication requests."))
+	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ReadOnly  = "true", ToolTip = "Base URL for authentication requests."))
 	FString ApiBaseAuthUrl;
 
 	UPROPERTY(EditAnywhere, Config, Category = "Player Zero Settings", meta = (ToolTip = "Application ID used for authentication."))
@@ -37,7 +37,7 @@ public:
 
 	bool IsValid() const
 	{
-		return !ApplicationId.IsEmpty();
+		return !ApplicationId.IsEmpty() && !GameId.IsEmpty() && !ApiBaseUrl.IsEmpty() && !ApiBaseAuthUrl.IsEmpty() && !DefaultAvatarId.IsEmpty();
 	}
 
 	virtual void PostInitProperties() override;

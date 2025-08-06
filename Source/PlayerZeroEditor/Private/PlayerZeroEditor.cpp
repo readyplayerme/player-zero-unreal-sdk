@@ -9,6 +9,7 @@
 #include "ToolMenus.h"
 #include "Settings/ProjectPackagingSettings.h"
 #include "UI/LoginWindowStyle.h"
+#include "UI/PlayerZeroDeveloperSettingsCustomization.h"
 
 static const FName DeveloperWindowName("LoginWindow");
 static const FName LoaderWindowName("LoaderWindow");
@@ -53,6 +54,13 @@ void FPlayerZeroEditorModule::StartupModule()
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(DeveloperWindowName, FOnSpawnTab::CreateRaw(this, &FPlayerZeroEditorModule::OnSpawnPluginTab))
 		.SetDisplayName(LOCTEXT("DeveloperLoginWidget", "Player Zero"))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
+
+	FPropertyEditorModule& PropertyEditor = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+	PropertyEditor.RegisterCustomClassLayout(
+		"PlayerZeroDeveloperSettings",
+		FOnGetDetailCustomizationInstance::CreateStatic(&FPlayerZeroDeveloperSettingsCustomization::MakeInstance)
+	);
 }
 
 void FPlayerZeroEditorModule::RegisterMenus()
@@ -100,6 +108,12 @@ void FPlayerZeroEditorModule::ShutdownModule()
 
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(DeveloperWindowName);
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(CacheWindowName);
+
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& PropertyEditor = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		PropertyEditor.UnregisterCustomClassLayout("PlayerZeroDeveloperSettings");
+	}
 }
 
 TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
