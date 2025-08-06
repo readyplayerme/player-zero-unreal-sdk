@@ -41,8 +41,7 @@ public:
 	}
 
 	virtual void PostInitProperties() override;
-	virtual void PreSave(const ITargetPlatform* TargetPlatform) override;
-private:
+	virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 	
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
