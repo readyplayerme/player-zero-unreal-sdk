@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Api/Common/WebApi.h"
@@ -13,7 +13,7 @@ class PLAYERZEROEDITOR_API FDeveloperAuthApi : public FWebApi
 public:	
 	FDeveloperAuthApi();
 
-	void LoginWithEmail(TSharedPtr<FDeveloperLoginRequest> Request, FOnDeveloperLoginResponse OnComplete);
+	void LoginWithEmail(FDeveloperLoginRequest Request, FOnDeveloperLoginResponse OnComplete);
 
 private:
 	FString ApiUrl;

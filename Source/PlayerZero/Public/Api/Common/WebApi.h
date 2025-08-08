@@ -10,15 +10,12 @@
 #include "Models/ApiRequest.h"
 
 class FHttpModule;
+struct FApiRequest;
 
-<<<<<<< HEAD:Source/PlayerZero/Public/Api/Common/WebApi.h
-
-class PLAYERZERO_API FWebApi
-=======
-class RPMNEXTGEN_API FWebApi : public TSharedFromThis<FWebApi> 
->>>>>>> origin/develop:Source/RpmNextGen/Public/Api/Common/WebApi.h
+class PLAYERZERO_API FWebApi : public TSharedFromThis<FWebApi>
 {
-public:	
+public:
+	
 	FWebApi();
 	virtual ~FWebApi();
 	

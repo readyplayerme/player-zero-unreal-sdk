@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "DeveloperLoginResponse.h"
@@ -18,28 +18,13 @@ struct PLAYERZEROEDITOR_API FDeveloperAuth
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "name"))
 	FString Name;
 
-<<<<<<< HEAD:Source/PlayerZeroEditor/Public/Auth/Models/DeveloperAuth.h
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta = (JsonName = "isDemo"))
-	bool IsDemo;
-=======
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ready Player Me", meta = (JsonName = "isDemo"))
-	bool IsDemo = false;
->>>>>>> origin/develop:Source/RpmNextGenEditor/Public/Auth/Models/DeveloperAuth.h
-
-	FDeveloperAuth()
-	{
-		Token = TEXT("");
-		RefreshToken = TEXT("");
-		Name = TEXT("");
-		IsDemo = false;
-	}
+	FDeveloperAuth() = default;
 	
-	FDeveloperAuth(FDeveloperLoginResponseBody Data, bool bIsDemo)
+	FDeveloperAuth(FDeveloperLoginResponseBody Data)
 	{
 		Token = Data.Token;
 		RefreshToken = Data.RefreshToken;
 		Name = Data.Name;
-		IsDemo = bIsDemo;
 	}
 
 	FString ToJsonString() const
@@ -50,7 +35,6 @@ struct PLAYERZEROEDITOR_API FDeveloperAuth
 		Writer->WriteValue(TEXT("token"), Token);
 		Writer->WriteValue(TEXT("refreshToken"), RefreshToken);
 		Writer->WriteValue(TEXT("name"), Name);
-		Writer->WriteValue(TEXT("isDemo"), IsDemo);
 		Writer->WriteObjectEnd();
 		Writer->Close();
 		return OutputString;
@@ -63,6 +47,6 @@ struct PLAYERZEROEDITOR_API FDeveloperAuth
 
 	bool IsValid() const
 	{
-		return IsDemo || !Token.IsEmpty();
+		return !Token.IsEmpty();
 	}
 };

@@ -1,29 +1,46 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "PlayerZeroEditor.h"
-#include "UI/SCharacterLoaderWidget.h"
-#include "UI/Commands/LoaderWindowCommands.h"
 #include "UI/Commands/LoginWindowCommands.h"
 #include "UI/SPlayerZeroDeveloperLoginWidget.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
+#include "Settings/ProjectPackagingSettings.h"
 #include "UI/LoginWindowStyle.h"
+#include "UI/PlayerZeroDeveloperSettingsCustomization.h"
 
 static const FName DeveloperWindowName("LoginWindow");
 static const FName LoaderWindowName("LoaderWindow");
 static const FName CacheWindowName("CacheGeneratorWindow");
 #define LOCTEXT_NAMESPACE "PlayerZeroEditorModule"
+DEFINE_LOG_CATEGORY(LogPlayerZeroEditor);
 
+namespace
+{
+	void AddGLTFRuntimeToCookingDirectories()
+	{
+		UProjectPackagingSettings* PackagingSetting = GetMutableDefault<UProjectPackagingSettings>();
+		if (!PackagingSetting->DirectoriesToAlwaysCook.ContainsByPredicate([](const auto& Item){ return Item.Path == "/ReadyPlayerMe/glTFRuntime";} ))
+		{
+			PackagingSetting->DirectoriesToAlwaysCook.Add(FDirectoryPath{"/glTFRuntime"});
+#if ENGINE_MAJOR_VERSION > 4
+			PackagingSetting->TryUpdateDefaultConfigFile();
+#else
+			PackagingSetting->UpdateDefaultConfigFile();
+#endif
+		}
+	}
+}
 
 void FPlayerZeroEditorModule::StartupModule()
 {
+	AddGLTFRuntimeToCookingDirectories();
 	FLoginWindowStyle::Initialize();
 	FLoginWindowStyle::ReloadTextures();
 
 	FLoginWindowCommands::Register();
-	FLoaderWindowCommands::Register();
 
 	PluginCommands = MakeShareable(new FUICommandList);
 
@@ -32,65 +49,52 @@ void FPlayerZeroEditorModule::StartupModule()
 		FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::PluginButtonClicked),
 		FCanExecuteAction());
 
-	// Don't show Loader window in the menu
-	// PluginCommands->MapAction(
-	// 	FLoaderWindowCommands::Get().OpenPluginWindow,
-	// 	FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::OpenLoaderWindow),
-	// 	FCanExecuteAction());
-
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FPlayerZeroEditorModule::RegisterMenus));
 
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(DeveloperWindowName, FOnSpawnTab::CreateRaw(this, &FPlayerZeroEditorModule::OnSpawnPluginTab))
-		.SetDisplayName(LOCTEXT("DeveloperLoginWidget", "Ready Player Me"))
+		.SetDisplayName(LOCTEXT("DeveloperLoginWidget", "Player Zero"))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
-	
-	// Don't show Loader window in the menu
-	// FGlobalTabmanager::Get()->RegisterNomadTabSpawner(NewWindowTabName, FOnSpawnTab::CreateRaw(this, &FPlayerZeroEditorModule::OnSpawnLoaderWindow))
-	// 	.SetDisplayName(LOCTEXT("CharacterLoaderWidget", "Avatar Loader"))
-	// 	.SetMenuType(ETabSpawnerMenuType::Hidden);
+
+	FPropertyEditorModule& PropertyEditor = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+	PropertyEditor.RegisterCustomClassLayout(
+		"PlayerZeroDeveloperSettings",
+		FOnGetDetailCustomizationInstance::CreateStatic(&FPlayerZeroDeveloperSettingsCustomization::MakeInstance)
+	);
 }
 
 void FPlayerZeroEditorModule::RegisterMenus()
 {
 	FToolMenuOwnerScoped OwnerScoped(this);
 
-	// Create a new main menu entry called "ReadyPlayerMe"
+	// Create a new main menu entry called "PlayerZero"
 	UToolMenu* MainMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu");
 
-	// Add a new top-level menu "Ready Player Me"
-	FToolMenuSection& Section = MainMenu->AddSection("ReadyPlayerMeTopMenu", LOCTEXT("ReadyPlayerMeMenuSection", "Ready Player Me"));
+	// Add a new top-level menu "Player Zero"
+	FToolMenuSection& Section = MainMenu->AddSection("PlayerZeroTopMenu", LOCTEXT("PlayerZeroMenuSection", "Player Zero"));
 
-	// Add a sub-menu for "Ready Player Me"
+	// Add a sub-menu for "Player Zero"
 	FToolMenuEntry& SubMenuEntry = Section.AddSubMenu(
-		"ReadyPlayerMe",
-		LOCTEXT("ReadyPlayerMeMenu", "Ready Player Me"),
-		LOCTEXT("ReadyPlayerMeMenu_ToolTip", "Open Ready Player Me tools"),
-		FNewToolMenuDelegate::CreateRaw(this, &FPlayerZeroEditorModule::FillReadyPlayerMeMenu),
+		"PlayerZero",
+		LOCTEXT("PlayerZeroMenu", "Player Zero"),
+		LOCTEXT("PlayerZeroMenu_ToolTip", "Open Player Zero tools"),
+		FNewToolMenuDelegate::CreateRaw(this, &FPlayerZeroEditorModule::FillPlayerZeroMenu),
 		false, // Don't open on hover
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.User") // Optional icon for the top-level menu
 	);
 }
 
-void FPlayerZeroEditorModule::FillReadyPlayerMeMenu(UToolMenu* Menu)
+void FPlayerZeroEditorModule::FillPlayerZeroMenu(UToolMenu* Menu)
 {
-	FToolMenuSection& Section = Menu->AddSection("ReadyPlayerMeSubSection");
+	FToolMenuSection& Section = Menu->AddSection("PlayerZeroSubSection");
 
 	Section.AddMenuEntry(
 		"OpenLoginWindow",
 		LOCTEXT("OpenLoginWindow", "Developer Window"),
-		LOCTEXT("OpenLoginWindowToolTip", "Open the RPM Developer Window."),
+		LOCTEXT("OpenLoginWindowToolTip", "Open the Player Zero Developer Window."),
 		FSlateIcon(),
 		FUIAction(FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::PluginButtonClicked))
 	);
-	
-	// Don't show Loader window in the menu
-	// Section.AddMenuEntry(
-	// 	"OpenLoaderWindow",
-	// 	LOCTEXT("OpenLoaderWindow", "Glb Loader"),
-	// 	LOCTEXT("OpenLoaderWindowToolTip", "Avatar Loader Window."),
-	// 	FSlateIcon(),
-	// 	FUIAction(FExecuteAction::CreateRaw(this, &FPlayerZeroEditorModule::OpenLoaderWindow))
-	// );
 }
 
 void FPlayerZeroEditorModule::ShutdownModule()
@@ -101,13 +105,15 @@ void FPlayerZeroEditorModule::ShutdownModule()
 	FLoginWindowStyle::Shutdown();
 
 	FLoginWindowCommands::Unregister();
-	FLoaderWindowCommands::Unregister();
 
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(DeveloperWindowName);
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(CacheWindowName);
-	
-	// Don't show Loader window in the menu
-	//FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(LoaderWindowName);
+
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& PropertyEditor = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		PropertyEditor.UnregisterCustomClassLayout("PlayerZeroDeveloperSettings");
+	}
 }
 
 TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
@@ -126,16 +132,7 @@ TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnPluginTab(const FSpawnTabAr
 	
 }
 
-TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnLoaderWindow(const FSpawnTabArgs& SpawnTabArgs)
-{
-	return SNew(SDockTab)
-		.TabRole(NomadTab)
-		[
-			SNew(SCharacterLoaderWidget)
-		];
-}
-
-void FRpmNextGenEditorModule::PluginButtonClicked()
+void FPlayerZeroEditorModule::PluginButtonClicked()
 {
 	FGlobalTabmanager::Get()->TryInvokeTab(DeveloperWindowName);
 }

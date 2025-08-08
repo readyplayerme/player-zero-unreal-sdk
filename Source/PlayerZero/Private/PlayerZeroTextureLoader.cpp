@@ -1,7 +1,7 @@
 ﻿#include "PlayerZeroTextureLoader.h"
-
 #include "PlayerZero.h"
-#include "Api/Assets/AssetIconLoader.h"
+#include "Api/Files/FileApi.h"
+#include "Api/Files/Models/FileData.h"
 #include "Async/Async.h"
 #include "Modules/ModuleManager.h"
 #include "Engine/Texture2D.h"
@@ -9,22 +9,21 @@
 
 FPlayerZeroTextureLoader::FPlayerZeroTextureLoader()
 {
-	AssetIconLoader = MakeShared<FAssetIconLoader>();
-	AssetIconLoader->OnIconLoaded.BindRaw( this, &FPlayerZeroTextureLoader::OnIconLoaded);
+	FileApi = MakeShared<FFileApi>();
 }
 
-void FPlayerZeroTextureLoader::LoadIconFromAsset(const FAsset& Asset, bool bStoreInCache)
+void FPlayerZeroTextureLoader::LoadIconFromUrl(const FString& Url)
 {
-	AssetIconLoader->LoadIcon(Asset, bStoreInCache);
+	FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateRaw(this, &FPlayerZeroTextureLoader::OnIconLoaded));
 }
 
-void FPlayerZeroTextureLoader::OnIconLoaded(const FAsset& Asset, const TArray<unsigned char>& Array)
+void FPlayerZeroTextureLoader::OnIconLoaded(const FFileData& File, const TArray<unsigned char>& Data)
 {
-	if (UTexture2D* Texture = FPlayerZeroImageHelper::CreateTextureFromData(Array))
+	if (UTexture2D* Texture = FPlayerZeroImageHelper::CreateTextureFromData(Data))
 	{
 		OnTextureLoaded.ExecuteIfBound(Texture);
 		return;
 	}
-	UE_LOG(LogPlayerZero, Error, TEXT("Failed to load icon for asset: %s"), *Asset.Id);
+	UE_LOG(LogPlayerZero, Error, TEXT("Failed to load icon for asset: %s"), *File.Name);
 	OnTextureLoaded.ExecuteIfBound(nullptr);
 }

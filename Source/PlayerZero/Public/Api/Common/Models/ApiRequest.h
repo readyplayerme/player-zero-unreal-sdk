@@ -2,7 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
+#include "HttpModule.h"
 #include "ApiRequest.generated.h"
+
+
 
 UENUM(BlueprintType)
 enum ERequestMethod { 	
@@ -12,6 +15,8 @@ enum ERequestMethod {
 	DELETE,
 	PATCH
 };
+struct FApiRequest;
+DECLARE_DELEGATE_ThreeParams(FOnApiRequestComplete, TSharedPtr<FApiRequest>, FHttpResponsePtr, bool);
 
 USTRUCT(BlueprintType)
 struct PLAYERZERO_API FApiRequest
@@ -29,6 +34,8 @@ struct PLAYERZERO_API FApiRequest
 	TMap<FString, FString> QueryParams;
 
 	FString Payload;
+
+	FOnApiRequestComplete OnApiRequestComplete;
 
 	FString GetVerb() const
 	{
@@ -52,6 +59,8 @@ struct PLAYERZERO_API FApiRequest
 		return !Url.IsEmpty();
 	}
 };
+
+
 
 USTRUCT(BlueprintType)
 struct PLAYERZERO_API FApiRequestBody

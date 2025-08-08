@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+PLAYERZEROEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogPlayerZeroEditor, Log, All);
+
 class PLAYERZEROEDITOR_API FPlayerZeroEditorModule : public IModuleInterface
 {
 public:
@@ -18,12 +20,9 @@ public:
 	
 private:
 	void RegisterMenus();
-	void FillReadyPlayerMeMenu(UToolMenu* Menu);
+	void FillPlayerZeroMenu(UToolMenu* Menu);
 	void OpenLoaderWindow();
-	void OpenCacheEditorWindow();
 	
-	TSharedRef<SDockTab> OnSpawnLoaderWindow(const FSpawnTabArgs& SpawnTabArgs);
-	TSharedRef<SDockTab> OnSpawnCacheWindow(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<SDockTab> OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedPtr<FUICommandList> PluginCommands;
 };

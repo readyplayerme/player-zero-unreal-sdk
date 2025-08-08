@@ -1,4 +1,4 @@
-﻿#include "Api/Common/WebApi.h"
+#include "Api/Common/WebApi.h"
 <<<<<<< HEAD:Source/PlayerZero/Private/Api/Common/WebApi.cpp
 #include "HttpModule.h"
 #include "PlayerZero.h"
@@ -29,7 +29,20 @@ void FWebApi::CancelAllRequests()
     {
         Request->SetContentAsString(ApiRequest->Payload);
     }
-    Request->OnProcessRequestComplete().BindRaw(this, &FWebApi::OnProcessResponse, ApiRequest);
+
+    TSharedPtr<FWebApi> Self = AsShared();
+    Request->OnProcessRequestComplete().BindLambda(
+        [Self, ApiRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess)
+        {
+            if (!Self.IsValid() || !ApiRequest.IsValid())
+            {
+                UE_LOG(LogPlayerZero, Warning, TEXT("FWebApi or ApiRequest was invalid when processing HTTP response to URL: %s"), *Request->GetURL());
+                return;
+            }
+            
+            Self->OnProcessResponse(Request, Response, bSuccess, ApiRequest);
+        }
+    );
     Request->ProcessRequest();
 }
 
@@ -37,15 +50,12 @@ void FWebApi::OnProcessResponse(FHttpRequestPtr Request, FHttpResponsePtr Respon
 {
     if (bWasSuccessful && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
     {
-        OnRequestComplete.ExecuteIfBound(ApiRequest, Response, true);
+        ApiRequest->OnApiRequestComplete.ExecuteIfBound(ApiRequest, Response, true);
         return;
     }
     FString ErrorMessage = Response.IsValid() ? Response->GetContentAsString() : TEXT("Request failed");
     UE_LOG(LogPlayerZero, Warning, TEXT("WebApi from URL %s request failed: %s"), *Request->GetURL(), *ErrorMessage);
-    OnRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
-=======
-    ActiveRequests.Empty();
->>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Common/WebApi.cpp
+    ApiRequest->OnApiRequestComplete.ExecuteIfBound(ApiRequest, Response, false);
 }
 
 FString FWebApi::BuildQueryString(const TMap<FString, FString>& QueryParams)

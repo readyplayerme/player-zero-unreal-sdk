@@ -72,7 +72,7 @@ UImage* FPlayerZeroImageHelper::CreateUImageFromData(const TArray<uint8>& ImageD
 	return Image;
 }
 
-void FPlayerZeroImageHelper::LoadDataToUImage(const TArray<uint8>& ImageData, UImage*& Image)
+void FPlayerZeroImageHelper::LoadDataToUImage(const TArray<uint8>& ImageData, UImage* Image)
 {
 	if (UTexture2D* Texture = CreateTextureFromData(ImageData))
 	{
@@ -109,7 +109,7 @@ void FPlayerZeroImageHelper::LoadTextureToSImage(UTexture2D* Texture, const FVec
 	UE_LOG(LogPlayerZero, Error, TEXT("Failed to load texture to SImage"));
 }
 
-void FPlayerZeroImageHelper::LoadTextureToUImage(UTexture2D* Texture, const FVector2D& ImageSize, UImage*& Image)
+void FPlayerZeroImageHelper::LoadTextureToUImage(UTexture2D* Texture, const FVector2D& ImageSize, UImage* Image)
 {
 	if (Image)
 	{

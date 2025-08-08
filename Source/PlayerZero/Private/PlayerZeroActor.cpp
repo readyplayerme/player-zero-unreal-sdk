@@ -4,8 +4,8 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "glTFRuntimeSkeletalMeshComponent.h"
-#include "RpmNextGen.h"
-#include "RpmCharacterTypes.h"
+#include "PlayerZero.h"
+#include "PlayerZeroCharacterTypes.h"
 
 APlayerZeroActor::APlayerZeroActor()
 {
@@ -20,95 +20,67 @@ void APlayerZeroActor::BeginPlay()
 	Super::BeginPlay();
 }
 
+
 void APlayerZeroActor::LoadCharacter(const FPlayerZeroCharacterData& InCharacterData, UglTFRuntimeAsset* GltfAsset)
 {
 	CharacterData = InCharacterData;
-	if(AnimationConfigsByCharacterStyleId.Contains(CharacterData.CharacterStyleId))
+	if(AnimationConfigsByStyleId.Contains(CharacterData.BaseModelId))
 	{
-		AnimationConfig = AnimationConfigsByCharacterStyleId[CharacterData.CharacterStyleId];
+		AnimationConfig = AnimationConfigsByStyleId[CharacterData.BaseModelId];
 		SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
 		SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
 	}
-	// TODO cleanup
-	//LoadAsset(FRpmAsset(), GltfAsset);
-}
-
-void ARpmActor::LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FRpmAsset& Asset, const FRpmAnimationConfig& InAnimationCharacter)
->>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
-{
-	AnimationConfig = InAnimationCharacter;
-	SkeletalMeshConfig.Skeleton =  AnimationConfig.Skeleton;
-	SkeletalMeshConfig.SkeletonConfig.CopyRotationsFrom =  AnimationConfig.Skeleton;
-	// TODO cleanup
-	//LoadAsset(Asset, GltfAsset);
-}
-
-void APlayerZeroActor::RemoveMeshComponentsOfType(const FString& AssetType)
-{
-	if (LoadedMeshComponentsByAssetType.IsEmpty())
+	RemoveAllMeshes();
+	const double LoadingStartTime = FPlatformTime::Seconds();
+	const TArray<USceneComponent*> NewMeshComponents = LoadMeshComponents(GltfAsset);
+	if (NewMeshComponents.Num() > 0)
 	{
-		UE_LOG( LogPlayerZero, Log, TEXT("No mesh components to remove"));
+		LoadedMeshComponents.Append(NewMeshComponents);
+		if(AnimationConfigsByStyleId.Contains(CharacterData.BaseModelId))
+		{
+			if (MasterPoseComponent == nullptr)
+			{
+				UE_LOG(LogPlayerZero, Error, TEXT("MasterPoseComponent is null for base model %s"), *CharacterData.BaseModelId);
+				return;
+			}
+
+			if (!AnimationConfig.AnimationBlueprint)
+			{
+				UE_LOG(LogPlayerZero, Error, TEXT("AnimationBlueprint is null for base model %s"), *CharacterData.BaseModelId);
+				return;
+			}
+			
+			MasterPoseComponent->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+			MasterPoseComponent->SetAnimClass(AnimationConfig.AnimationBlueprint);
+		}
+
+		UE_LOG(LogPlayerZero, Log, TEXT("Asset loaded in %f seconds"), FPlatformTime::Seconds() - LoadingStartTime);
 		return;
 	}
-	// TODO cleanup
-	// // Remove components by type, or remove all if AssetType is empty or it's a new base model
-	// if (AssetType.IsEmpty() || AssetType == FAssetApi::CharacterStyleAssetType)
-	// {
-	// 	RemoveAllMeshes();
-	// }
-	// else if (LoadedMeshComponentsByAssetType.Contains(AssetType))
-	// {
-	// 	TArray<USceneComponent*>& ComponentsToRemove = LoadedMeshComponentsByAssetType[AssetType];
-	// 	for (USceneComponent* ComponentToRemove : ComponentsToRemove)
-	// 	{
-	// 		if (ComponentToRemove)
-	// 		{
-	// 			ComponentToRemove->DestroyComponent();
-	// 			ComponentToRemove = nullptr;
-	// 		}
-	// 	}
-	// 	LoadedMeshComponentsByAssetType.Remove(AssetType);
-	// }
+	
+	UE_LOG(LogPlayerZero, Error, TEXT("Failed to load mesh components"));
 }
 
-void ARpmActor::RemoveAssetOfType(const FRpmAsset& Asset)
-{
-	CharacterData.Assets.Remove(Asset.Type);
-	RemoveMeshComponentsOfType(Asset.Type);
-}
 
 void APlayerZeroActor::RemoveAllMeshes()
 {
-	for (const auto& Pair : LoadedMeshComponentsByAssetType)
+	for (USceneComponent* ComponentToRemove : LoadedMeshComponents)
 	{
-		RemoveMeshComponents(Pair.Value);
-	}
-	LoadedMeshComponentsByAssetType.Empty();
-}
-
-<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
-TArray<USceneComponent*> APlayerZeroActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAsset, const FString& AssetType)
-=======
-void ARpmActor::RemoveMeshComponents(const TArray<USceneComponent*>& Components)
-{
-	for (USceneComponent* Component : Components)
-	{
-		if (Component)
+		if (ComponentToRemove)
 		{
-			Component->DestroyComponent();
-			Component = nullptr;
+			ComponentToRemove->DestroyComponent();
+			ComponentToRemove = nullptr;
 		}
 	}
+	LoadedMeshComponents.Empty();
 }
 
-TArray<USceneComponent*> ARpmActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAsset, const FString& AssetType)
->>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
+TArray<USceneComponent*> APlayerZeroActor::LoadMeshComponents(UglTFRuntimeAsset* GltfAsset)
 {
 	TArray<FglTFRuntimeNode> AllNodes = GltfAsset->GetNodes();
 	TArray<USceneComponent*> NewMeshComponents;
-	// TODO cleanup
-	// bool bIsMasterPoseUpdateRequired = AssetType == FAssetApi::CharacterStyleAssetType || AssetType.IsEmpty();
-	bool bIsMasterPoseUpdateRequired = false;
+	
+	bool bIsMasterPoseUpdateRequired = true;
 	// Loop through all nodes to create mesh components
 	for (const FglTFRuntimeNode& Node : AllNodes)
 	{

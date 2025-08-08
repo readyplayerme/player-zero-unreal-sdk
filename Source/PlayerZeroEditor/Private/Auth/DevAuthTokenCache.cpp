@@ -13,7 +13,6 @@ void FDevAuthTokenCache::Initialize()
 		AuthData.Name = FEditorCache::GetString(CacheKeyName, FString());
 		AuthData.Token = FEditorCache::GetString(CacheKeyToken, FString());
 		AuthData.RefreshToken = FEditorCache::GetString(CacheKeyRefreshToken, FString());
-		AuthData.IsDemo = FEditorCache::GetBool(CacheKeyIsDemo, false);
 
 		if (!AuthData.IsValid())
 		{
@@ -37,7 +36,6 @@ void FDevAuthTokenCache::SetAuthData(const FDeveloperAuth& DevAuthData)
 	FEditorCache::SetString( CacheKeyName, AuthData.Name);
 	FEditorCache::SetString( CacheKeyToken, AuthData.Token);
 	FEditorCache::SetString( CacheKeyRefreshToken, AuthData.RefreshToken);
-	FEditorCache::SetBool( CacheKeyIsDemo, AuthData.IsDemo);
 }
 
 void FDevAuthTokenCache::ClearAuthData()
@@ -46,5 +44,4 @@ void FDevAuthTokenCache::ClearAuthData()
 	FEditorCache::RemoveKey(CacheKeyName);
 	FEditorCache::RemoveKey(CacheKeyToken);
 	FEditorCache::RemoveKey(CacheKeyRefreshToken);
-	FEditorCache::RemoveKey(CacheKeyIsDemo);
 }

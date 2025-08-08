@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "glTFRuntimeAsset.h"
 #include "PlayerZeroCharacterTypes.h"
-#include "PlayerZeroLoaderComponent.h"
 #include "PlayerZeroActor.generated.h"
 
 /**
@@ -28,24 +27,12 @@ public:
 	FPlayerZeroAnimationConfig AnimationConfig;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Player Zero")
-	TMap<FString, FPlayerZeroAnimationConfig> AnimationConfigsByBaseModelId;
-=======
-	/** Default constructor for ARpmActor. Initializes the actor and sets the root component. */
-	ARpmActor();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Ready Player Me")
-	FRpmAnimationConfig AnimationConfig;
+	TMap<FString, FPlayerZeroAnimationConfig> AnimationConfigsByStyleId;
 
-	/** A map of animation configurations associated with base model IDs. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Ready Player Me")
-	TMap<FString, FRpmAnimationConfig> AnimationConfigsByCharacterStyleId;
->>>>>>> origin/develop:Source/RpmNextGen/Public/RpmActor.h
-
-	/** Configuration settings for loading static meshes from glTF assets. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Ready Player Me|Glb Import Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Player Zero|Glb Import Settings")
 	FglTFRuntimeStaticMeshConfig StaticMeshConfig;
 
-	/** Configuration settings for loading skeletal meshes from glTF assets. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Ready Player Me|Glb Import Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Player Zero|Glb Import Settings")
 	FglTFRuntimeSkeletalMeshConfig SkeletalMeshConfig;
 
 <<<<<<< HEAD:Source/PlayerZero/Public/PlayerZeroActor.h
@@ -53,44 +40,11 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Player Zero")
 	virtual void LoadCharacter(const FPlayerZeroCharacterData& InCharacterData, UglTFRuntimeAsset* GltfAsset);
-
-	UFUNCTION(BlueprintCallable, Category = "Player Zero")
-	virtual void LoadAsset(const FAsset& Asset, UglTFRuntimeAsset* GltfAsset );
 	
-	UFUNCTION(BlueprintCallable, Category = "Player Zero")
-	virtual void LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FAsset& Asset, const FPlayerZeroAnimationConfig& InAnimationCharacter);
-
 	UFUNCTION(BlueprintCallable, Category = "Player Zero")
 	void RemoveAllMeshes();
 	
-	UFUNCTION(BlueprintCallable, Category = "Player Zero")
-=======
-	/** Data related to the character being loaded, such as base model ID. */
-	FRpmCharacterData CharacterData;
-
-	/**
-	 * @brief Loads a character using the provided character data and glTF asset.
-	 * 
-	 * This function sets the character data, retrieves animation configurations based on the base model ID, 
-	 * and loads the skeletal mesh or static mesh components for the character.
-	 * 
-	 * @param InCharacterData Struct containing character-specific data like the base model ID.
-	 * @param GltfAsset The glTF runtime asset used to load character mesh and skeleton.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void LoadCharacter(const FRpmCharacterData& InCharacterData, UglTFRuntimeAsset* GltfAsset);
-	
-	/**
-	 * @brief Loads a glTF asset and applies a skeleton configuration to the actor.
-	 * 
-	 * This function is used when loading a glTF asset with an associated skeleton and animation configuration.
-	 * 
-	 * @param GltfAsset The glTF asset containing the skeletal mesh.
-	 * @param Asset The asset containing data related to the skeletal mesh to be loaded.
-	 * @param InAnimationCharacter The animation configuration for the character.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Ready Player Me")
-	virtual void LoadGltfAssetWithSkeleton(UglTFRuntimeAsset* GltfAsset, const FRpmAsset& Asset, const FRpmAnimationConfig& InAnimationCharacter);
+	virtual void Tick(float DeltaTime) override;
 
 	/**
 	 * @brief Removes all mesh components attached to the actor.
@@ -133,33 +87,14 @@ protected:
 	{
 		return MakeUniqueObjectName(this, T::StaticClass(), *Node.Name);
 	}
-
+	
 private:
-	/** The root component of the actor, used to attach mesh components. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Ready Player Me")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Player Zero")
 	USceneComponent* AssetRoot;
 
-	/** A map storing arrays of mesh components, categorized by asset type (e.g., base model, clothing). */
-	TMap<FString, TArray<USceneComponent*>> LoadedMeshComponentsByAssetType;
-
-	/**
-	 * @brief Loads mesh components from a glTF asset.
-	 * 
-	 * This function processes the nodes in a glTF asset and creates skeletal or static mesh components accordingly.
-	 * 
-	 * @param GltfAsset The glTF runtime asset containing the mesh data.
-	 * @param AssetType The type of asset being loaded (e.g., base model or clothing).
-	 * @return An array of scene components that were created from the glTF asset.
-	 */
-	TArray<USceneComponent*> LoadMeshComponents(UglTFRuntimeAsset* GltfAsset, const FString& AssetType);
-
-	/**
-	 * @brief Creates a skeletal mesh component based on the node in the glTF asset.
-	 * 
-	 * @param GltfAsset The glTF runtime asset containing the skeletal mesh.
-	 * @param Node The node in the glTF asset that corresponds to the skeletal mesh.
-	 * @return A pointer to the newly created skeletal mesh component.
-	 */
+	TArray<USceneComponent*> LoadedMeshComponents;
+	
+	TArray<USceneComponent*> LoadMeshComponents(UglTFRuntimeAsset* GltfAsset);
 	USkeletalMeshComponent* CreateSkeletalMeshComponent(UglTFRuntimeAsset* GltfAsset, const FglTFRuntimeNode& Node);
 
 	/**

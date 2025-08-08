@@ -5,84 +5,42 @@
 #include "Interfaces/IHttpResponse.h"
 #include "Api/Auth/Models/RefreshTokenRequest.h"
 #include "Api/Auth/Models/RefreshTokenResponse.h"
+#include "Api/Common/WebApiHelpers.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
 
 FAuthApi::FAuthApi()
 {
 	const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
 	ApiUrl = FString::Printf(TEXT("%s/refresh"), *PlayerZeroSettings->ApiBaseAuthUrl);
-	OnRequestComplete.BindRaw(this, &FAuthApi::OnProcessComplete);
-=======
-﻿
-#include "Api/Auth/AuthApi.h"
-#include "Api/Auth/Models/CreateUserResponse.h"
-#include "Api/Auth/Models/LoginWithCodeResponse.h"
-#include "Api/Auth/Models/RefreshTokenResponse.h"
-#include "Settings/RpmDeveloperSettings.h"
-// ReSharper disable All
-#include "Api/Auth/Models/RefreshTokenRequest.h"
-#include "Api/Auth/Models/SendLoginCodeRequest.h"
-#include "Api/Auth/Models/LoginWithCodeRequest.h"
-#include "Api/Auth/Models/CreateUserRequest.h"
-// ReSharper restore All
-
-FAuthApi::FAuthApi()
-{
-	RpmSettings = GetDefault<URpmDeveloperSettings>();
->>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Auth/AuthApi.cpp
 }
 
-void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request, FOnRefreshTokenResponse OnComplete)
+void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request, FOnRefreshTokenResponse OnComplete )
 {
 	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
 	ApiRequest->Url = FString::Printf(TEXT("%s/refresh"), *RpmSettings->ApiBaseAuthUrl);
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	ApiRequest->Payload = ConvertToJsonString(Request);
-	SendRequest<FRefreshTokenResponse>(ApiRequest, [OnComplete](TSharedPtr<FRefreshTokenResponse> Response, bool bWasSuccessful, int32 StatusCode)
-	{
-		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
-	});
-}
-
-void FAuthApi::SendLoginCode(const FSendLoginCodeRequest& Request, FOnSendLoginCodeResponse OnComplete)
-{
-	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
-	ApiRequest->Url = FString::Printf(TEXT("%s/v1/auth/request-login-code"), *RpmSettings->GetApiBaseUrl());
-	ApiRequest->Method = POST;
-	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	ApiRequest->Payload = ConvertToJsonString(Request);
-	// TODO confirm this works since this request has no return data
-	SendRequest<FApiResponse>(ApiRequest, [OnComplete](TSharedPtr<FApiResponse> Response, bool bWasSuccessful, int32 StatusCode)
-	{
-<<<<<<< HEAD:Source/PlayerZero/Private/Api/Auth/AuthApi.cpp
-		UE_LOG(LogPlayerZero, Error, TEXT("Invalid ApiRequest in FAuthApi::OnProcessComplete."));
-		return;
-	}
-
-	if (bWasSuccessful && Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FString Data = Response->GetContentAsString();
-		FRefreshTokenResponse TokenResponse;
-
-		if (!Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &TokenResponse, 0, 0))
+	ApiRequest->Payload = Request.ToJsonString();
+	TSharedPtr<FAuthApi> SharedThis = StaticCastSharedRef<FAuthApi>(AsShared());
+	ApiRequest->OnApiRequestComplete = FOnApiRequestComplete::CreateLambda(
+		[SharedThis, OnComplete](TSharedPtr<FApiRequest> Request, FHttpResponsePtr Response, bool bSuccess)
 		{
-			if (OnRefreshTokenResponse.IsBound())
+			if (SharedThis.IsValid() == false)
 			{
-				OnRefreshTokenResponse.ExecuteIfBound(ApiRequest, TokenResponse, true);
+				UE_LOG(LogPlayerZero, Warning, TEXT("FAuthApi is no longer valid when processing HTTP response to URL: %s"), *Request->Url);
+				return;
 			}
-			return;
-		}
-	}
+			FRefreshTokenResponse ParsedResponse;
+			if (bSuccess && TryParseJsonResponse(Response, ParsedResponse))
+			{
+				OnComplete.ExecuteIfBound(Request, ParsedResponse, true);
+				return;
+			}
 
-	UE_LOG(LogPlayerZero, Error, TEXT("Failed to refresh token"));
-	if (OnRefreshTokenResponse.IsBound())
-	{
-		OnRefreshTokenResponse.ExecuteIfBound(ApiRequest, FRefreshTokenResponse(), false);
-	}
-=======
-		OnComplete.ExecuteIfBound(bWasSuccessful && Response.IsValid());
-	});
+			UE_LOG(LogPlayerZero, Warning, TEXT("Auth token refresh request failed."));
+			OnComplete.ExecuteIfBound(Request, FRefreshTokenResponse(), false);
+		});
+	DispatchRaw(ApiRequest);
 }
 
 void FAuthApi::LoginWithCode(const FLoginWithCodeRequest& Request, FOnLoginWithCodeResponse OnComplete)

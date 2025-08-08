@@ -1,23 +1,25 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
-#include "Api/Assets/Models/RpmAsset.h"
 #include "Engine/Texture2D.h"
 
-class FAssetIconLoader;
+class FFileApi;
+struct FFileData;
+
+DECLARE_DELEGATE_OneParam(FOnTextureLoaded, UTexture2D*);
 
 class PLAYERZERO_API FPlayerZeroTextureLoader : public TSharedFromThis<FPlayerZeroTextureLoader>
 {
 public:
 
 	FPlayerZeroTextureLoader();
-	DECLARE_DELEGATE_OneParam(FOnTextureLoaded, UTexture2D*);
 	
-	void LoadIconFromAsset(const FRpmAsset& Asset);
+	void LoadIconFromUrl(const FString& Url);
 	UFUNCTION()
-	void OnIconLoaded(const FRpmAsset& Asset, const TArray<unsigned char>& Array);
+	void OnIconLoaded(const FFileData& File, const TArray<unsigned char>& Array);
 
 	FOnTextureLoaded OnTextureLoaded;
 private:
-	TSharedPtr<FAssetIconLoader> AssetIconLoader;
+	TSharedPtr<FFileApi> FileApi;
+	
 };
