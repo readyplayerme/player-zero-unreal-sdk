@@ -1,9 +1,8 @@
-#include "Auth/DeveloperAuthApi.h"
+﻿#include "Auth/DeveloperAuthApi.h"
 
 #include "Api/Common/WebApiHelpers.h"
 #include "Auth/Models/DeveloperLoginRequest.h"
 #include "Auth/Models/DeveloperLoginResponse.h"
-<<<<<<< HEAD:Source/PlayerZeroEditor/Private/Auth/DeveloperAuthApi.cpp
 #include "Interfaces/IHttpResponse.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
 

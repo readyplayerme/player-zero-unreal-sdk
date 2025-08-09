@@ -9,12 +9,8 @@
 #include "DeveloperAccounts/Models/ApplicationListResponse.h"
 #include "DeveloperAccounts/Models/OrganizationListRequest.h"
 #include "DeveloperAccounts/Models/OrganizationListResponse.h"
-<<<<<<< HEAD:Source/PlayerZeroEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
 #include "Interfaces/IHttpResponse.h"
 #include "Settings/PlayerZeroDeveloperSettings.h"
-=======
-#include "Settings/RpmDeveloperSettings.h"
->>>>>>> origin/develop:Source/RpmNextGenEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
 
 FDeveloperAccountApi::FDeveloperAccountApi()
 {
@@ -146,11 +142,6 @@ void FDeveloperAccountApi::ListApplicationsAsync(const FApplicationListRequest& 
     const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
     ApiBaseUrl = PlayerZeroSettings->GetApiBaseUrl();
     const FString QueryString = BuildQueryString(Request.Params);
-=======
-    const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
-    ApiBaseUrl = RpmSettings->GetApiBaseUrl();
-    const FString QueryString = BuildQueryString(Request->Params);
->>>>>>> origin/develop:Source/RpmNextGenEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
     const FString Url = FString::Printf(TEXT("%s/v1/applications%s"), *ApiBaseUrl, *QueryString);
     TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
     ApiRequest->Url = Url;
@@ -162,18 +153,12 @@ void FDeveloperAccountApi::ListApplicationsAsync(const FApplicationListRequest& 
     DispatchRawWithDevToken(ApiRequest);
 }
 
-void FDeveloperAccountApi::ListOrganizationsAsync(TSharedPtr<FOrganizationListRequest> Request, FOnOrganizationListResponse OnComplete)
+void FDeveloperAccountApi::ListOrganizationsAsync(const FOrganizationListRequest& Request)
 {
     // TODO find better way to get settings (or move to editor only code)
-<<<<<<< HEAD:Source/PlayerZeroEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
     const UPlayerZeroDeveloperSettings* PlayerZeroSettings = GetDefault<UPlayerZeroDeveloperSettings>();
     ApiBaseUrl = PlayerZeroSettings->GetApiBaseUrl();
     const FString QueryString = BuildQueryString(Request.Params);
-=======
-    const URpmDeveloperSettings* RpmSettings = GetDefault<URpmDeveloperSettings>();
-    ApiBaseUrl = RpmSettings->GetApiBaseUrl();
-    const FString QueryString = BuildQueryString(Request->Params);
->>>>>>> origin/develop:Source/RpmNextGenEditor/Private/DeveloperAccounts/DeveloperAccountApi.cpp
     const FString Url = FString::Printf(TEXT("%s/v1/organizations%s"), *ApiBaseUrl, *QueryString);
     TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
     ApiRequest->Url = Url;
@@ -192,9 +177,10 @@ void FDeveloperAccountApi::HandleAppListResponse(TSharedPtr<FApiRequest> ApiRequ
     FString Data = Response->GetContentAsString();
     if (bWasSuccessful && !Data.IsEmpty() && FJsonObjectConverter::JsonObjectStringToUStruct(Data, &ApplicationListResponse, 0, 0))
     {
-        //UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed "));
-        OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
-    });
+        OnApplicationListResponse.ExecuteIfBound(ApplicationListResponse, true);
+        return;
+    }
+    OnApplicationListResponse.ExecuteIfBound(ApplicationListResponse, false);
 }
 
 void FDeveloperAccountApi::HandleOrgListResponse(TSharedPtr<FApiRequest> ApiRequest, FHttpResponsePtr Response, bool bWasSuccessful)
@@ -210,6 +196,10 @@ void FDeveloperAccountApi::HandleOrgListResponse(TSharedPtr<FApiRequest> ApiRequ
             return;
         }
     }
+
+    OnOrganizationResponse.ExecuteIfBound(OrganizationListResponse, false);
+}
+
 
 FString FDeveloperAccountApi::BuildQueryString(const TMap<FString, FString>& Params)
 {

@@ -1,4 +1,5 @@
-// Copyright Ready Player Me
+// Fill out your copyright notice in the Description page of Project Settings.
+
 
 #include "PlayerZeroActor.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -95,20 +96,13 @@ TArray<USceneComponent*> APlayerZeroActor::LoadMeshComponents(UglTFRuntimeAsset*
 			USkeletalMeshComponent* SkeletalMeshComponent = CreateSkeletalMeshComponent(GltfAsset, Node);
 			if(bIsMasterPoseUpdateRequired)
 			{
-<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 				UE_LOG( LogPlayerZero, Log, TEXT("Setting master pose component"));
-=======
->>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp
 				MasterPoseComponent = SkeletalMeshComponent;
 				NewMeshComponents.Add(SkeletalMeshComponent);
 				bIsMasterPoseUpdateRequired = false;
 				continue;
 			}
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
-			SkeletalMeshComponent->SetLeaderPoseComponent(MasterPoseComponent.Get());
-#else
 			SkeletalMeshComponent->SetMasterPoseComponent(MasterPoseComponent.Get());
-#endif
 			NewMeshComponents.Add(SkeletalMeshComponent);
 		}
 		else
@@ -125,7 +119,7 @@ USkeletalMeshComponent* APlayerZeroActor::CreateSkeletalMeshComponent(UglTFRunti
 	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
 
 	if (SkeletalMeshConfig.bPerPolyCollision)
-	{              
+	{
 		SkeletalMeshComponent = NewObject<UglTFRuntimeSkeletalMeshComponent>(this, GetSafeNodeName<UglTFRuntimeSkeletalMeshComponent>(Node));
 		SkeletalMeshComponent->bEnablePerPolyCollision = true;
 		SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -136,11 +130,6 @@ USkeletalMeshComponent* APlayerZeroActor::CreateSkeletalMeshComponent(UglTFRunti
 	}
 
 	USkeletalMesh* SkeletalMesh = GltfAsset->LoadSkeletalMesh(Node.MeshIndex, Node.SkinIndex, SkeletalMeshConfig);
-	if (!SkeletalMesh)
-	{
-		UE_LOG(LogReadyPlayerMe, Error, TEXT("Failed to load skeletal mesh for node %s"), *Node.Name);
-		return nullptr;
-	}
 	SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
 	SkeletalMeshComponent->SetupAttachment(AssetRoot);
 	SkeletalMeshComponent->SetRelativeTransform(Node.Transform);
@@ -178,11 +167,8 @@ UStaticMeshComponent* APlayerZeroActor::CreateStaticMeshComponent(UglTFRuntimeAs
 	
 	return StaticMeshComponent;
 }
-<<<<<<< HEAD:Source/PlayerZero/Private/PlayerZeroActor.cpp
 
 void APlayerZeroActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
-=======
->>>>>>> origin/develop:Source/RpmNextGen/Private/RpmActor.cpp

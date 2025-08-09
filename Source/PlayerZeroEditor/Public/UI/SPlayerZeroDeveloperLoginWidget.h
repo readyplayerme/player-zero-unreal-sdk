@@ -1,4 +1,4 @@
-// Copyright Ready Player Me
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,11 +14,6 @@ class FPlayerZeroTextureLoader;
 struct FDeveloperLoginResponse;
 class UPlayerZeroDeveloperSettings;
 class UDeveloperAuthApi;
-=======
-class SDeveloperSettingsPanel;
-class SDeveloperLoginPanel;
-class URpmDeveloperSettings;
->>>>>>> origin/develop:Source/RpmNextGenEditor/Public/UI/SRpmDeveloperLoginWidget.h
 class SEditableTextBox;
 
 /**
@@ -35,13 +30,8 @@ public:
 
 
 	void Construct(const FArguments& InArgs);
-<<<<<<< HEAD:Source/PlayerZeroEditor/Public/UI/SPlayerZeroDeveloperLoginWidget.h
 	virtual ~SPlayerZeroDeveloperLoginWidget() override;
 
-=======
-	virtual ~SRpmDeveloperLoginWidget() override;
-	
->>>>>>> origin/develop:Source/RpmNextGenEditor/Public/UI/SRpmDeveloperLoginWidget.h
 private:
 	void HandleLogin(const FString& String);
 	void HandleLogout();

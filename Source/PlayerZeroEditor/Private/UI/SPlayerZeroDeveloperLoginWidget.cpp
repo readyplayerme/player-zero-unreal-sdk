@@ -3,9 +3,6 @@
 #include "UI/SPlayerZeroDeveloperLoginWidget.h"
 #include "Auth/DevAuthTokenCache.h"
 #include "PlayerZero.h"
-=======
-#include "RpmNextGen.h"
->>>>>>> origin/develop:Source/RpmNextGenEditor/Private/UI/SRpmDeveloperLoginWidget.cpp
 #include "SlateOptMacros.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Auth/Models/DeveloperAuth.h"

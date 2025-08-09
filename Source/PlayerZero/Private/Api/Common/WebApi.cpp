@@ -1,29 +1,31 @@
-#include "Api/Common/WebApi.h"
-<<<<<<< HEAD:Source/PlayerZero/Private/Api/Common/WebApi.cpp
+﻿#include "Api/Common/WebApi.h"
 #include "HttpModule.h"
 #include "PlayerZero.h"
 #include "Interfaces/IHttpResponse.h"
-=======
->>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Common/WebApi.cpp
 
 FWebApi::FWebApi()
 {
-    HttpModule = &FHttpModule::Get();
+    Http = &FHttpModule::Get();
 }
 
 FWebApi::~FWebApi()
 {
-    CancelAllRequests();
+    
 }
 
-void FWebApi::CancelAllRequests()
+void FWebApi::DispatchRaw(TSharedPtr<FApiRequest> ApiRequest)
 {
-    for (const auto& Request : ActiveRequests)
+    TSharedPtr<IHttpRequest> Request = Http->CreateRequest();
+    FString Url = ApiRequest->Url + BuildQueryString(ApiRequest->QueryParams);
+    Request->SetURL(Url);
+    Request->SetVerb(ApiRequest->GetVerb());
+    Request->SetTimeout(10);
+    FString Headers;
+    for (const auto& Header : ApiRequest->Headers)
     {
-        Request->OnProcessRequestComplete().Unbind();
-        Request->CancelRequest();
+        Request->SetHeader(Header.Key, Header.Value);
+        Headers.Append(FString::Printf(TEXT("%s: %s\n"), *Header.Key, *Header.Value));
     }
-<<<<<<< HEAD:Source/PlayerZero/Private/Api/Common/WebApi.cpp
 
     if (!ApiRequest->Payload.IsEmpty() && ApiRequest->Method != ERequestMethod::GET)
     {

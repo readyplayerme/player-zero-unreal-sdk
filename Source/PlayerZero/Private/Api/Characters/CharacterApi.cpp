@@ -1,5 +1,4 @@
 #include "Api/Characters/CharacterApi.h"
-<<<<<<< HEAD:Source/PlayerZero/Private/Api/Characters/CharacterApi.cpp
 #include "HttpModule.h"
 #include "PlayerZero.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"

@@ -1,14 +1,10 @@
-// Copyright Ready Player Me
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
 #include "PlayerZeroDeveloperSettings.generated.h"
-
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1)
-class FObjectPreSaveContext;
-#endif
 
 /**
  * 

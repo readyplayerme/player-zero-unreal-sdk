@@ -1,6 +1,5 @@
 #include "Api/Files/FileApi.h"
 #include "HttpModule.h"
-<<<<<<< HEAD:Source/PlayerZero/Private/Api/Files/FileApi.cpp
 #include "PlayerZero.h"
 #include "Api/Files/Models/FileData.h"
 #include "Interfaces/IHttpResponse.h"

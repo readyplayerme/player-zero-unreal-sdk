@@ -10,15 +10,10 @@ DECLARE_DELEGATE_TwoParams(FOnCharacterFindResponse, FCharacterFindByIdResponse,
 
 class PLAYERZERO_API FCharacterApi : public FWebApi
 {
-=======
-class RPMNEXTGEN_API FCharacterApi : public FWebApiWithAuth
-{	
->>>>>>> origin/develop:Source/RpmNextGen/Public/Api/Characters/CharacterApi.h
 public:
 	
 	FCharacterApi();
 	virtual ~FCharacterApi() override;
-	void FindByIdAsync(TSharedPtr<FCharacterFindByIdRequest> Request, FOnCharacterFindResponse OnComplete);
 
 	void FindByIdAsync(const FCharacterFindByIdRequest& Request, FOnCharacterFindResponse OnComplete);
 
@@ -29,3 +24,11 @@ protected:
 private:
 	FString BaseUrl;
 };
+
+template <typename T>
+FString FCharacterApi::ConvertToJsonString(const T& Data)
+{
+	FString JsonString;
+	FJsonObjectConverter::UStructToJsonObjectString(Data, JsonString);
+	return JsonString;
+}

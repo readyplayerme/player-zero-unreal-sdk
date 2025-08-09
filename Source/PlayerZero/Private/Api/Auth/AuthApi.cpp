@@ -1,4 +1,3 @@
-<<<<<<< HEAD:Source/PlayerZero/Private/Api/Auth/AuthApi.cpp
 ﻿#include "Api/Auth/AuthApi.h"
 
 #include "PlayerZero.h"
@@ -16,8 +15,8 @@ FAuthApi::FAuthApi()
 
 void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request, FOnRefreshTokenResponse OnComplete )
 {
-	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
-	ApiRequest->Url = FString::Printf(TEXT("%s/refresh"), *RpmSettings->ApiBaseAuthUrl);
+	TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
+	ApiRequest->Url = ApiUrl;
 	ApiRequest->Method = POST;
 	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 	ApiRequest->Payload = Request.ToJsonString();
@@ -41,31 +40,4 @@ void FAuthApi::RefreshToken(const FRefreshTokenRequest& Request, FOnRefreshToken
 			OnComplete.ExecuteIfBound(Request, FRefreshTokenResponse(), false);
 		});
 	DispatchRaw(ApiRequest);
-}
-
-void FAuthApi::LoginWithCode(const FLoginWithCodeRequest& Request, FOnLoginWithCodeResponse OnComplete)
-{
-	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
-	ApiRequest->Url = FString::Printf(TEXT("%s/v1/auth/login"), *RpmSettings->GetApiBaseUrl());
-	ApiRequest->Method = POST;
-	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	ApiRequest->Payload = ConvertToJsonString(Request);
-	SendRequest<FLoginWithCodeResponse>(ApiRequest, [OnComplete](TSharedPtr<FLoginWithCodeResponse> Response, bool bWasSuccessful, int32 StatusCode)
-	{
-		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
-	});
-}
-
-void FAuthApi::CreateUser(const FCreateUserRequest& Request, FOnCreateUserResponse OnComplete)
-{
-	const TSharedPtr<FApiRequest> ApiRequest = MakeShared<FApiRequest>();
-	ApiRequest->Url = FString::Printf(TEXT("%s/v1/users"), *RpmSettings->GetApiBaseUrl());
-	ApiRequest->Method = POST;
-	ApiRequest->Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
-	ApiRequest->Payload = ConvertToJsonString(Request);
-	SendRequest<FCreateUserResponse>(ApiRequest, [OnComplete](TSharedPtr<FCreateUserResponse> Response, bool bWasSuccessful, int32 StatusCode)
-	{
-		OnComplete.ExecuteIfBound(Response, bWasSuccessful && Response.IsValid());
-	});
->>>>>>> origin/develop:Source/RpmNextGen/Private/Api/Auth/AuthApi.cpp
 }

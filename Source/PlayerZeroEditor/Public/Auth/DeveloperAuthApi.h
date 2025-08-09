@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Api/Common/WebApi.h"
@@ -6,7 +6,7 @@
 struct FDeveloperLoginResponse;
 struct FDeveloperLoginRequest;
 
-DECLARE_DELEGATE_TwoParams(FOnDeveloperLoginResponse, TSharedPtr<FDeveloperLoginResponse>, bool);
+DECLARE_DELEGATE_TwoParams(FOnDeveloperLoginResponse, const FDeveloperLoginResponse&, bool);
 
 class PLAYERZEROEDITOR_API FDeveloperAuthApi : public FWebApi
 {

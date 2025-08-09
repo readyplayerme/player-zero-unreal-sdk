@@ -10,8 +10,8 @@ struct FOrganizationListRequest;
 struct FApplicationListResponse;
 struct FApplicationListRequest;
 
-DECLARE_DELEGATE_TwoParams(FOnApplicationListResponse, TSharedPtr<FApplicationListResponse>, bool);
-DECLARE_DELEGATE_TwoParams(FOnOrganizationListResponse, TSharedPtr<FOrganizationListResponse>, bool);
+DECLARE_DELEGATE_TwoParams(FOnApplicationListResponse, const FApplicationListResponse&, bool);
+DECLARE_DELEGATE_TwoParams(FOnOrganizationListResponse, const FOrganizationListResponse&, bool);
 
 class PLAYERZEROEDITOR_API FDeveloperAccountApi : public FWebApi
 {
