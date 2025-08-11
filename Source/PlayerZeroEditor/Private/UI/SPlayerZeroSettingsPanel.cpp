@@ -239,38 +239,38 @@ void SPlayerZeroSettingsPanel::AddCharacterBlueprint(const FCharacterBlueprint& 
 				SAssignNew(ImageWidget, SImage).
 				DesiredSizeOverride(ImageSize)
 			]
-			+ SVerticalBox::Slot()
-			  .AutoHeight()
-			  .Padding(5, 5)
-			[
-				SNew(SBox)
-				.WidthOverride(100.0f)
-				[
-					SNew(SButton)
-					.HAlign(HAlign_Center)
-					.VAlign(VAlign_Center)
-					.Text(FText::FromString("Import"))
-					.OnClicked_Lambda([this, CharacterBlueprint]() -> FReply
-					{
-						//OnLoadCharacterStyleClicked(CharacterBlueprint);
-						return FReply::Handled();
-					})
-				]
-
-			]
 		]
 		+ SHorizontalBox::Slot()
 		  .AutoWidth()
 		  .VAlign(VAlign_Top)
 		  .Padding(10, 10, 0, 0)
 		[
-			SNew(SEditableText)
-			   .Text(FText::FromString(FString::Printf(TEXT("ID: %s"), *CharacterBlueprint.Id)))
-			   .IsReadOnly(true)
-			   .IsCaretMovedWhenGainFocus(false)
-			   .SelectAllTextWhenFocused(false)
-			   .MinDesiredWidth(100.0f)
+			SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+				  .AutoHeight()
+				  .HAlign(HAlign_Left)
+			[
+				SNew(SEditableText)
+				   .Text(FText::FromString(FString::Printf(TEXT("Name: %s"), *CharacterBlueprint.Name)))
+				   .IsReadOnly(true)
+				   .IsCaretMovedWhenGainFocus(false)
+				   .SelectAllTextWhenFocused(false)
+				   .MinDesiredWidth(100.0f)
+			]
+			+ SVerticalBox::Slot()
+				  .AutoHeight()
+				  .HAlign(HAlign_Left)
+			[
+				SNew(SEditableText)
+				   .Text(FText::FromString(FString::Printf(TEXT("ID: %s"), *CharacterBlueprint.Id)))
+				   .IsReadOnly(true)
+				   .IsCaretMovedWhenGainFocus(false)
+				   .SelectAllTextWhenFocused(false)
+				   .MinDesiredWidth(100.0f)
+			]
 		]
+
+		
 	];
 
 	TSharedPtr<FPlayerZeroTextureLoader> ImageLoader = MakeShared<FPlayerZeroTextureLoader>();
@@ -305,6 +305,10 @@ void SPlayerZeroSettingsPanel::HandleBlueprintListResponse(const FBlueprintListR
 		UE_LOG(LogPlayerZeroEditor, Log, TEXT("Blueprints listed successfully. Count: %d"), Response.Data.Num());
 		for (FCharacterBlueprint CharacterBlueprint : Response.Data)
 		{
+			if (LoadedBlueprints .Contains(CharacterBlueprint.Id))
+			{
+				continue;
+			}
 			LoadedBlueprints.Add(CharacterBlueprint.Id, CharacterBlueprint);
 			AddCharacterBlueprint(CharacterBlueprint);
 		}
@@ -348,7 +352,6 @@ void SPlayerZeroSettingsPanel::HandleApplicationListResponse(const FApplicationL
 	{
 		UE_LOG(LogPlayerZeroEditor, Error, TEXT("Failed to list applications"));
 	}
-	LoadBlueprintList();
 }
 
 void SPlayerZeroSettingsPanel::PopulateComboBoxItems(const TArray<FString>& Items, const FString ActiveItem)
