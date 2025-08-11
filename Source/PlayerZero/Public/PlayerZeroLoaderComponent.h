@@ -34,13 +34,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Player Zero")
 	void LoadAvatar( const FAvatarConfig& Config);
+
+	UFUNCTION(BlueprintCallable, Category = "Player Zero")
+	void ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* GltfAsset);
 	
 	void LogSkeletonCompatibility(USkeletalMesh* Mesh, USkeleton* ExpectedSkeleton);
 	
 protected:
 	virtual void BeginPlay() override;
-	
-private:
-	UFUNCTION()
-	void ReplaceMeshWithGltfAsset(UglTFRuntimeAsset* GltfAsset);
+
 };

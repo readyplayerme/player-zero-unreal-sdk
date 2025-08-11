@@ -242,12 +242,55 @@ The event passes the loaded SkeletalMeshComponent as a parameter.
 
 ---
 
-🧪 Sample Use Case
+## 📡 Async Actions in Player Zero SDK
 
-Want to let users customize their avatar via web and launch your game? Simply:
+The Player Zero SDK provides several async actions for loading and managing avatars in Unreal Engine. These actions can be used in Blueprints to handle various avatar-related tasks, such as loading an avatar, its image, metadata, or assets, and responding to success or failure events. Below are examples of how to use these async actions.
 
-- Pass the AvatarId to your game (e.g., via Steam deep link, or UI input).
-- Set it on the component.
-- Call Load Avatar.
+### 1. Loading Avatar Asset
 
-Done!
+<img width="328" height="188" alt="image" src="https://github.com/user-attachments/assets/2b3f416c-71ed-4d3f-a456-1a8980a17699" />
+
+Use this action to load an avatar from an avatar ID. It returns a UglTFRuntimeAsset which contains all the data needed to load the avatar. For example using the `UPlayerZeroLoaderComponent::ReplaceMeshWithGltfAsset`  function. 
+
+- **On Success:** OnCompleted event is triggered with the loaded asset (UglTFRuntimeAsset).
+- **On Failure:** OnFailed event is triggered if the load fails.
+
+Example Usage in Blueprint:
+
+<img width="1207" height="641" alt="Screenshot 2025-08-11 100244" src="https://github.com/user-attachments/assets/41a6b5c9-037e-4459-ab69-aa756ac12c38" />
+
+### 3. Loading Avatar Image
+
+<img width="942" height="582" alt="Screenshot 2025-08-11 100534" src="https://github.com/user-attachments/assets/1dfbd6a1-f472-45a9-ace4-be4b1ceaf132" />
+
+Use this action to asynchronously load an avatar's image as a `UTexture2D`.
+
+- **On Success:** OnCompleted is triggered with the loaded texture.
+- **On Failure:On Failure:** OnFailed is triggered if the image load fails.
+
+### 4. Loading Avatar Metadata
+
+<img width="403" height="180" alt="Screenshot 2025-08-11 100439" src="https://github.com/user-attachments/assets/8f60ad8a-7611-4e11-b43e-36afe2d7c1b3" />
+
+Use this action to load metadata for an avatar. This is useful for getting things like icon url, model url (.glb model) etc.
+
+- **On Success:** OnCompleted is triggered with the loaded metadata.
+- **On Failure:** OnFailed is triggered if the metadata load fails.
+
+
+### 6. Getting Avatar ID from Code
+
+<img width="451" height="235" alt="image" src="https://github.com/user-attachments/assets/642d4878-4742-4a60-aa1e-ee91c71c549b" />
+
+Use this action to get the Avatar ID from an avatar shortcode. 
+
+- **On Success:** OnCompleted is triggered with the Avatar ID.
+- **On Failure:** OnFailed is triggered if the shortcode is invalid.
+
+### 💡 Tips for Using Async Actions
+
+- **Ensure proper event handling:** Bind your success (OnCompleted) and failure (OnFailed) events to appropriate functions to handle different cases.
+- **Load asynchronously:** Use the async actions to load avatars, images, and data in the background, preventing UI freezes or lag during runtime.
+- **Optimize for performance:** For large avatar assets or images, consider preloading or loading in smaller chunks.
+
+

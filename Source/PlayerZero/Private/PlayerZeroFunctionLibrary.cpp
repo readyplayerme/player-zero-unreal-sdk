@@ -7,6 +7,11 @@
 
 FString UPlayerZeroFunctionLibrary::GetHotLoadedAvatarId(UObject* WorldContextObject)
 {
+	if (!WorldContextObject)
+	{
+		WorldContextObject = GEngine->GetWorldFromContextObjectChecked(WorldContextObject);
+	}
+
 	if (const UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject))
 	{
 		if (UPlayerZeroSubsystem* Subsystem = GameInstance->GetSubsystem<UPlayerZeroSubsystem>())
