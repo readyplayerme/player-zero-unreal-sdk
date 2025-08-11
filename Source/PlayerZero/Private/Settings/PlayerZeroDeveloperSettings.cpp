@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Settings/PlayerZeroDeveloperSettings.h"
+#include "UObject/ObjectSaveContext.h"
 
 UPlayerZeroDeveloperSettings::UPlayerZeroDeveloperSettings() : ApiBaseUrl(TEXT("https://api.readyplayer.me")), ApiBaseAuthUrl(TEXT("https://readyplayer.me/api/auth")), DefaultAvatarId((TEXT("688b3deec85bec2f31fd6d6d")))
 {
@@ -12,16 +13,15 @@ void UPlayerZeroDeveloperSettings::PostInitProperties()
 	Super::PostInitProperties();
 }
 
-void UPlayerZeroDeveloperSettings::PreSave(const ITargetPlatform* TargetPlatform)
+void UPlayerZeroDeveloperSettings::PreSave(FObjectPreSaveContext SaveContext)
 {
-	Super::PreSave(TargetPlatform);
+	Super::PreSave(SaveContext);
 
-	if(!ApplicationId.IsEmpty())
+	if (!ApplicationId.IsEmpty())
 	{
 		return;
 	}
-	
-	// Ensure settings are saved before the build
+
 	SaveConfig(CPF_Config, *GetDefaultConfigFilename());
 }
 

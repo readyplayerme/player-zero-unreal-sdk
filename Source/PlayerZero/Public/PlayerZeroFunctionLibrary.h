@@ -19,7 +19,7 @@ class PLAYERZERO_API UPlayerZeroFunctionLibrary : public UBlueprintFunctionLibra
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero")
+	UFUNCTION(BlueprintCallable, Category = "Player Zero")
 	static FString GetHotLoadedAvatarId(UObject* WorldContextObject);
 
 };

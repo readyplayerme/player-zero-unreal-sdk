@@ -22,7 +22,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAvatarMetaDataFailureBP OnFailed;
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
+	UFUNCTION(BlueprintCallable, Category = "Player Zero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
 	static ULoadAvatarMetaDataAsyncAction* LoadAvatarMetaDataAsync(UObject* WorldContextObject, const FString& AvatarId);
 
 	virtual void Activate() override;

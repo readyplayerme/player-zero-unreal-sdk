@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Api/Blueprints/Models/CharacterBlueprint.h"
+#include "DeveloperAccounts/Models/ApplicationListResponse.h"
 #include "Widgets/SCompoundWidget.h"
 
 struct FBlueprintListResponse;
@@ -15,7 +16,6 @@ class FRpmTextureLoader;
 struct FRpmAsset;
 class FAssetApi;
 struct FAssetListResponse;
-struct FApplication;
 
 DECLARE_DELEGATE(FOnLogout);
 
@@ -40,14 +40,14 @@ private:
 	TArray<TSharedPtr<FString>> ComboBoxItems;
 	TSharedPtr<STextBlock> SelectedApplicationTextBlock;
 	TArray<UTexture2D*> CharacterStyleTextures;
-	TArray<FApplication> ApplicationList;
+	TArray<FPlayerZeroApplication> ApplicationList;
 	TMap<FString, FCharacterBlueprint> LoadedBlueprints;
 	TArray<TSharedPtr<FPlayerZeroTextureLoader>> ActiveLoaders;
 	FString UserName;
 
 	void LoadBlueprintList();
 	void UpdateErrorMessage(const FString& Message);
-	void PopulateSettingsContent(TArray<FApplication> InApplicationList);
+	void PopulateSettingsContent(TArray<FPlayerZeroApplication> InApplicationList);
 	void SetApplicationIdFromEditorTool(const FString& NewApplicationId);
 	void OnTextureLoaded(UTexture2D* Texture2D, TSharedPtr<SImage> Image, TSharedPtr<FPlayerZeroTextureLoader> RpmTextureLoader);
 	void AddCharacterBlueprint(const FCharacterBlueprint& CharacterBlueprint);

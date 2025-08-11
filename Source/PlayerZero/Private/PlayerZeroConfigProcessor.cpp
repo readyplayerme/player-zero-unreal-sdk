@@ -3,7 +3,7 @@
 #include "AvatarRenderConfig.h"
 #include "Utilities/PluginInfo.h"
 #include "PlayerZeroCharacterTypes.h"
-#include "CharacterLoaderConfig.h"
+#include "AvatarConfig.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Utilities/MorphTargetUtilities.h"
 
@@ -119,7 +119,7 @@ namespace
 	}
 }
 
-FString FPlayerZeroConfigProcessor::ProcessCharacter(const FCharacterConfig& Config)
+FString FPlayerZeroConfigProcessor::ProcessCharacter(const FAvatarConfig& Config)
 {
 	const bool UseDraco = FPluginInfo::IsDracoPluginIncluded() && Config.bUseDracoMeshCompression;
 	const FString MorphTargetsParam = ProcessMorphTargets(Config.MorphTargetGroups, Config.MorphTargets);

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerZero.h"
 #include "FileData.generated.h"
 
 UENUM(BlueprintType)
@@ -57,7 +58,7 @@ struct PLAYERZERO_API FFileData
 		else
 		{
 			FileType = EFileType::None;
-			UE_LOG(LogTemp, Error, TEXT("Unable to determine file type for URL: %s"), *InUrl);
+			UE_LOG(LogPlayerZero, Error, TEXT("Unable to determine file type for URL: %s"), *InUrl);
 		}
 		
 		if (Name.IsEmpty())

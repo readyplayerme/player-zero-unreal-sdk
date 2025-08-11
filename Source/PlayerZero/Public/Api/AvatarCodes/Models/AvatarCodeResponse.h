@@ -9,10 +9,10 @@ struct PLAYERZERO_API FAvatarCodeData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadOnly, Category = "PlayerZero|AvatarCode")
+	UPROPERTY(BlueprintReadOnly, Category = "Player Zero|Avatar Codes")
 	FString AvatarId;
 	
-	UPROPERTY(BlueprintReadOnly, Category = "PlayerZero|AvatarCode")
+	UPROPERTY(BlueprintReadOnly, Category = "Player Zero|Avatar Codes")
 	FString Code;
 	
 };
@@ -22,6 +22,6 @@ struct PLAYERZERO_API FAvatarCodeResponse : public FApiResponse
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadOnly, Category = "PlayerZero|AvatarCode")
+	UPROPERTY(BlueprintReadOnly, Category = "Player Zero|Avatar Codes")
 	FAvatarCodeData Data;
 };

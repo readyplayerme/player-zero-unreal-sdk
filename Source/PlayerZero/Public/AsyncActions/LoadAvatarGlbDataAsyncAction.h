@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CharacterLoaderConfig.h"
+#include "AvatarConfig.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "LoadAvatarGlbDataAsyncAction.generated.h"
 
@@ -22,15 +22,15 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAvatarDataDownloadFailureBP OnFailed;
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true", AutoCreateRefTerm = "CharacterConfig"))
-	static ULoadAvatarGlbDataAsyncAction* LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url, const FCharacterConfig& CharacterConfig = FCharacterConfig());
+	UFUNCTION(BlueprintCallable, Category = "Player Zero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true", AutoCreateRefTerm = "CharacterConfig"))
+	static ULoadAvatarGlbDataAsyncAction* LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url, const FAvatarConfig& CharacterConfig = FAvatarConfig());
 
 	virtual void Activate() override;
 
 private:
 	FString CachedUrl;
 	UObject* ContextObject;
-	FCharacterConfig CharacterConfig;
+	FAvatarConfig CharacterConfig;
 	
 	void OnDataDownloaded(const TArray<uint8>& Data);
 };

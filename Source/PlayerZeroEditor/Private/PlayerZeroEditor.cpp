@@ -7,7 +7,9 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
+#include "Settings/ProjectPackagingSettings.h"
 #include "UI/LoginWindowStyle.h"
+#include "UI/PlayerZeroDeveloperSettingsCustomization.h"
 
 static const FName DeveloperWindowName("LoginWindow");
 static const FName LoaderWindowName("LoaderWindow");
@@ -15,8 +17,26 @@ static const FName CacheWindowName("CacheGeneratorWindow");
 #define LOCTEXT_NAMESPACE "PlayerZeroEditorModule"
 DEFINE_LOG_CATEGORY(LogPlayerZeroEditor);
 
+namespace
+{
+	void AddGLTFRuntimeToCookingDirectories()
+	{
+		UProjectPackagingSettings* PackagingSetting = GetMutableDefault<UProjectPackagingSettings>();
+		if (!PackagingSetting->DirectoriesToAlwaysCook.ContainsByPredicate([](const auto& Item){ return Item.Path == "/ReadyPlayerMe/glTFRuntime";} ))
+		{
+			PackagingSetting->DirectoriesToAlwaysCook.Add(FDirectoryPath{"/glTFRuntime"});
+#if ENGINE_MAJOR_VERSION > 4
+			PackagingSetting->TryUpdateDefaultConfigFile();
+#else
+			PackagingSetting->UpdateDefaultConfigFile();
+#endif
+		}
+	}
+}
+
 void FPlayerZeroEditorModule::StartupModule()
 {
+	AddGLTFRuntimeToCookingDirectories();
 	FLoginWindowStyle::Initialize();
 	FLoginWindowStyle::ReloadTextures();
 
@@ -34,6 +54,13 @@ void FPlayerZeroEditorModule::StartupModule()
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(DeveloperWindowName, FOnSpawnTab::CreateRaw(this, &FPlayerZeroEditorModule::OnSpawnPluginTab))
 		.SetDisplayName(LOCTEXT("DeveloperLoginWidget", "Player Zero"))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
+
+	FPropertyEditorModule& PropertyEditor = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+	PropertyEditor.RegisterCustomClassLayout(
+		"PlayerZeroDeveloperSettings",
+		FOnGetDetailCustomizationInstance::CreateStatic(&FPlayerZeroDeveloperSettingsCustomization::MakeInstance)
+	);
 }
 
 void FPlayerZeroEditorModule::RegisterMenus()
@@ -81,6 +108,12 @@ void FPlayerZeroEditorModule::ShutdownModule()
 
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(DeveloperWindowName);
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(CacheWindowName);
+
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& PropertyEditor = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		PropertyEditor.UnregisterCustomClassLayout("PlayerZeroDeveloperSettings");
+	}
 }
 
 TSharedRef<SDockTab> FPlayerZeroEditorModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)

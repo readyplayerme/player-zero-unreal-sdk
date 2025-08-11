@@ -3,7 +3,7 @@
 #include "AsyncActions/LoadAvatarAssetAsyncAction.h"
 #include "Subsystems/PlayerZeroSubsystem.h"
 
-ULoadAvatarAssetAsyncAction* ULoadAvatarAssetAsyncAction::LoadAvatarAssetAsync(UObject* WorldContextObject, const FString& AvatarId, const FCharacterConfig& CharacterConfig)
+ULoadAvatarAssetAsyncAction* ULoadAvatarAssetAsyncAction::LoadAvatarAssetAsync(UObject* WorldContextObject, const FString& AvatarId, const FAvatarConfig& CharacterConfig)
 {
 	ULoadAvatarAssetAsyncAction* Node = NewObject<ULoadAvatarAssetAsyncAction>();
 	Node->CachedAvatarId = AvatarId;

@@ -3,11 +3,11 @@
 #include "CoreMinimal.h"
 
 struct FAvatarRenderConfig;
-struct FCharacterConfig;
+struct FAvatarConfig;
 
 class FPlayerZeroConfigProcessor
 {
 public:
-	static FString ProcessCharacter(const FCharacterConfig& Config);
+	static FString ProcessCharacter(const FAvatarConfig& Config);
 	static FString ProcessRender(const FAvatarRenderConfig& Config);
 };

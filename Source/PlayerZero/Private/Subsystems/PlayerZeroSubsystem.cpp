@@ -1,5 +1,6 @@
 #include "Subsystems/PlayerZeroSubsystem.h"
 #include "glTFRuntimeFunctionLibrary.h"
+#include "AvatarConfig.h"
 #include "PlayerZero.h"
 #include "PlayerZeroConfigProcessor.h"
 #include "Api/AvatarCodes/AvatarCodeApi.h"
@@ -7,7 +8,7 @@
 #include "Api/AvatarCodes/Models/AvatarCodeResponse.h"
 #include "Api/Characters/CharacterApi.h"
 #include "Api/Characters/Models/CharacterFindByIdRequest.h"
-#include "Api/Files/GlbLoader.h"
+#include "Api/Files/FileApi.h"
 #include "Api/Files/Models/FileData.h"
 #include "Api/GameEvents/GameEventApi.h"
 #include "Api/GameEvents/Events/AvatarSessionEndedEvent.h"
@@ -81,7 +82,7 @@ FString UPlayerZeroSubsystem::GetAvatarId()
 
 void UPlayerZeroSubsystem::GetAvatarIconAsTexture(FString AvatarId, const FAvatarRenderConfig& Config, FOnAvatarTextureLoaded OnComplete)
 {
-	const FString Url = FString::Printf(TEXT("https://avatars.readyplayer.me/%s.png%s"), *AvatarId, *FPlayerZeroConfigProcessor::ProcessRender(Config));
+	const FString Url = FString::Printf(TEXT("%s%s.png%s"), *AvatarsBaseUrl, *AvatarId,  *FPlayerZeroConfigProcessor::ProcessRender(Config));
 
 	TWeakObjectPtr<UPlayerZeroSubsystem> WeakThis(this);
 	FileApi->LoadFileFromUrl(Url, FOnAssetFileRequestComplete::CreateLambda(
@@ -124,7 +125,7 @@ void UPlayerZeroSubsystem::GetAvatarMetaData(const FString& Id, FOnCharacterData
 		}));
 }
 
-void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& AvatarId, const FCharacterConfig& Config, const FOnGltfAssetLoaded& OnComplete)
+void UPlayerZeroSubsystem::LoadAvatarAsset(const FString& AvatarId, const FAvatarConfig& Config, const FOnGltfAssetLoaded& OnComplete)
 {
 	TSharedPtr<FCharacterFindByIdRequest> Request = MakeShared<FCharacterFindByIdRequest>();
 	Request->Id = AvatarId;
@@ -203,7 +204,7 @@ void UPlayerZeroSubsystem::GetAvatarFromAvatarCode(const FString& AvatarCode, FO
 		}));
 }
 
-void UPlayerZeroSubsystem::DownloadAvatarData(const FString& Url, const FCharacterConfig& Config, FOnAvatarDataDownloaded OnComplete)
+void UPlayerZeroSubsystem::DownloadAvatarData(const FString& Url, const FAvatarConfig& Config, FOnAvatarDataDownloaded OnComplete)
 {
 	const FString ProcessedUrlParams = Url + FPlayerZeroConfigProcessor::ProcessCharacter(Config);
 	TWeakObjectPtr<UPlayerZeroSubsystem> WeakThis(this);

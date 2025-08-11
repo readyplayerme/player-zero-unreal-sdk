@@ -3,7 +3,7 @@
 #include "AsyncActions/LoadAvatarGlbDataAsyncAction.h"
 #include "Subsystems/PlayerZeroSubsystem.h"
 
-ULoadAvatarGlbDataAsyncAction* ULoadAvatarGlbDataAsyncAction::LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url, const FCharacterConfig& CharacterConfig)
+ULoadAvatarGlbDataAsyncAction* ULoadAvatarGlbDataAsyncAction::LoadAvatarGlbDataAsync(UObject* WorldContextObject, const FString& Url, const FAvatarConfig& CharacterConfig)
 {
 	ULoadAvatarGlbDataAsyncAction* Node = NewObject<ULoadAvatarGlbDataAsyncAction>();
 	Node->CachedUrl = Url;

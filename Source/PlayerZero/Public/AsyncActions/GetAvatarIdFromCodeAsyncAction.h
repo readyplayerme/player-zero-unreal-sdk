@@ -24,7 +24,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnGetAvatarCodeFailed OnFailed;
 	
-	UFUNCTION(BlueprintCallable, Category = "PlayerZero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
+	UFUNCTION(BlueprintCallable, Category = "Player Zero|Avatar", meta = (WorldContext = "WorldContextObject", BlueprintInternalUseOnly = "true"))
 	static UGetAvatarIdFromCodeAsyncAction* GetAvatarIdFromCodeAsync(UObject* WorldContextObject, const FString& AvatarCode);
 
 	virtual void Activate() override;

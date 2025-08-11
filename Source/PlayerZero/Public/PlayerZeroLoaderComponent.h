@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "PlayerZeroLoaderComponent.generated.h"
 
-struct FCharacterConfig;
+struct FAvatarConfig;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAvatarLoadComplete, USkeletalMeshComponent*, LoadedMeshComponent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -17,23 +17,23 @@ class PLAYERZERO_API UPlayerZeroLoaderComponent : public UActorComponent
 public:
 	UPlayerZeroLoaderComponent();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar Loader", meta=(AllowAbstract = "false"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero", meta=(AllowAbstract = "false"))
 	TSubclassOf<UAnimInstance> AnimationBlueprint;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar Loader")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero")
 	FString AvatarId;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar Loader")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero")
 	USkeletalMeshComponent* TargetMeshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar Loader")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Zero")
 	USkeleton* TargetSkeleton;
 
-	UPROPERTY(BlueprintAssignable, Category = "Avatar Loader")
+	UPROPERTY(BlueprintAssignable, Category = "Player Zero")
 	FOnAvatarLoadComplete OnAvatarLoadComplete;
 
-	UFUNCTION(BlueprintCallable, Category = "Avatar Loader")
-	void LoadAvatar( const FCharacterConfig& Config);
+	UFUNCTION(BlueprintCallable, Category = "Player Zero")
+	void LoadAvatar( const FAvatarConfig& Config);
 	
 	void LogSkeletonCompatibility(USkeletalMesh* Mesh, USkeleton* ExpectedSkeleton);
 	
