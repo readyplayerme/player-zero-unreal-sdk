@@ -195,6 +195,7 @@ The PlayerZeroLoaderComponent is a self-contained component that allows you to l
 ## 🧩 Using PlayerZeroLoaderComponent (Blueprints)
 
 The PlayerZeroLoaderComponent lets you load a Ready Player Me avatar in Blueprints with minimal setup. Add it to your actor, configure a few properties, and call LoadAvatar().
+
 ✅ 1. Add the Component
 
 - Open your Blueprint actor (e.g. BP_Character, BP_Viewer).
