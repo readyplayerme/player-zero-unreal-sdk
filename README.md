@@ -42,11 +42,15 @@ After importing the PlayerZero SDK plugin, follow these steps to complete your s
 
 ### 🛠️ 1. Open the Developer Window
 
+<img width="696" height="111" alt="Screenshot 2025-08-11 083310" src="https://github.com/user-attachments/assets/7d0fbb5c-64d2-4790-a101-ef20accc2dea" />
+
 You can access the custom editor window from the top toolbar:
 
 > **Player Zero ➜ Developer Window**
 
 This opens the **PlayerZero Developer Login** panel.
+
+<img width="510" height="357" alt="Screenshot 2025-08-11 083328" src="https://github.com/user-attachments/assets/95c26241-253e-4da6-b8c5-b5e32ae78682" />
 
 ---
 
@@ -62,6 +66,8 @@ Once logged in:
 - You’ll see a **dropdown** containing all applications linked to your account.
 - Select the **application** you want this project to be associated with.
 - Your **existing character blueprints** will be displayed visually (IDs only, non-interactable).
+
+<img width="1003" height="584" alt="image" src="https://github.com/user-attachments/assets/776aa701-6b2d-48df-b96a-04abbf61faa6" />
 
 ---
 
@@ -82,6 +88,8 @@ Here’s what you’ll find:
 | **Default Avatar Id**  | Optional fallback avatar ID to use if none is set during load.              |
 
 > ⚠️ Make sure your **Game Id** is set correctly — this is essential for revenue tracking!
+
+<img width="938" height="281" alt="image" src="https://github.com/user-attachments/assets/60b6734d-0750-4d82-a296-eb472e346388" />
 
 ---
 
@@ -129,6 +137,9 @@ You can find the demo map inside the Player Zero plugin folder under: `Content/P
 ---
 
 ### 🎭 Map Setup
+
+<img width="1191" height="820" alt="Screenshot 2025-08-11 083436" src="https://github.com/user-attachments/assets/b05cdbb2-488f-481c-97c5-b42105c007f0" />
+
 
 The map contains:
 
@@ -184,6 +195,7 @@ The PlayerZeroLoaderComponent is a self-contained component that allows you to l
 ## 🧩 Using PlayerZeroLoaderComponent (Blueprints)
 
 The PlayerZeroLoaderComponent lets you load a Ready Player Me avatar in Blueprints with minimal setup. Add it to your actor, configure a few properties, and call LoadAvatar().
+
 ✅ 1. Add the Component
 
 - Open your Blueprint actor (e.g. BP_Character, BP_Viewer).
